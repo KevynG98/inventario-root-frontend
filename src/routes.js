@@ -12,6 +12,7 @@ const Roles = React.lazy(() => import('./pages/roles/Index'));
 const Products = React.lazy(() => import('./pages/products/Index'));
 const Doctor = React.lazy(() => import('./pages/doctor/Index'));
 const Enfermero = React.lazy(() => import('./pages/enfermero/Index'));
+const Error404 = React.lazy(() => import('./pages/404/Index'));
 
 const UIBasicButton = React.lazy(() => import('./Demo/UIElements/Basic/Button'));
 const UIBasicBadges = React.lazy(() => import('./Demo/UIElements/Basic/Badges'));
@@ -32,13 +33,21 @@ const GoogleMap = React.lazy(() => import('./Demo/Maps/GoogleMap/index'));
 const OtherSamplePage = React.lazy(() => import('./Demo/Other/SamplePage'));
 const OtherDocs = React.lazy(() => import('./Demo/Other/Docs'));
 
+const user = localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user")) : null;
+
+const userPermissions = user?.roles?.map(role => role.id) || [];
+
+console.log(userPermissions); // Ejemplo: [1]
+
 const routes = [
     { path: '/dashboard/default', exact: true, name: 'Default', component: DashboardDefault },
-    { path: '/dashboard/users', exact: true, name: 'Users', component: Users},
-    { path: '/dashboard/roles', exact: true, name: 'Roles', component: Roles},
-    { path: '/dashboard/products', exact: true, name: 'Roles', component: Products},
-    { path: '/dashboard/doctor', exact: true, name: 'Roles', component: Doctor},
-    { path: '/dashboard/enfermero', exact: true, name: 'Roles', component: Enfermero},
+    { path: '/dashboard/users', exact: true, name: 'Users', component: Users },
+    { path: '/dashboard/roles', exact: true, name: 'Roles', component: Roles },
+    { path: '/dashboard/products', exact: true, name: 'Roles', component: Products },
+    { path: '/dashboard/doctor', exact: true, name: 'Roles', component: Doctor },
+    { path: '/dashboard/enfermero', exact: true, name: 'Roles', component: Enfermero },
+    { path: '/dashboard/404', exact: true, name: '404', component: Error404 },
+    // -------------------------------------------------------------------------------------------------------------------------------
     { path: '/basic/button', exact: true, name: 'Basic Button', component: UIBasicButton },
     { path: '/basic/badges', exact: true, name: 'Basic Badges', component: UIBasicBadges },
     { path: '/basic/breadcrumb-paging', exact: true, name: 'Basic Breadcrumb Pagination', component: UIBasicBreadcrumbPagination },

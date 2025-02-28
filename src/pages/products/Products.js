@@ -3,12 +3,14 @@ import { Row, Col, Card, Table, Button } from 'react-bootstrap';
 import { useMyContext } from './Context';
 import UcFirst from '../../App/components/UcFirst';
 import { FcCancel, FcCheckmark } from "react-icons/fc";
+import ModalCreate from './ModalCreate';
 
 export const Products = () => {
 
-  const { data, showModal, deleteUser, showModalRol, username, setUsername } = useMyContext();
-  const editRol = (user) => {
-    setUsername(user)
+  const { data, showModal, deleteProduct, showModalRol, setProduct } = useMyContext();
+  
+  const editProduct = (product) => {
+    setProduct(product);
     setTimeout(showModalRol, 0);
   }
 
@@ -16,14 +18,17 @@ export const Products = () => {
     <div>
       <h1>Products</h1>
       <Button variant='primary' onClick={() => showModal()}><UcFirst text='Add +' /></Button>
+      <ModalCreate />
       <div>
         <Table striped responsive>
           <thead>
             <tr>
               <th>#</th>
-              <th>Username</th>
-              <th>Last Name</th>
-              <th>Last Login</th>
+              <th>Name</th>
+              <th>Description</th>
+              <th>Price</th>
+              <th>Unit</th>
+              <th>Category</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -31,13 +36,15 @@ export const Products = () => {
             {data.map((item) => (
               <tr key={item.id}>
                 <th scope="row">{item.id}</th>
-                <td>{item.username}</td>
-                <td>{item.last_name}</td>
-                <td>{item.last_login}</td>
+                <td>{item.name}</td>
+                <td>{item.description}</td>
+                <td>{item.price}</td>
+                <td>{item.unit}</td>
+                <td>{item.category.name}</td>
                 <td>
                   <div>
-                    <Button variant='outline-dark' onClick={() => editRol(item.username)}><FcCheckmark /></Button>
-                    <Button variant='outline-dark' onClick={() => deleteUser(item.id)}><FcCancel /></Button>
+                    <Button variant='outline-dark' onClick={() => editProduct(item)}><FcCheckmark /></Button>
+                    <Button variant='outline-dark' onClick={() => deleteProduct(item.id)}><FcCancel /></Button>
                   </div>
                 </td>
               </tr>

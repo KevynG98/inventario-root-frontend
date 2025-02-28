@@ -35,7 +35,7 @@ export const ContextProvider = ({ children }) => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await postData("user/register/", data);
+      const response = await postData("products/create/", data);
 
       console.log("Response completa:", response);
 

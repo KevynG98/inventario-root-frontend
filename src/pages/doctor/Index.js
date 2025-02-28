@@ -1,16 +1,17 @@
 import React from 'react'
 import { ContextProvider } from './Context';  // Asegúrate de importar el proveedor
-import { Users } from './Users';
-import ModalCreate from './ModalCreate';
+import ModalCreate from './PrescriptionForm';
 import ModalRol from './ModarRol';
+import PrescriptionForm from './PrescriptionForm';
+import PrescriptionTable from './PrescriptionTable';
 
 const Index = () => {
   return (
     <ContextProvider>
-      <h1>Doctor</h1>
-      {/* <Users />
-      <ModalCreate />
-      <ModalRol/> */}
+      <PrescriptionForm />
+      <PrescriptionTable />
+      {/* <ModalCreate /> */}
+      <ModalRol/>
     </ContextProvider>
   )
 }

@@ -17,6 +17,10 @@ const AdminLayout = Loadable({
 
 class App extends Component {
     render() {
+        const user = localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user")) : null;
+
+        const userPermissions = user?.roles?.map(role => role.id) || [];
+
         const menu = routes.map((route, index) => {
           return (route.component) ? (
               <Route
