@@ -87,7 +87,12 @@ class Navigation extends Component {
             document.body.classList.remove('container', 'box-layout');
         }
 
-        const userPermissions = [1]; // Cambia esto por la lógica para obtener los permisos del usuario
+        const user = localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user")) : null;
+
+        const userPermissions = user?.roles?.map(role => role.id) || [];
+
+        console.log(userPermissions); // Ejemplo: [1]
+
 
         const filteredNavigation = {
             items: navigation.items

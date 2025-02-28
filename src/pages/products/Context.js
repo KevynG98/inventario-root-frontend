@@ -22,10 +22,10 @@ export const ContextProvider = ({ children }) => {
 
   const fetchData = async () => {
     try {
-      const data = await getData('user/');
-      const dataRol = await getData('rol/')
+      const data = await getData('products/');
+      //const dataRol = await getData('rol/')
       setData(data.data)
-      setGetRol(dataRol.data)
+      //setGetRol(dataRol.data)
     } catch (error) {
       console.error('Error al obtener los datos:', error);
     }

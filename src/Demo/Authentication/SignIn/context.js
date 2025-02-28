@@ -1,4 +1,4 @@
-import { createContext, useState, useContext } from "react";
+import { createContext, useState, useContext, useEffect } from "react";
 import { withRouter } from "react-router-dom";
 import apiClient, { postData } from "../../../apiService";
 
@@ -21,8 +21,9 @@ function ComponentProvider({ children, history }) {
             if (response?.status === 200 && response.data) {
                 // Guardar token en localStorage
                 localStorage.setItem("token", response.data.token);
-                console.log("Token guardado:", response.data.token);
-
+                // console.log("Token guardado:", response.data.token);
+                console.log("RESPUESTA: ", response.data)
+                localStorage.setItem("user", JSON.stringify(response.data.user));
                 setData1(response.data);
                 history.push("/dashboard/default");
             } else {
@@ -34,6 +35,14 @@ function ComponentProvider({ children, history }) {
             setIsLoading(false);
         }
     };
+
+    useEffect(() => {
+        localStorage.removeItem("token");
+        localStorage.removeItem("token-data");
+        localStorage.removeItem("user");
+        localStorage.removeItem("user-data");
+        localStorage.removeItem("userData");
+    }, [])
 
 
     const values = {

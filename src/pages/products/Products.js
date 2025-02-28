@@ -4,7 +4,7 @@ import { useMyContext } from './Context';
 import UcFirst from '../../App/components/UcFirst';
 import { FcCancel, FcCheckmark } from "react-icons/fc";
 
-export const Users = () => {
+export const Products = () => {
 
   const { data, showModal, deleteUser, showModalRol, username, setUsername } = useMyContext();
   const editRol = (user) => {
