@@ -16,20 +16,18 @@ export const Products = () => {
 
   return (
     <div>
-      <h1>Products</h1>
-      <Button variant='primary' onClick={() => showModal()}><UcFirst text='Add +' /></Button>
+      <h1>Inventario</h1>
+      {/* <Button variant='primary' onClick={() => showModal()}><UcFirst text='Add +' /></Button> */}
       <ModalCreate />
       <div>
         <Table striped responsive>
           <thead>
             <tr>
               <th>#</th>
-              <th>Name</th>
-              <th>Description</th>
-              <th>Price</th>
-              <th>Unidad de medida</th>
-              <th>Category</th>
-              <th>Cantidad disponible</th>
+              <th>quantity</th>
+              <th>warehouse_location</th>
+              <th>status</th>
+              <th>product</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -37,12 +35,10 @@ export const Products = () => {
             {data.map((item) => (
               <tr key={item.id}>
                 <th scope="row">{item.id}</th>
-                <td>{item.name}</td>
-                <td>{item.description}</td>
-                <td>{item.price}</td>
-                <td>{item.unit}</td>
-                <td>{item.category.name}</td>
                 <td>{item.quantity}</td>
+                <td>{item.warehouse_location}</td>
+                <td>{item.status}</td>
+                <td>{item.product}</td>
                 <td>
                   <div>
                     <Button variant='outline-dark' onClick={() => editProduct(item)}><FcCheckmark /></Button>

@@ -4,22 +4,17 @@ import { useMyContext } from './Context';
 import { useForm } from 'react-hook-form';
 
 const ModalCreate = () => {
-    const { register, handleSubmit, reset, formState: { errors } } = useForm();
-    const { show, showModal, sendData, categories } = useMyContext();
+    const { register, handleSubmit, formState: { errors } } = useForm();
+    const { show, showModal, sendData } = useMyContext();
 
     const onSubmit = async (data) => {
         try {
-            data.price = parseFloat(data.price);
-            data.quantity = parseInt(data.quantity, 10);
-            data.category_id = parseInt(data.category_id, 10); // Asegurar que se envía el ID correcto
-            
-            await sendData(data);
-            reset()
+            data.price = parseFloat(data.price); // Convertir el precio a número
+            await sendData(data); // Enviar datos al contexto
         } catch (error) {
             console.error("Error al enviar datos", error);
         }
     };
-    
 
     return (
         <Modal show={show} onHide={showModal} centered>
@@ -32,27 +27,19 @@ const ModalCreate = () => {
                             {errors.name && <p className="text-danger">{errors.name.message}</p>}
                         </div>
                         <div className="input-group mb-3">
-                            <input type="text" className="form-control" placeholder="Descripción (opcional)" {...register("description")} />
+                            <input type="text" className="form-control" placeholder="Descripción" {...register("description", { required: "La descripción es obligatoria" })} />
+                            {errors.description && <p className="text-danger">{errors.description.message}</p>}
                         </div>
                         <div className="input-group mb-3">
                             <input type="number" className="form-control" placeholder="Precio" step="0.01" {...register("price", { required: "El precio es obligatorio", min: { value: 0, message: "El precio no puede ser negativo" } })} />
                             {errors.price && <p className="text-danger">{errors.price.message}</p>}
                         </div>
                         <div className="input-group mb-3">
-                            <input type="text" className="form-control" placeholder="Unidad (ej. kg, pieza, litro)" {...register("unit", { required: "La unidad es obligatoria" })} />
+                            <input type="text" className="form-control" placeholder="Unidad (ej. kg, piezas)" {...register("unit", { required: "La unidad es obligatoria" })} />
                             {errors.unit && <p className="text-danger">{errors.unit.message}</p>}
                         </div>
                         <div className="input-group mb-3">
-                            <input type="number" className="form-control" placeholder="Cantidad" {...register("quantity", { required: "La cantidad es obligatoria", min: { value: 1, message: "Debe ser al menos 1" } })} />
-                            {errors.quantity && <p className="text-danger">{errors.quantity.message}</p>}
-                        </div>
-                        <div className="input-group mb-3">
-                            <select className="form-control" {...register("category_id", { required: "La categoría es obligatoria" })}>
-                                <option value="">Selecciona una categoría</option>
-                                {categories && categories.map(category => (
-                                    <option key={category.id} value={category.id}>{category.name}</option>
-                                ))}
-                            </select>
+                            <input type="number" className="form-control" placeholder="ID de categoría" {...register("category_id", { required: "El ID de la categoría es obligatorio" })} />
                             {errors.category_id && <p className="text-danger">{errors.category_id.message}</p>}
                         </div>
                         <button type="submit" className="btn btn-primary shadow-2 mb-4">Crear Producto</button>

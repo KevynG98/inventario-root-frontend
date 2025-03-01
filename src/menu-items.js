@@ -47,6 +47,14 @@ export default {
                     permition: [1, 2],
                 },
                 {
+                    id: 'inventario',
+                    title: 'Inventario',
+                    type: 'item',
+                    url: '/dashboard/inventario',
+                    icon: 'feather icon-home',
+                    permition: [1, 2],
+                },
+                {
                     id: 'enfermero',
                     title: 'Enfermero',
                     type: 'item',

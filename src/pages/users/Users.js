@@ -23,6 +23,7 @@ export const Users = () => {
             <tr>
               <th>#</th>
               <th>Username</th>
+              <th>Email</th>
               <th>First Name</th>
               <th>Last Name</th>
               <th>Last Login</th>
@@ -35,6 +36,7 @@ export const Users = () => {
               <tr key={item.id}>
                 <th scope="row">{item.id}</th>
                 <td>{item.username}</td>
+                <td>{item.email}</td>
                 <td>{item.first_name}</td>
                 <td>{item.last_name}</td>
                 <td>{convert_fecha_hora(item.last_login)}</td>

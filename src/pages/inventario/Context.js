@@ -15,18 +15,16 @@ export const ContextProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [username, setUsername] = useState("");
-  const [categories, setCategories] = useState([])
+  const [getRol, setGetRol] = useState([])
 
   const showModal = () => setShow(!show)
   const showModalRol = () => setShowRol(!showRol)
 
   const fetchData = async () => {
     try {
-      const data = await getData('products/');
-      const dataCategory = await getData('category/');
+      const data = await getData('inventory/');
       //const dataRol = await getData('rol/')
       setData(data.data)
-      setCategories(dataCategory.data)
       //setGetRol(dataRol.data)
     } catch (error) {
       console.error('Error al obtener los datos:', error);
@@ -112,8 +110,7 @@ export const ContextProvider = ({ children }) => {
     show,
     showRol,
     username,
-    categories, 
-    setCategories,
+    getRol,
     assignRol,
     setUsername,
     showModalRol,

@@ -12,6 +12,7 @@ const Roles = React.lazy(() => import('./pages/roles/Index'));
 const Products = React.lazy(() => import('./pages/products/Index'));
 const Doctor = React.lazy(() => import('./pages/doctor/Index'));
 const Enfermero = React.lazy(() => import('./pages/enfermero/Index'));
+const Inventario = React.lazy(() => import('./pages/inventario/Index'));
 const Error404 = React.lazy(() => import('./pages/404/Index'));
 
 const UIBasicButton = React.lazy(() => import('./Demo/UIElements/Basic/Button'));
@@ -46,6 +47,7 @@ const routes = [
     { path: '/dashboard/products', exact: true, name: 'Roles', component: Products },
     { path: '/dashboard/doctor', exact: true, name: 'Roles', component: Doctor },
     { path: '/dashboard/enfermero', exact: true, name: 'Roles', component: Enfermero },
+    { path: '/dashboard/inventario', exact: true, name: 'Roles', component: Inventario },
     { path: '/dashboard/404', exact: true, name: '404', component: Error404 },
     // -------------------------------------------------------------------------------------------------------------------------------
     { path: '/basic/button', exact: true, name: 'Basic Button', component: UIBasicButton },
