@@ -5,7 +5,7 @@ import { useMyContext } from './Context';
 import { convert_fecha_hora } from '../../utils/formatUtils';
 
 const PrescriptionTable = () => {
-    const { data, deletePrescription } = useMyContext();
+    const { data = [], deletePrescription } = useMyContext();
 
     return (
         <Container className="mt-4">
@@ -23,7 +23,7 @@ const PrescriptionTable = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {data.length > 0 ? (
+                            {Array.isArray(data) && data.length > 0 ? (
                                 data.map((item, index) => (
                                     <tr key={item.id}>
                                         <td>{index + 1}</td>

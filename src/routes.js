@@ -38,16 +38,16 @@ const user = localStorage.getItem("user") ? JSON.parse(localStorage.getItem("use
 
 const userPermissions = user?.roles?.map(role => role.id) || [];
 
-console.log(userPermissions); // Ejemplo: [1]
+console.log("PERMISIONS: ", userPermissions); // Ejemplo: [1]
 
 const routes = [
-    { path: '/dashboard/default', exact: true, name: 'Default', component: DashboardDefault },
-    { path: '/dashboard/users', exact: true, name: 'Users', component: Users },
-    { path: '/dashboard/roles', exact: true, name: 'Roles', component: Roles },
-    { path: '/dashboard/products', exact: true, name: 'Roles', component: Products },
-    { path: '/dashboard/doctor', exact: true, name: 'Roles', component: Doctor },
-    { path: '/dashboard/enfermero', exact: true, name: 'Roles', component: Enfermero },
-    { path: '/dashboard/inventario', exact: true, name: 'Roles', component: Inventario },
+    { path: '/dashboard/default', exact: true, name: 'Default', component: userPermissions.some(item => [1, 2, 3].includes(item)) ? DashboardDefault : Error404 },
+    { path: '/dashboard/users', exact: true, name: 'Users', component: userPermissions.some(item => [0, 1].includes(item)) ? Users : Error404 },
+    { path: '/dashboard/roles', exact: true, name: 'Roles', component: userPermissions.some(item => [0, 1].includes(item)) ? Roles : Error404 },
+    { path: '/dashboard/products', exact: true, name: 'Roles', component: userPermissions.some(item => [1, 2].includes(item)) ? Products : Error404 },
+    { path: '/dashboard/doctor', exact: true, name: 'Roles', component: userPermissions.some(item => [1, 2].includes(item)) ? Doctor : Error404 },
+    { path: '/dashboard/enfermero', exact: true, name: 'Roles', component: userPermissions.some(item => [1, 3].includes(item)) ? Enfermero : Error404 },
+    { path: '/dashboard/inventario', exact: true, name: 'Roles', component: userPermissions.some(item => [1, 2].includes(item)) ? Inventario : Error404 },
     { path: '/dashboard/404', exact: true, name: '404', component: Error404 },
     // -------------------------------------------------------------------------------------------------------------------------------
     { path: '/basic/button', exact: true, name: 'Basic Button', component: UIBasicButton },

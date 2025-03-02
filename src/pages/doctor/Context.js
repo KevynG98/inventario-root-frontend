@@ -20,17 +20,6 @@ export const ContextProvider = ({ children }) => {
   const showModal = () => setShow(!show)
   const showModalRol = () => setShowRol(!showRol)
 
-  const fetchData = async () => {
-    try {
-      const data = await getData('user/');
-      const dataRol = await getData('rol/')
-      setData(data.data)
-      setGetRol(dataRol.data)
-      console.log(data.data)
-    } catch (error) {
-      console.error('Error al obtener los datos:', error);
-    }
-  };
 
   const sendData = async (data) => {
     setIsLoading(true);
@@ -43,7 +32,7 @@ export const ContextProvider = ({ children }) => {
       if (response?.status === 201 && response.data) {
         setData1(response.data);
         NotificationManager.success("Mensaje", "Título", 3000);
-        fetchData()
+        
         showModal()
       } else {
         setError(`Error ${response?.status || "desconocido"}`);
@@ -61,10 +50,10 @@ export const ContextProvider = ({ children }) => {
     setError(null);
     try {
       const response = await deleteData(`user/delete/${id}/`);
-  
+
       if (response.status === 200) {
         NotificationManager.success("Usuario eliminado", "Éxito", 3000);
-        fetchData(); // Refrescar datos después de eliminar
+         // Refrescar datos después de eliminar
       } else {
         setError(`Error ${response.status || "desconocido"}`);
         NotificationManager.error("No se pudo eliminar", "Error", 5000);
@@ -87,7 +76,7 @@ export const ContextProvider = ({ children }) => {
       if (response?.status === 200 && response.data) {
         setData1(response.data);
         NotificationManager.success("Mensaje", "Título", 3000);
-        fetchData()
+        
         showModalRol()
       } else {
         setError(`Error ${response?.status || "desconocido"}`);
@@ -99,10 +88,19 @@ export const ContextProvider = ({ children }) => {
       setIsLoading(false);
     }
   };
+
+  const deletePrescription = (id) => {
+    setData((prevData) => {
+      const updatedData = prevData.filter((item) => item.id !== id);
+      console.log("Eliminando ID:", id, "Nuevo estado:", updatedData);
+      return updatedData;
+    });
+  };
   
 
+
   useEffect(() => {
-    fetchData(); // Llamar a la función asíncrona
+    console.log("Hola")
   }, []);
 
   const values = {
@@ -112,6 +110,8 @@ export const ContextProvider = ({ children }) => {
     showRol,
     username,
     getRol,
+    deletePrescription,
+    setData,
     assignRol,
     setUsername,
     showModalRol,

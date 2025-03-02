@@ -19,7 +19,7 @@ export default {
                     title: 'Users',
                     type: 'item',
                     url: '/dashboard/users',
-                    icon: 'feather icon-home',
+                    icon: 'feather icon-users',
                     permition: [1],
                 },
                 {
@@ -27,7 +27,7 @@ export default {
                     title: 'Roles',
                     type: 'item',
                     url: '/dashboard/roles',
-                    icon: 'feather icon-home',
+                    icon: 'feather icon-shield',
                     permition: [1],
                 },
                 {
@@ -35,7 +35,7 @@ export default {
                     title: 'Products',
                     type: 'item',
                     url: '/dashboard/products',
-                    icon: 'feather icon-home',
+                    icon: 'feather icon-package',
                     permition: [1, 2],
                 },
                 {
@@ -43,7 +43,7 @@ export default {
                     title: 'Doctor',
                     type: 'item',
                     url: '/dashboard/doctor',
-                    icon: 'feather icon-home',
+                    icon: 'feather icon-thermometer',
                     permition: [1, 2],
                 },
                 {
@@ -51,7 +51,7 @@ export default {
                     title: 'Inventario',
                     type: 'item',
                     url: '/dashboard/inventario',
-                    icon: 'feather icon-home',
+                    icon: 'feather icon-box',
                     permition: [1, 2],
                 },
                 {
@@ -59,7 +59,7 @@ export default {
                     title: 'Enfermero',
                     type: 'item',
                     url: '/dashboard/enfermero',
-                    icon: 'feather icon-home',
+                    icon: 'feather icon-award',
                     permition: [1, 3],
                 }
             ]
