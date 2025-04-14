@@ -6,9 +6,17 @@ import { FcCancel, FcCheckmark } from "react-icons/fc";
 import ModalCreate from './ModalCreate';
 
 export const Products = () => {
+  const {
+    data,
+    showModal,
+    deleteUser,
+    showModalRol,
+    setProduct,
+    fetchPage,
+    nextPageUrl,
+    prevPageUrl,
+  } = useMyContext();
 
-  const { data, showModal, deleteProduct, showModalRol, setProduct } = useMyContext();
-  
   const editProduct = (product) => {
     setProduct(product);
     setTimeout(showModalRol, 0);
@@ -17,8 +25,11 @@ export const Products = () => {
   return (
     <div>
       <h1>Products</h1>
-      <Button variant='primary' onClick={() => showModal()}><UcFirst text='Add +' /></Button>
+      <Button variant='primary' onClick={() => showModal()}>
+        <UcFirst text='Add +' />
+      </Button>
       <ModalCreate />
+
       <div>
         <Table striped responsive>
           <thead>
@@ -46,13 +57,23 @@ export const Products = () => {
                 <td>
                   <div>
                     <Button variant='outline-dark' onClick={() => editProduct(item)}><FcCheckmark /></Button>
-                    <Button variant='outline-dark' onClick={() => deleteProduct(item.id)}><FcCancel /></Button>
+                    <Button variant='outline-dark' onClick={() => deleteUser(item.id)}><FcCancel /></Button>
                   </div>
                 </td>
               </tr>
             ))}
           </tbody>
         </Table>
+
+        {/* Botones de paginación */}
+        <div className="d-flex justify-content-between mt-3">
+          <Button variant="secondary" disabled={!prevPageUrl} onClick={() => fetchPage(prevPageUrl)}>
+            ← Anterior
+          </Button>
+          <Button variant="secondary" disabled={!nextPageUrl} onClick={() => fetchPage(nextPageUrl)}>
+            Siguiente →
+          </Button>
+        </div>
       </div>
     </div>
   )

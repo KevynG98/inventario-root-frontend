@@ -2,34 +2,47 @@ import React, { createContext, useState, useContext, useEffect } from 'react';
 import { getData, postData, deleteData } from '../../apiService';
 import { NotificationManager } from "react-notifications";
 
-// Crear el contexto
 const MyContext = createContext();
 
-// Crear el proveedor
 export const ContextProvider = ({ children }) => {
   const [state, setState] = useState("Valor inicial");
-  const [data, setData] = useState([])
-  const [show, setShow] = useState(false)
-  const [showRol, setShowRol] = useState(false)
+  const [data, setData] = useState([]);
+  const [show, setShow] = useState(false);
+  const [showRol, setShowRol] = useState(false);
   const [data1, setData1] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [username, setUsername] = useState("");
-  const [categories, setCategories] = useState([])
+  const [categories, setCategories] = useState([]);
 
-  const showModal = () => setShow(!show)
-  const showModalRol = () => setShowRol(!showRol)
+  const [nextPageUrl, setNextPageUrl] = useState(null);
+  const [prevPageUrl, setPrevPageUrl] = useState(null);
+
+  const showModal = () => setShow(!show);
+  const showModalRol = () => setShowRol(!showRol);
 
   const fetchData = async () => {
     try {
       const data = await getData('products/');
       const dataCategory = await getData('category/');
-      //const dataRol = await getData('rol/')
-      setData(data.data)
-      setCategories(dataCategory.data)
-      //setGetRol(dataRol.data)
+      setData(data.data.results);
+      setNextPageUrl(data.data.next);
+      setPrevPageUrl(data.data.previous);
+      setCategories(dataCategory.data);
     } catch (error) {
       console.error('Error al obtener los datos:', error);
+    }
+  };
+
+  const fetchPage = async (url) => {
+    if (!url) return;
+    try {
+      const res = await getData(url.replace('http://localhost:8000/', '')); // ajustar si es necesario
+      setData(res.data.results);
+      setNextPageUrl(res.data.next);
+      setPrevPageUrl(res.data.previous);
+    } catch (error) {
+      console.error('Error al cambiar de página:', error);
     }
   };
 
@@ -38,14 +51,11 @@ export const ContextProvider = ({ children }) => {
     setError(null);
     try {
       const response = await postData("products/create/", data);
-
-      console.log("Response completa:", response);
-
       if (response?.status === 201 && response.data) {
         setData1(response.data);
         NotificationManager.success("Mensaje", "Título", 3000);
-        fetchData()
-        showModal()
+        fetchData();
+        showModal();
       } else {
         setError(`Error ${response?.status || "desconocido"}`);
         NotificationManager.error("Algo salió mal", "Error", 5000);
@@ -61,11 +71,10 @@ export const ContextProvider = ({ children }) => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await deleteData(`user/delete/${id}/`);
-  
+      const response = await deleteData(`products/delete/${id}/`);
       if (response.status === 200) {
         NotificationManager.success("Usuario eliminado", "Éxito", 3000);
-        fetchData(); // Refrescar datos después de eliminar
+        fetchData();
       } else {
         setError(`Error ${response.status || "desconocido"}`);
         NotificationManager.error("No se pudo eliminar", "Error", 5000);
@@ -82,14 +91,11 @@ export const ContextProvider = ({ children }) => {
     setError(null);
     try {
       const response = await postData("rol/assign/", data);
-
-      console.log("Response completa:", response);
-
       if (response?.status === 200 && response.data) {
         setData1(response.data);
         NotificationManager.success("Mensaje", "Título", 3000);
-        fetchData()
-        showModalRol()
+        fetchData();
+        showModalRol();
       } else {
         setError(`Error ${response?.status || "desconocido"}`);
         NotificationManager.error("Algo salió mal", "Error", 5000);
@@ -100,10 +106,9 @@ export const ContextProvider = ({ children }) => {
       setIsLoading(false);
     }
   };
-  
 
   useEffect(() => {
-    fetchData(); // Llamar a la función asíncrona
+    fetchData();
   }, []);
 
   const values = {
@@ -112,16 +117,21 @@ export const ContextProvider = ({ children }) => {
     show,
     showRol,
     username,
-    categories, 
-    setCategories,
+    categories,
+    isLoading,
+    error,
+    nextPageUrl,
+    prevPageUrl,
     assignRol,
+    setCategories,
     setUsername,
     showModalRol,
     setState,
     showModal,
     sendData,
     deleteUser,
-  }
+    fetchPage,
+  };
 
   return (
     <MyContext.Provider value={values}>
@@ -130,7 +140,4 @@ export const ContextProvider = ({ children }) => {
   );
 };
 
-// Crear un hook personalizado para usar el contexto
-export const useMyContext = () => {
-  return useContext(MyContext);
-};
+export const useMyContext = () => useContext(MyContext);
