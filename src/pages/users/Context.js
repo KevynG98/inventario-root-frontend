@@ -2,31 +2,53 @@ import React, { createContext, useState, useContext, useEffect } from 'react';
 import { getData, postData, deleteData } from '../../apiService';
 import { NotificationManager } from "react-notifications";
 
-// Crear el contexto
 const MyContext = createContext();
 
-// Crear el proveedor
 export const ContextProvider = ({ children }) => {
   const [state, setState] = useState("Valor inicial");
-  const [data, setData] = useState([])
-  const [show, setShow] = useState(false)
-  const [showRol, setShowRol] = useState(false)
+  const [data, setData] = useState([]);
+  const [show, setShow] = useState(false);
   const [data1, setData1] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [username, setUsername] = useState("");
-  const [getRol, setGetRol] = useState([])
+  const [getRol, setGetRol] = useState([]);
+  const [isCreatingUser, setIsCreatingUser] = useState(true);
+  const [isViewingUser, setIsViewingUser] = useState(false);
+  const [formKey, setFormKey] = useState(Date.now()); // <-- NUEVO
 
-  const showModal = () => setShow(!show)
-  const showModalRol = () => setShowRol(!showRol)
+  const showModal = () => setShow(!show);
+
+  const openCreateUserModal = () => {
+    setIsViewingUser(false);
+    setIsCreatingUser(true);
+    setUsername("");
+    setFormKey(Date.now()); // <-- cambia la clave
+    setShow(true);
+  };
+
+  const openAssignRolModal = (username) => {
+    setUsername(username);
+    setIsViewingUser(false);
+    setIsCreatingUser(false);
+    setFormKey(Date.now());
+    setShow(true);
+  };
+
+  const openViewUserModal = (username) => {
+    setUsername(username);
+    setIsCreatingUser(false);
+    setIsViewingUser(true);
+    setFormKey(Date.now());
+    setShow(true);
+  };
 
   const fetchData = async () => {
     try {
       const data = await getData('user/');
-      const dataRol = await getData('rol/')
-      setData(data.data)
-      setGetRol(dataRol.data)
-      console.log(data.data)
+      const dataRol = await getData('rol/');
+      setData(data.data);
+      setGetRol(dataRol.data);
     } catch (error) {
       console.error('Error al obtener los datos:', error);
     }
@@ -37,14 +59,11 @@ export const ContextProvider = ({ children }) => {
     setError(null);
     try {
       const response = await postData("user/register/", data);
-
-      console.log("Response completa:", response);
-
       if (response?.status === 201 && response.data) {
         setData1(response.data);
-        NotificationManager.success("Mensaje", "Título", 3000);
-        fetchData()
-        showModal()
+        NotificationManager.success("Usuario creado", "Éxito", 3000);
+        fetchData();
+        showModal();
       } else {
         setError(`Error ${response?.status || "desconocido"}`);
         NotificationManager.error("Algo salió mal", "Error", 5000);
@@ -61,10 +80,9 @@ export const ContextProvider = ({ children }) => {
     setError(null);
     try {
       const response = await deleteData(`user/delete/${id}/`);
-  
       if (response.status === 200) {
         NotificationManager.success("Usuario eliminado", "Éxito", 3000);
-        fetchData(); // Refrescar datos después de eliminar
+        fetchData();
       } else {
         setError(`Error ${response.status || "desconocido"}`);
         NotificationManager.error("No se pudo eliminar", "Error", 5000);
@@ -81,14 +99,11 @@ export const ContextProvider = ({ children }) => {
     setError(null);
     try {
       const response = await postData("rol/assign/", data);
-
-      console.log("Response completa:", response);
-
       if (response?.status === 200 && response.data) {
         setData1(response.data);
-        NotificationManager.success("Mensaje", "Título", 3000);
-        fetchData()
-        showModalRol()
+        NotificationManager.success("Rol asignado", "Éxito", 3000);
+        fetchData();
+        showModal();
       } else {
         setError(`Error ${response?.status || "desconocido"}`);
         NotificationManager.error("Algo salió mal", "Error", 5000);
@@ -99,27 +114,31 @@ export const ContextProvider = ({ children }) => {
       setIsLoading(false);
     }
   };
-  
 
   useEffect(() => {
-    fetchData(); // Llamar a la función asíncrona
+    fetchData();
   }, []);
 
   const values = {
     state,
     data,
     show,
-    showRol,
     username,
     getRol,
     assignRol,
     setUsername,
-    showModalRol,
-    setState,
     showModal,
     sendData,
     deleteUser,
-  }
+    isCreatingUser,
+    isViewingUser,
+    setIsCreatingUser,
+    setIsViewingUser,
+    openCreateUserModal,
+    openAssignRolModal,
+    openViewUserModal,
+    formKey, // <-- exportamos formKey
+  };
 
   return (
     <MyContext.Provider value={values}>
@@ -128,7 +147,6 @@ export const ContextProvider = ({ children }) => {
   );
 };
 
-// Crear un hook personalizado para usar el contexto
 export const useMyContext = () => {
   return useContext(MyContext);
 };

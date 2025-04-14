@@ -1,22 +1,26 @@
-import React from 'react'
-import { Row, Col, Card, Table, Button } from 'react-bootstrap';
+import React from 'react';
+import { Table, Button } from 'react-bootstrap';
 import { useMyContext } from './Context';
 import UcFirst from '../../App/components/UcFirst';
 import { FcCancel, FcCheckmark } from "react-icons/fc";
+import { BsEye } from "react-icons/bs";
 import { convert_fecha_hora } from '../../utils/formatUtils';
 
 export const Users = () => {
-
-  const { data, showModal, deleteUser, showModalRol, username, setUsername } = useMyContext();
-  const editRol = (user) => {
-    setUsername(user)
-    setTimeout(showModalRol, 0);
-  }
+  const {
+    data,
+    deleteUser,
+    openAssignRolModal,
+    openCreateUserModal,
+    openViewUserModal
+  } = useMyContext();
 
   return (
     <div>
       <h1>Usuarios</h1>
-      <Button variant='primary' onClick={() => showModal()}><UcFirst text='Add +' /></Button>
+      <Button variant="primary" onClick={openCreateUserModal} className="mb-3">
+        <UcFirst text="Add +" />
+      </Button>
       <div>
         <Table striped responsive>
           <thead>
@@ -42,9 +46,25 @@ export const Users = () => {
                 <td>{convert_fecha_hora(item.last_login)}</td>
                 <td>{item.rol[0]?.rol || 'Sin rol'}</td>
                 <td>
-                  <div>
-                    <Button variant='outline-dark' onClick={() => editRol(item.username)}><FcCheckmark /></Button>
-                    <Button variant='outline-dark' onClick={() => deleteUser(item.id)}><FcCancel /></Button>
+                  <div className="d-flex gap-2">
+                    <Button
+                      variant="outline-info"
+                      onClick={() => openViewUserModal(item.username)}
+                    >
+                      <BsEye />
+                    </Button>
+                    <Button
+                      variant="outline-success"
+                      onClick={() => openAssignRolModal(item.username)}
+                    >
+                      <FcCheckmark />
+                    </Button>
+                    <Button
+                      variant="outline-danger"
+                      onClick={() => deleteUser(item.id)}
+                    >
+                      <FcCancel />
+                    </Button>
                   </div>
                 </td>
               </tr>
@@ -53,5 +73,5 @@ export const Users = () => {
         </Table>
       </div>
     </div>
-  )
-}
+  );
+};
