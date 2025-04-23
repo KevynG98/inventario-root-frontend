@@ -1,17 +1,15 @@
-import React from 'react'
-import { ContextProvider } from './Context';  // Asegúrate de importar el proveedor
+import React from 'react';
+import { ContextProvider } from './Context';
 import { Products } from './Products';
-import ModalCreate from './ModalCreate';
-import ModalRol from './ModarRol';
+import ModalProductForm from './ModalProductForm'; // ✅ nombre nuevo
 
 const Index = () => {
   return (
     <ContextProvider>
       <Products />
-      <ModalCreate />
-      <ModalRol />
+      <ModalProductForm />
     </ContextProvider>
-  )
-}
+  );
+};
 
-export default Index
+export default Index;

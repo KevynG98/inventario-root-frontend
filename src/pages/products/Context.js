@@ -1,110 +1,95 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import { getData, postData, deleteData } from '../../apiService';
+import { getData, postData, deleteData, putData } from '../../apiService';
 import { NotificationManager } from "react-notifications";
 
 const MyContext = createContext();
 
 export const ContextProvider = ({ children }) => {
-  const [state, setState] = useState("Valor inicial");
   const [data, setData] = useState([]);
   const [show, setShow] = useState(false);
-  const [showRol, setShowRol] = useState(false);
-  const [data1, setData1] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [username, setUsername] = useState("");
+  const [formKey, setFormKey] = useState(Date.now());
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [isEditingProduct, setIsEditingProduct] = useState(false);
+  const [isViewingProduct, setIsViewingProduct] = useState(false);
   const [categories, setCategories] = useState([]);
 
   const [nextPageUrl, setNextPageUrl] = useState(null);
   const [prevPageUrl, setPrevPageUrl] = useState(null);
 
   const showModal = () => setShow(!show);
-  const showModalRol = () => setShowRol(!showRol);
 
-  const fetchData = async () => {
+  const fetchData = async (url = 'products/') => {
     try {
-      const data = await getData('products/');
-      const dataCategory = await getData('category/');
-      setData(data.data.results);
-      setNextPageUrl(data.data.next);
-      setPrevPageUrl(data.data.previous);
-      setCategories(dataCategory.data);
+      const response = await getData(url);
+      setData(response.data.results || response.data);
+      setNextPageUrl(response.data.next || null);
+      setPrevPageUrl(response.data.previous || null);
+
+      const cats = await getData('category/');
+      setCategories(cats.data);
     } catch (error) {
-      console.error('Error al obtener los datos:', error);
+      console.error('Error al obtener productos o categorías:', error);
     }
   };
 
-  const fetchPage = async (url) => {
-    if (!url) return;
+  const sendData = async (product) => {
     try {
-      const res = await getData(url.replace('http://localhost:8000/', '')); // ajustar si es necesario
-      setData(res.data.results);
-      setNextPageUrl(res.data.next);
-      setPrevPageUrl(res.data.previous);
+      await postData('products/createcode a/', product);
+      NotificationManager.success("Producto creado", "Éxito", 3000);
+      fetchData();
+      showModal();
     } catch (error) {
-      console.error('Error al cambiar de página:', error);
+      NotificationManager.error("Error al crear producto", "Error", 5000);
     }
   };
 
-  const sendData = async (data) => {
-    setIsLoading(true);
-    setError(null);
+  const updateProduct = async (product) => {
     try {
-      const response = await postData("products/create/", data);
-      if (response?.status === 201 && response.data) {
-        setData1(response.data);
-        NotificationManager.success("Mensaje", "Título", 3000);
+      const response = await putData(`products/update/${product.id}/`, product); // <-- PUT en vez de POST
+      if (response.status === 200) {
+        NotificationManager.success("Producto actualizado", "Éxito", 3000);
         fetchData();
         showModal();
       } else {
-        setError(`Error ${response?.status || "desconocido"}`);
-        NotificationManager.error("Algo salió mal", "Error", 5000);
+        NotificationManager.error("Error al actualizar", "Error", 5000);
       }
-    } catch (err) {
-      setError(err.message || "Ocurrió un error inesperado");
-    } finally {
-      setIsLoading(false);
+    } catch (error) {
+      NotificationManager.error("Error al actualizar", "Error", 5000);
+    }
+  };  
+
+  const deleteProduct = async (id) => {
+    try {
+      await deleteData(`products/delete/${id}/`);
+      NotificationManager.success("Producto eliminado", "Éxito", 3000);
+      fetchData();
+    } catch (error) {
+      NotificationManager.error("Error al eliminar", "Error", 5000);
     }
   };
 
-  const deleteUser = async (id) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const response = await deleteData(`products/delete/${id}/`);
-      if (response.status === 200) {
-        NotificationManager.success("Usuario eliminado", "Éxito", 3000);
-        fetchData();
-      } else {
-        setError(`Error ${response.status || "desconocido"}`);
-        NotificationManager.error("No se pudo eliminar", "Error", 5000);
-      }
-    } catch (err) {
-      setError(err.message || "Ocurrió un error inesperado");
-    } finally {
-      setIsLoading(false);
-    }
+  const openCreateProductModal = () => {
+    setSelectedProduct(null);
+    setIsEditingProduct(false);
+    setIsViewingProduct(false);
+    setFormKey(Date.now());
+    setShow(true);
   };
 
-  const assignRol = async (data) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const response = await postData("rol/assign/", data);
-      if (response?.status === 200 && response.data) {
-        setData1(response.data);
-        NotificationManager.success("Mensaje", "Título", 3000);
-        fetchData();
-        showModalRol();
-      } else {
-        setError(`Error ${response?.status || "desconocido"}`);
-        NotificationManager.error("Algo salió mal", "Error", 5000);
-      }
-    } catch (err) {
-      setError(err.message || "Ocurrió un error inesperado");
-    } finally {
-      setIsLoading(false);
-    }
+  const openEditProductModal = (product) => {
+    setSelectedProduct(product);
+    setIsEditingProduct(true);
+    setIsViewingProduct(false);
+    setFormKey(Date.now());
+    setShow(true);
+  };
+
+  const openViewProductModal = (product) => {
+    setSelectedProduct(product);
+    setIsViewingProduct(true);
+    setIsEditingProduct(false);
+    setFormKey(Date.now());
+    setShow(true);
   };
 
   useEffect(() => {
@@ -112,25 +97,23 @@ export const ContextProvider = ({ children }) => {
   }, []);
 
   const values = {
-    state,
     data,
     show,
-    showRol,
-    username,
-    categories,
-    isLoading,
-    error,
+    formKey,
+    selectedProduct,
+    isEditingProduct,
+    isViewingProduct,
     nextPageUrl,
     prevPageUrl,
-    assignRol,
-    setCategories,
-    setUsername,
-    showModalRol,
-    setState,
+    categories,
     showModal,
     sendData,
-    deleteUser,
-    fetchPage,
+    updateProduct,
+    deleteProduct,
+    fetchPage: fetchData,
+    openCreateProductModal,
+    openEditProductModal,
+    openViewProductModal,
   };
 
   return (

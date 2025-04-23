@@ -27,7 +27,7 @@ const getCsrfToken = async () => {
 // Función para obtener el token de autenticación desde el localStorage
 const getAuthToken = () => {
   const token = localStorage.getItem("token");
-  console.log("TOKEN: ",token)
+  console.log("TOKEN: ", token)
   return token || null;  // Si no hay token, retorna null
 };
 
@@ -89,6 +89,18 @@ const deleteData = async (endpoint) => {
   }
 };
 
+const putData = async (url, data) => {
+  const response = await fetch(`${API_URL}${url}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(data),
+  });
+  const json = await response.json();
+  return { status: response.status, data: json };
+};
+
 
 export default apiClient;
-export { postData, getData, deleteData };
+export { postData, getData, deleteData, putData };
