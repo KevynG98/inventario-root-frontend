@@ -200,18 +200,20 @@ const ModalUserForm = () => {
 
           {/* Botones */}
           <div className="d-flex justify-content-end gap-2">
-            <button
-              type="button"
-              onClick={() => {
-                reset({ username: '', email: '', first_name: '', last_name: '', password: '' });
-                setAssignedGroups([]);
-                setAvailableGroups(getRol.map(r => r.name));
-                setActive(true);
-              }}
-              className="btn btn-secondary"
-            >
-              Nuevo
-            </button>
+            {isCreatingUser && (
+              <button
+                type="button"
+                onClick={() => {
+                  reset({ username: '', email: '', first_name: '', last_name: '', password: '' });
+                  setAssignedGroups([]);
+                  setAvailableGroups(getRol.map(r => r.name));
+                  setActive(true);
+                }}
+                className="btn btn-secondary"
+              >
+                Nuevo
+              </button>
+            )}
             <button type="submit" className="btn btn-primary">
               {isCreatingUser ? 'Registrar' : 'Guardar'}
             </button>
