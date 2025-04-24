@@ -1,109 +1,154 @@
-import React, {Component} from 'react';
-import {connect} from 'react-redux';
-import { withRouter } from 'react-router-dom';
+import React, { Component } from 'react';
+import { Link, withRouter } from 'react-router-dom';
+import { connect } from 'react-redux';
 import PerfectScrollbar from 'react-perfect-scrollbar';
 import windowSize from 'react-window-size';
 
 import Aux from "../../../../../hoc/_Aux";
-import NavGroup from './NavGroup';
-import DEMO from "../../../../../store/constant";
 import * as actionTypes from "../../../../../store/actions";
 
 class NavContent extends Component {
-    state = {
-        scrollWidth: 0,
-        prevDisable: true,
-        nextDisable: false
+  constructor(props) {
+    super(props);
+    this.state = {
+      scrollWidth: 0,
+      prevDisable: true,
+      nextDisable: false,
+      activeMenu: null
     };
+    this.submenuRefs = {};
+  }
 
-    scrollPrevHandler = () => {
-        const wrapperWidth = document.getElementById('sidenav-wrapper').clientWidth;
+  scrollPrevHandler = () => {
+    const wrapperWidth = document.getElementById('sidenav-wrapper').clientWidth;
+    let scrollWidth = this.state.scrollWidth - wrapperWidth;
+    this.setState({
+      scrollWidth: scrollWidth < 0 ? 0 : scrollWidth,
+      prevDisable: scrollWidth <= 0,
+      nextDisable: false
+    });
+  };
 
-        let scrollWidth = this.state.scrollWidth - wrapperWidth;
-        if(scrollWidth < 0) {
-            this.setState({scrollWidth: 0, prevDisable: true, nextDisable: false});
-        } else {
-            this.setState({scrollWidth: scrollWidth, prevDisable: false});
-        }
-    };
+  scrollNextHandler = () => {
+    const wrapperWidth = document.getElementById('sidenav-wrapper').clientWidth;
+    const contentWidth = document.getElementById('sidenav-horizontal').clientWidth;
+    let scrollWidth = this.state.scrollWidth + (wrapperWidth - 80);
+    const maxScroll = contentWidth - wrapperWidth + 80;
 
-    scrollNextHandler = () => {
-        const wrapperWidth = document.getElementById('sidenav-wrapper').clientWidth;
-        const contentWidth = document.getElementById('sidenav-horizontal').clientWidth;
+    this.setState({
+      scrollWidth: scrollWidth > maxScroll ? maxScroll : scrollWidth,
+      prevDisable: false,
+      nextDisable: scrollWidth >= maxScroll
+    });
+  };
 
-        let scrollWidth = this.state.scrollWidth + (wrapperWidth - 80);
-        if (scrollWidth > (contentWidth - wrapperWidth)) {
-            scrollWidth = contentWidth - wrapperWidth + 80;
-            this.setState({scrollWidth: scrollWidth, prevDisable: false, nextDisable: true});
-        } else {
-            this.setState({scrollWidth: scrollWidth, prevDisable: false});
-        }
-    };
+  toggleSubmenu = (index) => {
+    this.setState(prevState => ({
+      activeMenu: prevState.activeMenu === index ? null : index
+    }));
+  };
 
-    render() {
-        const navItems = this.props.navigation.map(item => {
-                switch (item.type) {
-                    case 'group':
-                        return <NavGroup layout={this.props.layout} key={item.id} group={item}/>;
-                    default:
-                        return false;
-                }
-            }
-        );
+  renderNavItems = (items, parentIndex = '') => {
+    return items.map((item, index) => {
+      const currentIndex = `${parentIndex}${index}`;
+      const hasChildren = item.children && item.children.length > 0;
+      const isOpen = this.state.activeMenu === currentIndex;
+      const isChild = parentIndex !== '';
 
-        let mainContent = '';
-        if (this.props.layout === 'horizontal') {
-            let prevClass = ['sidenav-horizontal-prev'];
-            if (this.state.prevDisable) {
-                prevClass = [...prevClass, 'disabled'];
-            }
-            let nextClass = ['sidenav-horizontal-next'];
-            if (this.state.nextDisable) {
-                nextClass = [...nextClass, 'disabled'];
-            }
-
-            mainContent = (
-                <div className="navbar-content sidenav-horizontal" id="layout-sidenav">
-                    <a href={DEMO.BLANK_LINK} className={prevClass.join(' ')} onClick={this.scrollPrevHandler}><span/></a>
-                    <div id="sidenav-wrapper" className="sidenav-horizontal-wrapper">
-                        <ul id="sidenav-horizontal" className="nav pcoded-inner-navbar sidenav-inner" onMouseLeave={this.props.onNavContentLeave} style={{marginLeft: '-'+this.state.scrollWidth+'px'}}>
-                            {navItems}
-                        </ul>
-                    </div>
-                    <a href={DEMO.BLANK_LINK} className={nextClass.join(' ')} onClick={this.scrollNextHandler}><span/></a>
-                </div>
-            );
-        } else {
-            mainContent = (
-                <div className="navbar-content datta-scroll">
-                    <PerfectScrollbar>
-                        <ul className="nav pcoded-inner-navbar">
-                            {navItems}
-                        </ul>
-                    </PerfectScrollbar>
-                </div>
-            );
-        }
-
+      if (hasChildren) {
         return (
-            <Aux>
-                {mainContent}
-            </Aux>
+          <li key={index} className={`nav-item pcoded-hasmenu ${isOpen ? 'pcoded-trigger' : ''}`}>
+            <a href="#!" className="nav-link" onClick={() => this.toggleSubmenu(currentIndex)}>
+              <span className="pcoded-micon">{item.icon}</span>
+              <span className="pcoded-mtext">{item.title}</span>
+            </a>
+            <ul
+              className="pcoded-submenu"
+              ref={el => this.submenuRefs[currentIndex] = el}
+              style={{
+                maxHeight: isOpen
+                  ? this.submenuRefs[currentIndex]?.scrollHeight + "px"
+                  : "0px",
+                overflow: 'hidden',
+                transition: 'max-height 0.75s cubic-bezier(0.25, 1, 0.5, 1)'
+              }}
+            >
+              {this.renderNavItems(item.children, `${currentIndex}-`)}
+            </ul>
+          </li>
         );
-    }
+      }
+
+      return (
+        <li key={index} className="nav-item">
+          <Link
+            to={item.url}
+            className="nav-link"
+            onClick={() => {
+              if (!isChild) this.setState({ activeMenu: null });
+            }}
+            style={{ paddingLeft: isChild ? '1.5rem' : undefined }}
+          >
+            <span className="pcoded-micon">{item.icon}</span>
+            <span className="pcoded-mtext">{item.title}</span>
+          </Link>
+        </li>
+      );
+    });
+  };
+
+  render() {
+    const navItems = this.renderNavItems(this.props.navigation);
+    const horizontal = this.props.layout === 'horizontal';
+
+    const navList = (
+      <ul
+        className={`nav pcoded-inner-navbar ${horizontal ? 'sidenav-inner' : ''}`}
+        id={horizontal ? 'sidenav-horizontal' : ''}
+        onMouseLeave={this.props.onNavContentLeave}
+        style={horizontal ? { marginLeft: `-${this.state.scrollWidth}px` } : {}}
+      >
+        {navItems}
+      </ul>
+    );
+
+    return (
+      <Aux>
+        {horizontal ? (
+          <div className="navbar-content sidenav-horizontal" id="layout-sidenav">
+            <a
+              href="#!"
+              className={`sidenav-horizontal-prev ${this.state.prevDisable ? 'disabled' : ''}`}
+              onClick={this.scrollPrevHandler}
+            >
+              <span />
+            </a>
+            <div id="sidenav-wrapper" className="sidenav-horizontal-wrapper">{navList}</div>
+            <a
+              href="#!"
+              className={`sidenav-horizontal-next ${this.state.nextDisable ? 'disabled' : ''}`}
+              onClick={this.scrollNextHandler}
+            >
+              <span />
+            </a>
+          </div>
+        ) : (
+          <div className="navbar-content datta-scroll">
+            <PerfectScrollbar>{navList}</PerfectScrollbar>
+          </div>
+        )}
+      </Aux>
+    );
+  }
 }
 
-const mapStateToProps = state => {
-    return {
-        layout: state.layout,
-        collapseMenu: state.collapseMenu,
-    }
-};
+const mapStateToProps = state => ({
+  layout: state.layout,
+  collapseMenu: state.collapseMenu,
+});
 
-const mapDispatchToProps = dispatch => {
-    return {
-        onNavContentLeave: () => dispatch({type: actionTypes.NAV_CONTENT_LEAVE}),
-    }
-};
+const mapDispatchToProps = dispatch => ({
+  onNavContentLeave: () => dispatch({ type: actionTypes.NAV_CONTENT_LEAVE }),
+});
 
-export default withRouter(connect(mapStateToProps, mapDispatchToProps) (windowSize(NavContent)));
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(windowSize(NavContent)));

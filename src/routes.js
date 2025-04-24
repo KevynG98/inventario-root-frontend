@@ -14,6 +14,8 @@ const Doctor = React.lazy(() => import('./pages/doctor/Index'));
 const Enfermero = React.lazy(() => import('./pages/enfermero/Index'));
 const Inventario = React.lazy(() => import('./pages/inventario/Index'));
 const Error404 = React.lazy(() => import('./pages/404/Index'));
+const Construccion = React.lazy(() => import('./pages/construccion/Index'));
+const Futuro = React.lazy(() => import('./pages/futuro/Index'));
 
 const UIBasicButton = React.lazy(() => import('./Demo/UIElements/Basic/Button'));
 const UIBasicBadges = React.lazy(() => import('./Demo/UIElements/Basic/Badges'));
@@ -49,6 +51,8 @@ const routes = [
     { path: '/dashboard/enfermero', exact: true, name: 'Roles', component: userPermissions.some(item => [1, 3].includes(item)) ? Enfermero : Error404 },
     { path: '/dashboard/inventario', exact: true, name: 'Roles', component: userPermissions.some(item => [1, 2].includes(item)) ? Inventario : Error404 },
     { path: '/dashboard/404', exact: true, name: '404', component: Error404 },
+    { path: '/dashboard/construccion', exact: true, name: '404', component: Construccion },
+    { path: '/dashboard/futuro', exact: true, name: '404', component: Futuro },
     // -------------------------------------------------------------------------------------------------------------------------------
     { path: '/basic/button', exact: true, name: 'Basic Button', component: UIBasicButton },
     { path: '/basic/badges', exact: true, name: 'Basic Badges', component: UIBasicBadges },
