@@ -15,7 +15,12 @@ export const ContextProvider = ({ children }) => {
   const [getRol, setGetRol] = useState([]);
   const [isCreatingUser, setIsCreatingUser] = useState(true);
   const [isViewingUser, setIsViewingUser] = useState(false);
-  const [formKey, setFormKey] = useState(Date.now()); // <-- NUEVO
+  const [formKey, setFormKey] = useState(Date.now());
+
+  // Nuevo estado para modal de reset de contraseña
+  const [showResetPassword, setShowResetPassword] = useState(false);
+  const openResetPasswordModal = () => setShowResetPassword(true);
+  const closeResetPasswordModal = () => setShowResetPassword(false);
 
   const showModal = () => setShow(!show);
 
@@ -23,7 +28,7 @@ export const ContextProvider = ({ children }) => {
     setIsViewingUser(false);
     setIsCreatingUser(true);
     setUsername("");
-    setFormKey(Date.now()); // <-- cambia la clave
+    setFormKey(Date.now());
     setShow(true);
   };
 
@@ -137,7 +142,12 @@ export const ContextProvider = ({ children }) => {
     openCreateUserModal,
     openAssignRolModal,
     openViewUserModal,
-    formKey, // <-- exportamos formKey
+    formKey,
+
+    // nuevos
+    showResetPassword,
+    openResetPasswordModal,
+    closeResetPasswordModal,
   };
 
   return (
@@ -147,6 +157,4 @@ export const ContextProvider = ({ children }) => {
   );
 };
 
-export const useMyContext = () => {
-  return useContext(MyContext);
-};
+export const useMyContext = () => useContext(MyContext);
