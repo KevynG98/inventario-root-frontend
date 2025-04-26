@@ -17,6 +17,9 @@ const Error404 = React.lazy(() => import('./pages/404/Index'));
 const Construccion = React.lazy(() => import('./pages/construccion/Index'));
 const Futuro = React.lazy(() => import('./pages/futuro/Index'));
 
+/* ADMISIONES PAGINAS */
+const NuevaAdmision = React.lazy(() => import('./pages/admisiones/nuevaAdmision/Index'))
+
 const UIBasicButton = React.lazy(() => import('./Demo/UIElements/Basic/Button'));
 const UIBasicBadges = React.lazy(() => import('./Demo/UIElements/Basic/Badges'));
 const UIBasicBreadcrumbPagination = React.lazy(() => import('./Demo/UIElements/Basic/BreadcrumbPagination'));
@@ -53,6 +56,9 @@ const routes = [
     { path: '/dashboard/404', exact: true, name: '404', component: Error404 },
     { path: '/dashboard/construccion', exact: true, name: '404', component: Construccion },
     { path: '/dashboard/futuro', exact: true, name: '404', component: Futuro },
+    // -------------------------------------------------------------------------------------------------------------------------------
+    /*Admisiones*/
+    { path: '/dashboard/admisiones/nueva', exact: true, name: 'Nueva Admision', component: NuevaAdmision },
     // -------------------------------------------------------------------------------------------------------------------------------
     { path: '/basic/button', exact: true, name: 'Basic Button', component: UIBasicButton },
     { path: '/basic/badges', exact: true, name: 'Basic Badges', component: UIBasicBadges },
