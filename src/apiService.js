@@ -38,8 +38,9 @@ const postData = async (endpoint, data) => {
     const authToken = getAuthToken();
 
     const headers = {
+      'Content-Type': 'application/json',  // <-- agrega esto aquí
       'X-CSRFToken': csrfToken,
-      ...(authToken && { 'Authorization': `Token ${authToken}` }),  // Solo se agrega el token de auth si existe
+      ...(authToken && { 'Authorization': `Token ${authToken}` }),
     };
 
     const response = await apiClient.post(endpoint, data, {
@@ -48,7 +49,7 @@ const postData = async (endpoint, data) => {
 
     return response;
   } catch (error) {
-    console.error('Error al enviar datos:', error);
+    console.error('Error al enviar datos:', error.response ? error.response.data : error);
     throw error;
   }
 };
@@ -90,11 +91,18 @@ const deleteData = async (endpoint) => {
 };
 
 const putData = async (url, data) => {
+  const csrfToken = await getCsrfToken();
+  const authToken = getAuthToken();
+
+  const headers = {
+    'Content-Type': 'application/json',
+    'X-CSRFToken': csrfToken,
+    ...(authToken && { 'Authorization': `Token ${authToken}` }),
+  };
+
   const response = await fetch(`${API_URL}${url}`, {
     method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: headers,
     body: JSON.stringify(data),
   });
   const json = await response.json();

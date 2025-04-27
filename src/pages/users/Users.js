@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import {
   Table,
   Button,
@@ -7,40 +7,97 @@ import {
   Dropdown
 } from 'react-bootstrap';
 import { useMyContext } from './Context';
-import { FiEdit3, FiSettings } from 'react-icons/fi';
+import { FiEdit3, FiSettings, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import { BiSearch } from 'react-icons/bi';
 
-// ⏰ Función para formatear la fecha
 const formatFecha = () => {
   const hoy = new Date();
   return hoy.toLocaleDateString('es-ES');
 };
 
-export const Users = () => {
+const Users = () => {
   const {
     data,
+    pagination,
+    fetchPage,
+    searchUsers,
     openCreateUserModal,
     openViewUserModal
   } = useMyContext();
 
   const [search, setSearch] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 10;
+  const pageSize = 5; // Tamaño que usas en tu backend para paginación
 
-  const filteredData = useMemo(() => {
-    return data.filter(user =>
-      user.username.toLowerCase().includes(search.toLowerCase()) ||
-      user.first_name.toLowerCase().includes(search.toLowerCase()) ||
-      (user.last_name || '').toLowerCase().includes(search.toLowerCase()) ||
-      (user.email || '').toLowerCase().includes(search.toLowerCase())
+  const totalPages = Math.ceil(pagination.count / pageSize);
+
+  const handlePageChange = (pageNumber) => {
+    if (pageNumber !== currentPage && pageNumber >= 1 && pageNumber <= totalPages) {
+      const baseUrl = pagination.next
+        ? pagination.next.split('?')[0]
+        : pagination.previous
+        ? pagination.previous.split('?')[0]
+        : 'user/';
+      fetchPage(`${baseUrl}?page=${pageNumber}`);
+      setCurrentPage(pageNumber);
+    }
+  };
+
+  const handleSearch = (e) => {
+    const value = e.target.value;
+    setSearch(value);
+
+    if (value.trim() === '') {
+      fetchPage('user/');
+      setCurrentPage(1);
+    } else {
+      searchUsers(value);
+      setCurrentPage(1);
+    }
+  };
+
+  const renderPageNumbers = () => {
+    const pages = [];
+    const maxPagesToShow = 5;
+    const isStart = currentPage <= 3;
+    const isEnd = currentPage >= totalPages - 2;
+
+    if (isStart) {
+      for (let i = 1; i <= Math.min(maxPagesToShow, totalPages); i++) {
+        pages.push(i);
+      }
+      if (totalPages > maxPagesToShow) {
+        pages.push('...', totalPages);
+      }
+    } else if (isEnd) {
+      pages.push(1, '...');
+      for (let i = totalPages - (maxPagesToShow - 1); i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      pages.push(1, '...');
+      for (let i = currentPage - 1; i <= currentPage + 1; i++) {
+        pages.push(i);
+      }
+      pages.push('...', totalPages);
+    }
+
+    return pages.map((number, index) =>
+      number === '...' ? (
+        <span key={index} className="mx-1">...</span>
+      ) : (
+        <Button
+          key={index}
+          variant={number === currentPage ? "primary" : "outline-secondary"}
+          size="sm"
+          className="mx-1"
+          onClick={() => handlePageChange(number)}
+        >
+          {number}
+        </Button>
+      )
     );
-  }, [data, search]);
-
-  const totalPages = Math.ceil(filteredData.length / pageSize);
-  const paginatedData = useMemo(() => {
-    const start = (currentPage - 1) * pageSize;
-    return filteredData.slice(start, start + pageSize);
-  }, [filteredData, currentPage]);
+  };
 
   return (
     <div className="p-3 bg-light">
@@ -50,7 +107,7 @@ export const Users = () => {
         <span className="fw-semibold text-dark">{formatFecha()}</span>
       </div>
 
-      {/* Barra de control: Nuevo | Búsqueda | Exportar */}
+      {/* Barra de control */}
       <div className="row align-items-center mb-3">
         <div className="col-md-3 d-flex justify-content-start">
           <Button variant="primary" onClick={openCreateUserModal}>
@@ -64,10 +121,7 @@ export const Users = () => {
               type="text"
               placeholder="Búsqueda rápida"
               value={search}
-              onChange={(e) => {
-                setSearch(e.target.value);
-                setCurrentPage(1);
-              }}
+              onChange={handleSearch}
             />
             <InputGroup.Text>
               <BiSearch />
@@ -107,7 +161,7 @@ export const Users = () => {
           </tr>
         </thead>
         <tbody>
-          {paginatedData.map((item) => (
+          {data.map((item) => (
             <tr key={item.id}>
               <td>
                 <Button
@@ -121,55 +175,36 @@ export const Users = () => {
               <td>{item.username}</td>
               <td>{item.first_name} {item.last_name}</td>
               <td>{item.email || ''}</td>
-              <td>{item.active ? 'Sí' : 'No'}</td>
+              <td>{item.is_active === 1 ? 'Sí' : 'No'}</td>
             </tr>
           ))}
         </tbody>
       </Table>
 
       {/* Paginación */}
-      <div className="d-flex justify-content-between align-items-center">
-        <span>
-          [ {Math.min((currentPage - 1) * pageSize + 1, filteredData.length)} a {Math.min(currentPage * pageSize, filteredData.length)} de {filteredData.length} ]
-        </span>
-        <div>
-          <Button
-            variant="outline-secondary"
-            size="sm"
-            onClick={() => setCurrentPage(1)}
-            disabled={currentPage === 1}
-          >
-            «
-          </Button>
-          <Button
-            variant="outline-secondary"
-            size="sm"
-            onClick={() => setCurrentPage(currentPage - 1)}
-            disabled={currentPage === 1}
-            className="mx-1"
-          >
-            ‹
-          </Button>
-          <span className="mx-2 fw-bold">{currentPage}</span>
-          <Button
-            variant="outline-secondary"
-            size="sm"
-            onClick={() => setCurrentPage(currentPage + 1)}
-            disabled={currentPage === totalPages}
-            className="mx-1"
-          >
-            ›
-          </Button>
-          <Button
-            variant="outline-secondary"
-            size="sm"
-            onClick={() => setCurrentPage(totalPages)}
-            disabled={currentPage === totalPages}
-          >
-            »
-          </Button>
-        </div>
+      <div className="d-flex justify-content-center align-items-center gap-2">
+        <Button
+          variant="outline-secondary"
+          size="sm"
+          onClick={() => handlePageChange(currentPage - 1)}
+          disabled={currentPage === 1}
+        >
+          <FiChevronLeft /> Anterior
+        </Button>
+
+        {renderPageNumbers()}
+
+        <Button
+          variant="outline-secondary"
+          size="sm"
+          onClick={() => handlePageChange(currentPage + 1)}
+          disabled={currentPage === totalPages}
+        >
+          Siguiente <FiChevronRight />
+        </Button>
       </div>
     </div>
   );
 };
+
+export default Users
