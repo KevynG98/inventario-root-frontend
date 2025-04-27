@@ -1,28 +1,27 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import { getData, postData, deleteData } from '../../apiService';
+import { getData, postData, deleteData, putData } from '../../apiService';
 import { NotificationManager } from "react-notifications";
 
 const MyContext = createContext();
 
 export const ContextProvider = ({ children }) => {
-  const [state, setState] = useState("Valor inicial");
   const [data, setData] = useState([]);
+  const [pagination, setPagination] = useState({
+    count: 0,
+    next: null,
+    previous: null,
+  });
   const [show, setShow] = useState(false);
-  const [data1, setData1] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
   const [username, setUsername] = useState("");
   const [getRol, setGetRol] = useState([]);
   const [isCreatingUser, setIsCreatingUser] = useState(true);
   const [isViewingUser, setIsViewingUser] = useState(false);
   const [formKey, setFormKey] = useState(Date.now());
-
-  // Nuevo estado para modal de reset de contraseña
   const [showResetPassword, setShowResetPassword] = useState(false);
-  const openResetPasswordModal = () => setShowResetPassword(true);
-  const closeResetPasswordModal = () => setShowResetPassword(false);
 
   const showModal = () => setShow(!show);
+  const openResetPasswordModal = () => setShowResetPassword(true);
+  const closeResetPasswordModal = () => setShowResetPassword(false);
 
   const openCreateUserModal = () => {
     setIsViewingUser(false);
@@ -50,83 +49,116 @@ export const ContextProvider = ({ children }) => {
 
   const fetchData = async () => {
     try {
-      const data = await getData('user/');
-      const dataRol = await getData('rol/');
-      setData(data.data);
-      setGetRol(dataRol.data);
+      const response = await getData('user/');
+      setData(response.data.results);
+      console.log(response.data.results)
+      setPagination({
+        count: response.data.count,
+        next: response.data.next,
+        previous: response.data.previous,
+      });
     } catch (error) {
       console.error('Error al obtener los datos:', error);
     }
   };
 
+  const fetchPage = async (url) => {
+    try {
+      const baseURL = 'http://127.0.0.1:8000/';
+      const endpoint = url.replace(baseURL, '');
+      const response = await getData(endpoint);
+      setData(response.data.results);
+      setPagination({
+        count: response.data.count,
+        next: response.data.next,
+        previous: response.data.previous,
+      });
+    } catch (error) {
+      console.error('Error al obtener página:', error);
+    }
+  };
+
   const sendData = async (data) => {
-    setIsLoading(true);
-    setError(null);
     try {
       const response = await postData("user/register/", data);
       if (response?.status === 201 && response.data) {
-        setData1(response.data);
         NotificationManager.success("Usuario creado", "Éxito", 3000);
         fetchData();
         showModal();
       } else {
-        setError(`Error ${response?.status || "desconocido"}`);
         NotificationManager.error("Algo salió mal", "Error", 5000);
       }
     } catch (err) {
-      setError(err.message || "Ocurrió un error inesperado");
-    } finally {
-      setIsLoading(false);
+      console.error('Error al crear usuario:', err);
+    }
+  };
+
+  const updateUser = async (data) => {
+    try {
+      const response = await putData(`user/update/${data.id}/`, data);
+      if (response?.status === 200 && response.data) {
+        NotificationManager.success("Usuario actualizado", "Éxito", 3000);
+        fetchData();
+        showModal();
+      } else {
+        NotificationManager.error("Algo salió mal", "Error", 5000);
+      }
+    } catch (err) {
+      console.error('Error al actualizar usuario:', err);
     }
   };
 
   const deleteUser = async (id) => {
-    setIsLoading(true);
-    setError(null);
     try {
       const response = await deleteData(`user/delete/${id}/`);
       if (response.status === 200) {
         NotificationManager.success("Usuario eliminado", "Éxito", 3000);
         fetchData();
       } else {
-        setError(`Error ${response.status || "desconocido"}`);
         NotificationManager.error("No se pudo eliminar", "Error", 5000);
       }
     } catch (err) {
-      setError(err.message || "Ocurrió un error inesperado");
-    } finally {
-      setIsLoading(false);
+      console.error('Error al eliminar usuario:', err);
     }
   };
 
   const assignRol = async (data) => {
-    setIsLoading(true);
-    setError(null);
     try {
       const response = await postData("rol/assign/", data);
       if (response?.status === 200 && response.data) {
-        setData1(response.data);
         NotificationManager.success("Rol asignado", "Éxito", 3000);
         fetchData();
         showModal();
       } else {
-        setError(`Error ${response?.status || "desconocido"}`);
         NotificationManager.error("Algo salió mal", "Error", 5000);
       }
     } catch (err) {
-      setError(err.message || "Ocurrió un error inesperado");
-    } finally {
-      setIsLoading(false);
+      console.error('Error al asignar rol:', err);
     }
   };
+
+  const searchUsers = async (query) => {
+    try {
+      const response = await getData(`user/search/?q=${query}`);
+      setData(response.data.results);
+      setPagination({
+        count: response.data.count,
+        next: response.data.next,
+        previous: response.data.previous,
+      });
+    } catch (error) {
+      console.error('Error al buscar usuarios:', error);
+    }
+  };
+  
 
   useEffect(() => {
     fetchData();
   }, []);
 
   const values = {
-    state,
     data,
+    pagination,
     show,
     username,
     getRol,
@@ -143,11 +175,12 @@ export const ContextProvider = ({ children }) => {
     openAssignRolModal,
     openViewUserModal,
     formKey,
-
-    // nuevos
     showResetPassword,
     openResetPasswordModal,
     closeResetPasswordModal,
+    updateUser,
+    fetchPage,
+    searchUsers,
   };
 
   return (

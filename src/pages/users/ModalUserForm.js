@@ -10,7 +10,6 @@ const ModalUserForm = () => {
     handleSubmit,
     formState: { errors },
     reset,
-    setValue
   } = useForm();
 
   const {
@@ -24,7 +23,8 @@ const ModalUserForm = () => {
     isViewingUser,
     data,
     formKey,
-    openResetPasswordModal
+    openResetPasswordModal,
+    updateUser
   } = useMyContext();
 
   const userData = username ? data.find((u) => u.username === username) : null;
@@ -37,7 +37,7 @@ const ModalUserForm = () => {
   useEffect(() => {
     if (userData) {
       setAssignedGroups(userData.groups || []);
-      setActive(userData.active ?? true);
+      setActive(userData.is_active ?? true); // 🔥 Corregido: usar is_active
     } else {
       setAssignedGroups([]);
       setActive(true);
@@ -52,13 +52,13 @@ const ModalUserForm = () => {
 
   useEffect(() => {
     if (isCreatingUser) {
-      reset({ username: '', email: '', first_name: '', last_name: '', password: '' });
+      reset({ username: '', email: '', first_name: '', last_name: '' });
     } else if (userData) {
       reset({
         username: userData.username,
         email: userData.email,
         first_name: userData.first_name,
-        last_name: userData.last_name
+        last_name: userData.last_name,
       });
     }
   }, [isCreatingUser, isViewingUser, userData, reset]);
@@ -77,17 +77,17 @@ const ModalUserForm = () => {
 
   const onSubmit = async (formData) => {
     formData.groups = assignedGroups;
-    formData.active = active;
-
+    formData.is_active = active; // 🔥 Mandamos si está activo o no
+    delete formData.active; // 🔥 Por si hubiera 'active' residual
+  
     try {
-      if (isViewingUser) {
-        showModal();
-        return;
-      }
-      if (isCreatingUser) {
-        await sendData(formData);
+      if (!isCreatingUser) {
+        // 🔥 Si NO estamos creando, entonces es edición
+        formData.id = userData.id; // Necesitas enviar el id para actualizar
+        await updateUser(formData); // Usamos updateUser
       } else {
-        await assignRol(formData);
+        // 🔥 Si estamos creando, usamos sendData
+        await sendData(formData);
       }
       reset();
       showModal();
@@ -95,6 +95,7 @@ const ModalUserForm = () => {
       console.error("Error en el formulario", error);
     }
   };
+  
 
   return (
     <Modal show={show} onHide={showModal} size="lg" centered>
@@ -152,7 +153,7 @@ const ModalUserForm = () => {
             <div
               onClick={() => setActive(!active)}
               style={{
-                marginLeft: '12px',         // <<< separación visual real
+                marginLeft: '12px',
                 width: '32px',
                 height: '18px',
                 backgroundColor: active ? '#0d6efd' : '#ccc',
@@ -204,7 +205,7 @@ const ModalUserForm = () => {
               <button
                 type="button"
                 onClick={() => {
-                  reset({ username: '', email: '', first_name: '', last_name: '', password: '' });
+                  reset({ username: '', email: '', first_name: '', last_name: '' });
                   setAssignedGroups([]);
                   setAvailableGroups(getRol.map(r => r.name));
                   setActive(true);

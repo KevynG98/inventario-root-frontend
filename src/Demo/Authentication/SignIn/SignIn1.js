@@ -26,14 +26,14 @@ const SignUp1 = () => {
 
           <form onSubmit={handleSubmit(onSubmit)} style={{ width: '100%', maxWidth: '400px' }}>
             <div className="mb-3">
-              <label className="form-label">Correo de usuario</label>
+              <label className="form-label">Nombre de usuario</label>
               <input
-                type="email"
+                type="text"
                 className="form-control"
-                placeholder="email"
-                {...register('email', { required: 'El correo electrónico es requerido' })}
+                placeholder="usuario"
+                {...register('username', { required: 'El nombre de usuario es requerido' })}
               />
-              {errors.email && <div className="text-danger">{errors.email.message}</div>}
+              {errors.username && <div className="text-danger">{errors.username.message}</div>}
             </div>
 
             <div className="mb-3">
