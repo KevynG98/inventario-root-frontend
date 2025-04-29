@@ -6,6 +6,7 @@ const MyContext = createContext();
 
 export const ContextProvider = ({ children }) => {
   const [data, setData] = useState([]);
+  const [getRol, setGetRol] = useState([]);
   const [pagination, setPagination] = useState({
     count: 0,
     next: null,
@@ -13,7 +14,6 @@ export const ContextProvider = ({ children }) => {
   });
   const [show, setShow] = useState(false);
   const [username, setUsername] = useState("");
-  const [getRol, setGetRol] = useState([]);
   const [isCreatingUser, setIsCreatingUser] = useState(true);
   const [isViewingUser, setIsViewingUser] = useState(false);
   const [formKey, setFormKey] = useState(Date.now());
@@ -49,13 +49,16 @@ export const ContextProvider = ({ children }) => {
 
   const fetchData = async () => {
     try {
-      const response = await getData('user/');
-      setData(response.data.results);
-      console.log(response.data.results)
+      const responseUser = await getData('user/');
+      const responseRol = await getData('rol/');
+
+      setData(responseUser.data.results);
+      setGetRol(responseRol.data);
+
       setPagination({
-        count: response.data.count,
-        next: response.data.next,
-        previous: response.data.previous,
+        count: responseUser.data.count,
+        next: responseUser.data.next,
+        previous: responseUser.data.previous,
       });
     } catch (error) {
       console.error('Error al obtener los datos:', error);
@@ -67,6 +70,7 @@ export const ContextProvider = ({ children }) => {
       const baseURL = 'http://127.0.0.1:8000/';
       const endpoint = url.replace(baseURL, '');
       const response = await getData(endpoint);
+
       setData(response.data.results);
       setPagination({
         count: response.data.count,
@@ -125,15 +129,14 @@ export const ContextProvider = ({ children }) => {
   const assignRol = async (data) => {
     try {
       const response = await postData("rol/assign/", data);
-      if (response?.status === 200 && response.data) {
-        NotificationManager.success("Rol asignado", "Éxito", 3000);
-        fetchData();
-        showModal();
+      if (response?.status === 200) {
+        console.log(`Rol ${data.role} asignado a ${data.username}`);
       } else {
-        NotificationManager.error("Algo salió mal", "Error", 5000);
+        NotificationManager.error("Error al asignar rol", "Error", 5000);
       }
     } catch (err) {
       console.error('Error al asignar rol:', err);
+      NotificationManager.error("Error al asignar rol", "Error", 5000);
     }
   };
 
@@ -150,7 +153,21 @@ export const ContextProvider = ({ children }) => {
       console.error('Error al buscar usuarios:', error);
     }
   };
-  
+
+  const resetUserPassword = async (id, password) => {
+    try {
+      const response = await postData(`user/admin-reset-password/${id}/`, { password });
+      if (response?.status === 200) {
+        NotificationManager.success("Contraseña actualizada", "Éxito", 3000);
+        fetchData();
+      } else {
+        NotificationManager.error("Algo salió mal al cambiar contraseña", "Error", 5000);
+      }
+    } catch (error) {
+      console.error('Error al cambiar la contraseña:', error);
+      NotificationManager.error("Error inesperado", "Error", 5000);
+    }
+  };
 
   useEffect(() => {
     fetchData();
@@ -181,6 +198,7 @@ export const ContextProvider = ({ children }) => {
     updateUser,
     fetchPage,
     searchUsers,
+    resetUserPassword,
   };
 
   return (

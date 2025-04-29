@@ -175,7 +175,7 @@ const Users = () => {
               <td>{item.username}</td>
               <td>{item.first_name} {item.last_name}</td>
               <td>{item.email || ''}</td>
-              <td>{item.is_active === 1 ? 'Sí' : 'No'}</td>
+              <td>{item.is_active ? 'Sí' : 'No'}</td>
             </tr>
           ))}
         </tbody>

@@ -34,22 +34,23 @@ const ModalUserForm = () => {
   const [assignedGroups, setAssignedGroups] = useState([]);
   const [showResetModal, setShowResetModal] = useState(false);
 
+  // Cargar roles asignados y disponibles
   useEffect(() => {
-    if (userData) {
-      setAssignedGroups(userData.groups || []);
-      setActive(userData.is_active ?? true); // 🔥 Corregido: usar is_active
-    } else {
-      setAssignedGroups([]);
-      setActive(true);
-    }
-
     if (getRol.length > 0) {
-      const all = getRol.map(r => r.name);
-      const assigned = userData?.groups || [];
-      setAvailableGroups(all.filter(g => !assigned.includes(g)));
-    }
-  }, [userData, getRol]);
+      const allRoles = getRol.map(r => r.name);
+      const assigned = userData?.roles?.map(r => r.name) || [];
 
+      if (isCreatingUser) {
+        setAvailableGroups(allRoles);
+        setAssignedGroups([]);
+      } else {
+        setAssignedGroups(assigned);
+        setAvailableGroups(allRoles.filter(role => !assigned.includes(role)));
+      }
+    }
+  }, [getRol, userData, isCreatingUser]);
+
+  // Cargar datos del usuario o limpiar
   useEffect(() => {
     if (isCreatingUser) {
       reset({ username: '', email: '', first_name: '', last_name: '' });
@@ -63,39 +64,56 @@ const ModalUserForm = () => {
     }
   }, [isCreatingUser, isViewingUser, userData, reset]);
 
+  // Mover seleccionado a la derecha
   const handleAssign = () => {
     const selected = [...document.getElementById('groupLeft').selectedOptions].map(opt => opt.value);
     setAssignedGroups(prev => [...prev, ...selected]);
     setAvailableGroups(prev => prev.filter(g => !selected.includes(g)));
   };
 
+  // Mover seleccionado a la izquierda
   const handleRemove = () => {
     const selected = [...document.getElementById('groupRight').selectedOptions].map(opt => opt.value);
     setAvailableGroups(prev => [...prev, ...selected]);
     setAssignedGroups(prev => prev.filter(g => !selected.includes(g)));
   };
 
+  // Mover todos a la derecha
+  const handleAssignAll = () => {
+    setAssignedGroups(prev => [...prev, ...availableGroups]);
+    setAvailableGroups([]);
+  };
+
+  // Mover todos a la izquierda
+  const handleRemoveAll = () => {
+    setAvailableGroups(prev => [...prev, ...assignedGroups]);
+    setAssignedGroups([]);
+  };
+
+  // Enviar formulario
   const onSubmit = async (formData) => {
-    formData.groups = assignedGroups;
-    formData.is_active = active; // 🔥 Mandamos si está activo o no
-    delete formData.active; // 🔥 Por si hubiera 'active' residual
-  
+    formData.is_active = active;
+    delete formData.active;
+
     try {
-      if (!isCreatingUser) {
-        // 🔥 Si NO estamos creando, entonces es edición
-        formData.id = userData.id; // Necesitas enviar el id para actualizar
-        await updateUser(formData); // Usamos updateUser
-      } else {
-        // 🔥 Si estamos creando, usamos sendData
+      if (isCreatingUser) {
         await sendData(formData);
+      } else {
+        formData.id = userData.id;
+        await updateUser(formData);
       }
+
+      // Asignar roles uno por uno
+      for (const roleName of assignedGroups) {
+        await assignRol({ username: formData.username, role: roleName });
+      }
+
       reset();
       showModal();
     } catch (error) {
       console.error("Error en el formulario", error);
     }
   };
-  
 
   return (
     <Modal show={show} onHide={showModal} size="lg" centered>
@@ -140,7 +158,7 @@ const ModalUserForm = () => {
                 />
               </div>
               <div className="col-3 d-flex align-items-end">
-                <button type="button" className="btn btn-danger w-100">
+                <button type="button" className="btn btn-danger w-100" disabled>
                   E-mail
                 </button>
               </div>
@@ -182,24 +200,51 @@ const ModalUserForm = () => {
           <div className="mb-3">
             <label className="fw-semibold">Grupos</label>
             <div className="d-flex gap-3">
-              <select id="groupLeft" multiple className="form-control" size={6}>
-                {availableGroups.map(g => (
-                  <option key={g} value={g}>{g}</option>
-                ))}
+              {/* Roles disponibles */}
+              <select
+                id="groupLeft"
+                multiple
+                className="form-control"
+                size={6}
+                onDoubleClick={handleAssign}
+              >
+                {availableGroups.length > 0 ? (
+                  availableGroups.map((g) => (
+                    <option key={g} value={g}>{g}</option>
+                  ))
+                ) : (
+                  <option disabled>No hay grupos</option>
+                )}
               </select>
+
+              {/* Botones de acción */}
               <div className="d-flex flex-column justify-content-center gap-2">
                 <button type="button" onClick={handleAssign} className="btn btn-outline-secondary">&gt;</button>
                 <button type="button" onClick={handleRemove} className="btn btn-outline-secondary">&lt;</button>
+                <button type="button" onClick={handleAssignAll} className="btn btn-outline-secondary">&gt;&gt;</button>
+                <button type="button" onClick={handleRemoveAll} className="btn btn-outline-secondary">&lt;&lt;</button>
               </div>
-              <select id="groupRight" multiple className="form-control" size={6}>
-                {assignedGroups.map(g => (
-                  <option key={g} value={g}>{g}</option>
-                ))}
+
+              {/* Roles asignados */}
+              <select
+                id="groupRight"
+                multiple
+                className="form-control"
+                size={6}
+                onDoubleClick={handleRemove}
+              >
+                {assignedGroups.length > 0 ? (
+                  assignedGroups.map((g) => (
+                    <option key={g} value={g}>{g}</option>
+                  ))
+                ) : (
+                  <option disabled>No hay asignados</option>
+                )}
               </select>
             </div>
           </div>
 
-          {/* Botones */}
+          {/* Botones Finales */}
           <div className="d-flex justify-content-end gap-2">
             {isCreatingUser && (
               <button

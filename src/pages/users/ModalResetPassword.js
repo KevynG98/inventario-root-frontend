@@ -4,13 +4,17 @@ import { useMyContext } from './Context';
 import { AiFillEye, AiFillEyeInvisible } from 'react-icons/ai';
 
 const ModalResetPassword = () => {
-  const { showResetPassword, closeResetPasswordModal } = useMyContext();
+  const { showResetPassword, closeResetPasswordModal, username, data, resetUserPassword } = useMyContext();
 
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [isMismatch, setIsMismatch] = useState(false);
+
+  // Buscar el usuario actual
+  const userData = username ? data.find((u) => u.username === username) : null;
+  const userId = userData?.id;
 
   useEffect(() => {
     if (confirm.length > 0) {
@@ -20,14 +24,19 @@ const ModalResetPassword = () => {
     }
   }, [password, confirm]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (isMismatch) return;
+    if (isMismatch || !userId) return;
 
-    // Aquí iría la lógica del backend
-    alert(`Contraseña restablecida: ${password}`);
-    closeResetPasswordModal();
+    try {
+      await resetUserPassword(userId, password);
+      alert('Contraseña restablecida correctamente');
+      closeResetPasswordModal();
+    } catch (error) {
+      console.error('Error al restablecer contraseña:', error);
+      alert('Error al cambiar la contraseña');
+    }
   };
 
   return (
