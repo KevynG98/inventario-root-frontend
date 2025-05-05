@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import {
   Container,
   Row,
@@ -12,8 +12,12 @@ import { useForm } from 'react-hook-form';
 import { BiSearch } from 'react-icons/bi';
 import { convert_fecha_ddmmaa } from '../../../utils/formatUtils';
 import { FiAlignJustify } from "react-icons/fi";
+import { AppContext } from './Context';
 
 const FormularioAdmision = () => {
+
+  const { guardarAdmision, loading } = useContext(AppContext);
+
   const { register, handleSubmit, watch, setValue, getValues } = useForm();
   const [todayDate, setTodayDate] = useState('');
   const [mostrarModalFamiliar, setMostrarModalFamiliar] = useState(false);
@@ -61,9 +65,22 @@ const FormularioAdmision = () => {
     setValue('familiares', actualizada);
   };
 
-  const onSubmit = (data) => {
+  const onSubmit = async (data) => {
     console.log('Formulario enviado:', data);
+    try {
+      data.familiares = listaFamiliares; // si estás usando familiares
+      const resultado = await guardarAdmision(data);
+      alert('Formulario guardado correctamente');
+    } catch (error) {
+      alert('Error al guardar el formulario');
+    }
   };
+
+  const showPrimaryModal = (e) => {
+    if (e.key === 'Tab' || e.key === 'Enter') {
+      setMostrarModalFamiliar(true)
+    }
+  }
 
   return (
     <Container className="p-4 bg-light rounded shadow-sm">
@@ -73,7 +90,14 @@ const FormularioAdmision = () => {
         <div className="d-flex align-items-center">
           <span className="mr-3 font-weight-bold">Fecha: {todayDate}</span>
           <Button variant="primary"><FiAlignJustify /><span> Listado</span></Button>
-          <Button variant="primary" className="mr-2" onClick={handleSubmit(onSubmit)}>Guardar</Button>
+          <Button
+            variant="primary"
+            className="mr-2"
+            disabled={loading}
+            onClick={handleSubmit(onSubmit)}
+          >
+            {loading ? 'Guardando...' : 'Guardar'}
+          </Button>
         </div>
       </div>
 
@@ -85,7 +109,7 @@ const FormularioAdmision = () => {
             <Form.Group>
               <Form.Label>ID (Ficha Paciente)</Form.Label>
               <div className="input-group">
-                <Form.Control type="text" {...register('idFicha')} />
+                <Form.Control type="text" {...register('idFicha')} onKeyDown={showPrimaryModal} />
                 <div className="input-group-append">
                   <span className="input-group-text" style={{ cursor: 'pointer' }} onClick={() => setMostrarModalFamiliar(true)}><BiSearch /></span>
                 </div>
@@ -139,6 +163,13 @@ const FormularioAdmision = () => {
               <Form.Label>Religión</Form.Label>
               <Form.Control as="select" {...register('religion')}>
                 <option>Seleccione</option>
+                <option>CATOLICA</option>
+                <option>EVANGELICA</option>
+                <option>JUDIA</option>
+                <option>MORMONA</option>
+                <option>MUSULMANA</option>
+                <option>NO DEFINIDO</option>
+                <option>TESTIGO DE JEHOVA</option>
               </Form.Control>
             </Form.Group>
           </Col>
@@ -147,6 +178,8 @@ const FormularioAdmision = () => {
               <Form.Label>Tipo Identificación</Form.Label>
               <Form.Control as="select" {...register('tipoIdentificacion')}>
                 <option>Seleccione</option>
+                <option>DPI</option>
+                <option>PASAPORTE</option>
               </Form.Control>
             </Form.Group>
           </Col>
@@ -194,8 +227,13 @@ const FormularioAdmision = () => {
           <Col md={4}>
             <Form.Group>
               <Form.Label>Área de Admisión</Form.Label>
-              <Form.Control as="select" {...register('areaAdmision')}>
+              <Form.Control as="select" {...register('area_admision')}>
                 <option>Seleccione</option>
+                <option>EMERGENCIA</option>
+                <option>ENCAMAMIENTO / HOSPITAL</option>
+                <option>INTENSIVO</option>
+                <option>NEONATO</option>
+                <option>QUIROFANO / CIRUJIA</option>
               </Form.Control>
             </Form.Group>
           </Col>
@@ -204,6 +242,8 @@ const FormularioAdmision = () => {
               <Form.Label>Habitación</Form.Label>
               <Form.Control as="select" {...register('habitacion')}>
                 <option>Seleccione</option>
+                <option>HABITACION 1</option>
+                <option>HABITACION 2</option>
               </Form.Control>
             </Form.Group>
           </Col>
@@ -212,6 +252,9 @@ const FormularioAdmision = () => {
               <Form.Label>Médico Tratante</Form.Label>
               <Form.Control as="select" {...register('medicoTratante')}>
                 <option>Seleccione</option>
+                <option>MEDICO 1</option>
+                <option>MEDICO 2</option>
+                <option>MEDICO 3</option>
               </Form.Control>
             </Form.Group>
           </Col>
@@ -437,7 +480,7 @@ const FormularioAdmision = () => {
                 </Col>
                 <Col md={3}>
                   <Form.Group>
-                    <Form.Label>Fecha nacimiento</Form.Label>
+                    <Form.Label>Fecha de nacimiento</Form.Label>
                     <Form.Control type="date" {...register('resp_fechaNacimiento')} />
                   </Form.Group>
                 </Col>
@@ -570,7 +613,7 @@ const FormularioAdmision = () => {
               <Row className="mb-3">
                 <Col md={3}>
                   <Form.Group>
-                    <Form.Label>Fecha nacimiento</Form.Label>
+                    <Form.Label>Fecha de nacimiento</Form.Label>
                     <Form.Control type="date" {...register('esposo_fechaNacimiento')} />
                   </Form.Group>
                 </Col>
