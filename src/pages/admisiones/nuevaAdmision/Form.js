@@ -694,17 +694,19 @@ const FormularioAdmision = () => {
               // 1. Obtener los datos del familiar antes de limpiar
               const datosFamiliar = {
                 nombre: getValues('f_nombre'),
-                fecha_nacimiento: getValues('f_fecha_nacimiento'),
-                edad: getValues('f_fecha_nacimiento') ? calcularEdad(getValues('f_fecha_nacimiento')) : '',
-                tipo_identificacion: getValues('f_tipo_identificacion'),
-                numero_identificacion: getValues('f_numero_identificacion'),
                 direccion: getValues('f_direccion'),
                 correo: getValues('f_correo'),
                 telefono1: getValues('f_telefono1'),
                 telefono2: getValues('f_telefono2'),
                 empresa: getValues('f_empresa'),
+                direccion_empresa: getValues('f_direccion_empresa'),
                 ocupacion: getValues('f_ocupacion'),
-              };              
+                fecha_nacimiento: getValues('f_fecha_nacimiento'),
+                tipo_identificacion: getValues('f_tipo_identificacion'),
+                numero_identificacion: getValues('f_numero_identificacion'),
+                edad: calcularEdad(getValues('f_fecha_nacimiento')),
+                tipo_familiar: getValues('f_tipo_familiar'),
+              };
 
               const nuevoFamiliar = {
                 ...datosFamiliar,
@@ -785,7 +787,11 @@ const FormularioAdmision = () => {
               </Col>
               <Col md={2}>
                 <Form.Label>Edad</Form.Label>
-                <Form.Control type="number" disabled value={watch('f_fecha_nacimiento') ? calcularEdad(watch('f_fecha_nacimiento')) : ''} />
+                <Form.Control
+                  type="number"
+                  disabled
+                  value={watch('f_fecha_nacimiento') ? calcularEdad(watch('f_fecha_nacimiento')) : ''}
+                />
               </Col>
               <Col md={2}>
                 <Form.Label>Tipo identificación</Form.Label>
@@ -830,6 +836,25 @@ const FormularioAdmision = () => {
                 <Form.Control {...register('f_ocupacion')} />
               </Col>
             </Row>
+
+            <Row className="mb-3">
+              <Col md={4}>
+                <Form.Label>Tipo de Familiar</Form.Label>
+                <Form.Control as="select" {...register('f_tipo_familiar')}>
+                  <option value="">Seleccione</option>
+                  <option value="padre">Padre</option>
+                  <option value="madre">Madre</option>
+                  <option value="hijo">Hijo/a</option>
+                  <option value="hermano">Hermano/a</option>
+                  <option value="tio">Tío/a</option>
+                  <option value="sobrino">Sobrino/a</option>
+                  <option value="abuelo">Abuelo/a</option>
+                  <option value="amigo">Amigo/a</option>
+                  <option value="otro">Otro</option>
+                </Form.Control>
+              </Col>
+            </Row>
+
             <div className="d-flex justify-content-end">
               <Button variant="secondary" onClick={() => setMostrarModalFamiliar(false)} className="me-2">Cancelar</Button>
               <Button type="submit" variant="primary">Agregar</Button>
@@ -844,7 +869,11 @@ const FormularioAdmision = () => {
               <table className="table table-bordered table-sm">
                 <thead className="table-light">
                   <tr>
-                    <th>Nombre</th><th>Identificación</th><th>Edad</th><th>Teléfono</th>
+                    <th>Nombre</th>
+                    <th>Identificación</th>
+                    <th>Edad</th>
+                    <th>Teléfono</th>
+                    <th>Tipo</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -853,10 +882,12 @@ const FormularioAdmision = () => {
                       <td>{f.nombre}</td>
                       <td>{f.numero_identificacion}</td>
                       <td>{f.edad}</td>
-                      <td>{f.telefono}</td>
+                      <td>{f.telefono1}</td>
+                      <td>{f.tipo_familiar}</td>
                     </tr>
                   ))}
                 </tbody>
+
               </table>
             </div>
           )}
