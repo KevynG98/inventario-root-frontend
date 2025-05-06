@@ -44,7 +44,7 @@ class Navigation extends Component {
               icon: <FiUserPlus />,
               roles: [1],
               children: [
-                { title: 'Nueva Admision', url: '/dashboard/construccion/', icon: <FiUserPlus />, roles: [1] },
+                { title: 'Nueva Admision', url: '/dashboard/admisiones/nueva/', icon: <FiUserPlus />, roles: [1] },
                 { title: 'Listado de Admisiones', url: '/dashboard/construccion/', icon: <FiList />, roles: [1] },
                 { title: 'Estado de cuenta', url: '/dashboard/construccion/', icon: <FiFileText />, roles: [1] },
                 { title: 'Modificar Admision', url: '/dashboard/construccion/', icon: <FiEdit3 />, roles: [1] },
