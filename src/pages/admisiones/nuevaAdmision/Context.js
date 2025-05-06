@@ -11,6 +11,7 @@ export const AppProvider = ({ children }) => {
         setLoading(true);
         try {
             const datosLimpios = limpiarDatosVacios(formulario);
+            console.log(datosLimpios)
             const response = await postData('admisiones/', datosLimpios);
             console.log('Admisión guardada con éxito:', response.data);
             return response.data;

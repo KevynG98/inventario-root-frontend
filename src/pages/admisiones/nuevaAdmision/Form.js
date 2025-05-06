@@ -684,137 +684,216 @@ const FormularioAdmision = () => {
       {/* Modal de familiar */}
       <Modal show={mostrarModalFamiliar} onHide={() => setMostrarModalFamiliar(false)} centered size="xl">
         <Modal.Header closeButton>
-          <Modal.Title>Agregar Familiar</Modal.Title>
+          <Modal.Title>Ficha del Paciente</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <Form onSubmit={(e) => {
-            e.preventDefault();
-            const nombre = watch('f_nombre');
-            const relacion = watch('f_relacion');
-            const telefono1 = watch('f_telefono1');
-            const numeroIdentificacion = watch('f_numeroIdentificacion');
-            const fechaNacimiento = watch('f_fechaNacimiento');
-            const edad = calcularEdad(fechaNacimiento);
+          <Form
+            onSubmit={(e) => {
+              e.preventDefault();
 
-            const familiar = {
-              nombre,
-              relacion,
-              telefono1,
-              numeroIdentificacion,
-              edad,
-            };
+              // 1. Obtener los datos del familiar antes de limpiar
+              const datosFamiliar = {
+                nombre: getValues('f_nombre'),
+                direccion: getValues('f_direccion'),
+                correo: getValues('f_correo'),
+                telefono1: getValues('f_telefono1'),
+                telefono2: getValues('f_telefono2'),
+                empresa: getValues('f_empresa'),
+                direccion_empresa: getValues('f_direccion_empresa'),
+                ocupacion: getValues('f_ocupacion'),
+                fecha_nacimiento: getValues('f_fecha_nacimiento'),
+                tipo_identificacion: getValues('f_tipo_identificacion'),
+                numero_identificacion: getValues('f_numero_identificacion'),
+                edad: calcularEdad(getValues('f_fecha_nacimiento')),
+                tipo_familiar: getValues('f_tipo_familiar'),
+              };
 
-            agregarFamiliar(familiar);
-            setValue('f_nombre', '');
-            setValue('f_relacion', '');
-            setValue('f_telefono1', '');
-            setValue('f_numeroIdentificacion', '');
-            setValue('f_fechaNacimiento', '');
-          }}>
+              const nuevoFamiliar = {
+                ...datosFamiliar,
+              };
+
+              console.log(nuevoFamiliar)
+
+              // 2. Agregar a la lista
+              agregarFamiliar(nuevoFamiliar);
+
+              // 3. Limpiar los campos del familiar
+              const camposFamiliar = [
+                'f_nombre', 'f_direccion', 'f_correo', 'f_telefono1', 'f_telefono2',
+                'f_empresa', 'f_direccion_empresa', 'f_ocupacion'
+              ];
+              camposFamiliar.forEach((campo) => setValue(campo, ''));
+
+              // 4. Copiar datos del paciente (prefijo p_) al formulario principal
+              const camposPaciente = [
+                { origen: 'p_primer_nombre', destino: 'nombre' },
+                { origen: 'p_direccion', destino: 'direccion' },
+                { origen: 'p_correo', destino: 'correo' },
+                { origen: 'p_telefono', destino: 'telefono1' },
+                { origen: 'p_fecha_nacimiento', destino: 'fechaNacimiento' },
+                { origen: 'p_tipo_identificacion', destino: 'tipoIdentificacion' },
+                { origen: 'p_numero_identificacion', destino: 'numeroIdentificacion' },
+              ];
+
+              camposPaciente.forEach(({ origen, destino }) => {
+                const valor = getValues(origen);
+                setValue(destino, valor);
+              });
+
+              // 5. Calcular edad y colocarla
+              if (getValues('p_fecha_nacimiento')) {
+                setValue('edad', calcularEdad(getValues('p_fecha_nacimiento')));
+              }
+            }}
+
+          >
+
+            {/* Campos del paciente */}
+            < Row className="mb-3" >
+              <Col md={3}><Form.Label>Primer nombre</Form.Label><Form.Control {...register('p_primer_nombre')} /></Col>
+              <Col md={3}><Form.Label>Segundo nombre</Form.Label><Form.Control {...register('p_segundo_nombre')} /></Col>
+              <Col md={3}><Form.Label>Primer Apellido</Form.Label><Form.Control {...register('p_primer_apellido')} /></Col>
+              <Col md={3}><Form.Label>Segundo Apellido</Form.Label><Form.Control {...register('p_segundo_apellido')} /></Col>
+            </Row>
             <Row className="mb-3">
-              <Col md={3}>
-                <Form.Group>
-                  <Form.Label>Relación</Form.Label>
-                  <Form.Control as="select" {...register('f_relacion')} required>
-                    <option value="">Seleccione</option>
-                    <option>Padre</option>
-                    <option>Madre</option>
-                    <option>Tío</option>
-                    <option>Tía</option>
-                    <option>Otro</option>
-                  </Form.Control>
-                </Form.Group>
+              <Col md={2}><Form.Label>Género</Form.Label><Form.Control as="select" {...register('p_genero')}>
+                <option value="">Seleccione</option><option>Masculino</option><option>Femenino</option></Form.Control></Col>
+              <Col md={2}><Form.Label>Estado Civil</Form.Label><Form.Control as="select" {...register('p_estado_civil')}>
+                <option value="">Seleccione</option><option>Soltero</option><option>Casado</option><option>Divorciado</option><option>Viudo</option>
+              </Form.Control></Col>
+              <Col md={3}><Form.Label>Apellido de casada</Form.Label><Form.Control {...register('p_apellido_casada')} /></Col>
+              <Col md={2}><Form.Label>Teléfono</Form.Label><Form.Control {...register('p_telefono')} /></Col>
+            </Row>
+            <Row className="mb-3">
+              <Col md={3}><Form.Label>Fecha Nacimiento</Form.Label><Form.Control type="date" {...register('p_fecha_nacimiento')} /></Col>
+              <Col md={1}><Form.Label>Edad</Form.Label><Form.Control value={watch('p_fecha_nacimiento') ? calcularEdad(watch('p_fecha_nacimiento')) : ''} disabled /></Col>
+              <Col md={3}><Form.Label>Tipo de Identificación</Form.Label><Form.Control as="select" {...register('p_tipo_identificacion')}>
+                <option value="">Seleccione</option><option>DPI</option><option>PASAPORTE</option></Form.Control></Col>
+              <Col md={5}><Form.Label>Número de Identificación</Form.Label><Form.Control {...register('p_numero_identificacion')} /></Col>
+            </Row>
+
+            {/* Campos del familiar */}
+            <hr />
+            <h6 className="mt-3">Datos del Familiar</h6>
+
+            <Row className="mb-3">
+              <Col md={4}>
+                <Form.Label>Nombre</Form.Label>
+                <Form.Control {...register('f_nombre')} />
               </Col>
-              <Col md={3}>
-                <Form.Group>
-                  <Form.Label>Nombre</Form.Label>
-                  <Form.Control type="text" {...register('f_nombre')} required />
-                </Form.Group>
+              <Col md={4}>
+                <Form.Label>Fecha Nacimiento</Form.Label>
+                <Form.Control type="date" {...register('f_fecha_nacimiento')} />
               </Col>
               <Col md={2}>
-                <Form.Group>
-                  <Form.Label>Fecha de nacimiento</Form.Label>
-                  <Form.Control
-                    type="date"
-                    {...register('f_fechaNacimiento')}
-                    required
-                    onChange={(e) => {
-                      const edad = calcularEdad(e.target.value);
-                      setValue('f_edad', edad);
-                    }}
-                  />
-                </Form.Group>
+                <Form.Label>Edad</Form.Label>
+                <Form.Control
+                  type="number"
+                  disabled
+                  value={watch('f_fecha_nacimiento') ? calcularEdad(watch('f_fecha_nacimiento')) : ''}
+                />
               </Col>
-              <Col md={1}>
-                <Form.Group>
-                  <Form.Label>Edad</Form.Label>
-                  <Form.Control type="text" {...register('f_edad')} disabled />
-                </Form.Group>
+              <Col md={2}>
+                <Form.Label>Tipo identificación</Form.Label>
+                <Form.Control as="select" {...register('f_tipo_identificacion')}>
+                  <option value="">Seleccione</option>
+                  <option>DPI</option>
+                  <option>PASAPORTE</option>
+                </Form.Control>
+              </Col>
+            </Row>
+
+            <Row className="mb-3">
+              <Col md={4}>
+                <Form.Label>Número de Identificación</Form.Label>
+                <Form.Control {...register('f_numero_identificacion')} />
+              </Col>
+              <Col md={4}>
+                <Form.Label>Dirección</Form.Label>
+                <Form.Control {...register('f_direccion')} />
+              </Col>
+              <Col md={4}>
+                <Form.Label>Correo electrónico</Form.Label>
+                <Form.Control type="email" {...register('f_correo')} />
+              </Col>
+            </Row>
+
+            <Row className="mb-3">
+              <Col md={3}>
+                <Form.Label>Teléfono 1</Form.Label>
+                <Form.Control {...register('f_telefono1')} />
               </Col>
               <Col md={3}>
-                <Form.Group>
-                  <Form.Label>Tipo de identificación</Form.Label>
-                  <Form.Control type="text" {...register('f_tipoIdentificacion')} />
-                </Form.Group>
+                <Form.Label>Teléfono 2</Form.Label>
+                <Form.Control {...register('f_telefono2')} />
+              </Col>
+              <Col md={3}>
+                <Form.Label>Empresa en donde labora</Form.Label>
+                <Form.Control {...register('f_empresa')} />
+              </Col>
+              <Col md={3}>
+                <Form.Label>Ocupación</Form.Label>
+                <Form.Control {...register('f_ocupacion')} />
               </Col>
             </Row>
+
             <Row className="mb-3">
-              <Col md={6}>
-                <Form.Group>
-                  <Form.Label>Número de identificación</Form.Label>
-                  <Form.Control type="text" {...register('f_numeroIdentificacion')} />
-                </Form.Group>
-              </Col>
-              <Col md={6}>
-                <Form.Group>
-                  <Form.Label>Teléfono</Form.Label>
-                  <Form.Control type="text" {...register('f_telefono1')} />
-                </Form.Group>
+              <Col md={4}>
+                <Form.Label>Tipo de Familiar</Form.Label>
+                <Form.Control as="select" {...register('f_tipo_familiar')}>
+                  <option value="">Seleccione</option>
+                  <option value="padre">Padre</option>
+                  <option value="madre">Madre</option>
+                  <option value="hijo">Hijo/a</option>
+                  <option value="hermano">Hermano/a</option>
+                  <option value="tio">Tío/a</option>
+                  <option value="sobrino">Sobrino/a</option>
+                  <option value="abuelo">Abuelo/a</option>
+                  <option value="amigo">Amigo/a</option>
+                  <option value="otro">Otro</option>
+                </Form.Control>
               </Col>
             </Row>
+
             <div className="d-flex justify-content-end">
-              <Button variant="secondary" onClick={() => setMostrarModalFamiliar(false)} className="me-2">
-                Cancelar
-              </Button>
-              <Button type="submit" variant="primary">
-                Agregar
-              </Button>
-              <Button variant="success" className="ms-2" onClick={() => setMostrarModalFamiliar(false)}>
-                Guardar
-              </Button>
+              <Button variant="secondary" onClick={() => setMostrarModalFamiliar(false)} className="me-2">Cancelar</Button>
+              <Button type="submit" variant="primary">Agregar</Button>
+              <Button variant="success" className="ms-2" onClick={() => setMostrarModalFamiliar(false)}>Guardar</Button>
             </div>
           </Form>
 
+          {/* Tabla de familiares */}
           {listaFamiliares.length > 0 && (
             <div className="mt-4">
               <h6>Familiares agregados: {listaFamiliares.length}</h6>
               <table className="table table-bordered table-sm">
                 <thead className="table-light">
                   <tr>
-                    <th>Relación</th>
                     <th>Nombre</th>
                     <th>Identificación</th>
                     <th>Edad</th>
                     <th>Teléfono</th>
+                    <th>Tipo</th>
                   </tr>
                 </thead>
                 <tbody>
                   {listaFamiliares.map((f, idx) => (
                     <tr key={idx}>
-                      <td>{f.relacion}</td>
                       <td>{f.nombre}</td>
-                      <td>{f.numeroIdentificacion}</td>
+                      <td>{f.numero_identificacion}</td>
                       <td>{f.edad}</td>
                       <td>{f.telefono1}</td>
+                      <td>{f.tipo_familiar}</td>
                     </tr>
                   ))}
                 </tbody>
+
               </table>
             </div>
           )}
         </Modal.Body>
-      </Modal>
-    </Container>
+      </Modal >
+    </Container >
   );
 };
 
