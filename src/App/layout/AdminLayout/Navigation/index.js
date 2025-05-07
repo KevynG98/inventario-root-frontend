@@ -51,7 +51,7 @@ class Navigation extends Component {
                 { title: 'Consulta externa', url: '/dashboard/construccion/', icon: <FiUserCheck />, roles: [1] },
                 { title: 'Caja', url: '/dashboard/construccion/', icon: <FiCreditCard />, roles: [1] },
                 { title: 'Seguros', url: '/dashboard/construccion/', icon: <FiShield />, roles: [1] },
-                { title: 'Estado de habitaciones', url: '/dashboard/construccion/', icon: <FiGrid />, roles: [1] }
+                { title: 'Estado de habitaciones', url: '/dashboard/admisiones/estado-habitacion', icon: <FiGrid />, roles: [1] }
               ]
             },
             {

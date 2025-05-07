@@ -20,6 +20,7 @@ const Futuro = React.lazy(() => import('./pages/futuro/Index'));
 /* ADMISIONES PAGINAS */
 const NuevaAdmision = React.lazy(() => import('./pages/admisiones/nuevaAdmision/Index'))
 const ListadoAdmisiones = React.lazy(() => import('./pages/admisiones/listadoAdmisiones/Index'))
+const EstadoHabitaciones = React.lazy(() => import('./pages/admisiones/estadoHabitacion/Index'))
 
 const UIBasicButton = React.lazy(() => import('./Demo/UIElements/Basic/Button'));
 const UIBasicBadges = React.lazy(() => import('./Demo/UIElements/Basic/Badges'));
@@ -61,6 +62,7 @@ const routes = [
     /*Admisiones*/
     { path: '/dashboard/admisiones/nueva', exact: true, name: 'Nueva Admision', component: NuevaAdmision },
     { path: '/dashboard/admisiones/listar-admision', exact: true, name: 'Listar Admision', component: ListadoAdmisiones },
+    { path: '/dashboard/admisiones/estado-habitacion', exact: true, name: 'Estado Habitaciones', component: EstadoHabitaciones },
     // -------------------------------------------------------------------------------------------------------------------------------
     { path: '/basic/button', exact: true, name: 'Basic Button', component: UIBasicButton },
     { path: '/basic/badges', exact: true, name: 'Basic Badges', component: UIBasicBadges },
