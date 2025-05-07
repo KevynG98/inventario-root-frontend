@@ -1,26 +1,29 @@
 import React, { createContext, useEffect, useState } from 'react';
-import { getData } from '../../../apiService'
+import { getData } from '../../../apiService';
+import { useForm } from 'react-hook-form';
 
 export const AppContext = createContext();
 
 export const AppProvider = ({ children }) => {
-    const [state, setState] = useState(null);
-    const [loading, setLoading] = useState(false);
-    const [todayDate, setTodayDate] = useState('');
+    const { register, handleSubmit, setValue, getValues, watch } = useForm();
 
     const [admisionesData, setAdmisionesData] = useState([]);
+    const [mostrarModal, setMostrarModal] = useState(false);
+    const [modoFormulario, setModoFormulario] = useState('ver');
+    const [loading, setLoading] = useState(false);
+    const [seccionActiva, setSeccionActiva] = useState('datos-seguro');
+    const [todayDate, setTodayDate] = useState('');
 
     const getAdmisionesResumen = async (pagina = 1) => {
         try {
             const response = await getData(`admisiones/admisiones-resumen/?page=${pagina}`);
-            console.log('Resultados:', response.data.results);
             setAdmisionesData(response.data.results);
         } catch (error) {
             console.error('Error al cargar admisiones:', error);
         }
-    }
+    };
 
-    const cargarAdmision = async (id, setValue) => {
+    const cargarAdmision = async (id) => {
         try {
             const { data } = await getData(`admisiones/${id}/`);
             console.log(data)
@@ -110,23 +113,40 @@ export const AppProvider = ({ children }) => {
             setValue('esposo_empresa', data.esposo?.empresa);
             setValue('esposo_direccion', data.esposo?.direccion);
             setValue('esposo_email', data.esposo?.email);
-
         } catch (error) {
-            console.error('Error al cargar la admisión:', error);
+            console.error('Error al cargar admisión:', error);
         }
     };
 
+    const onSubmit = (data) => {
+        console.log("Formulario enviado:", data);
+    };
+
     useEffect(() => {
-        getAdmisionesResumen()
-    }, [])
+        getAdmisionesResumen();
+    }, []);
 
     const values = {
         admisionesData,
         cargarAdmision,
-    };
+        mostrarModal,
+        setMostrarModal,
+        modoFormulario,
+        setModoFormulario,
+        loading,
+        setLoading,
+        seccionActiva,
+        setSeccionActiva,
+        register,
+        handleSubmit,
+        setValue,
+        getValues,
+        watch,
+        onSubmit,
+    }
 
     return (
-        <AppContext.Provider value={values}>
+        <AppContext.Provider value={values} >
             {children}
         </AppContext.Provider>
     );

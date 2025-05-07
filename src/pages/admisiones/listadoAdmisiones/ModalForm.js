@@ -1,19 +1,20 @@
-import React from 'react';
+import React, { useContext, useState } from 'react';
 import { Modal, Button, Form, Row, Col, Nav } from 'react-bootstrap';
+import { AppContext } from './Context';
 import { useForm } from 'react-hook-form';
 import { FiAlignJustify } from 'react-icons/fi';
-import { useState } from 'react';
 import { BiSearch } from 'react-icons/bi';
 
-const ModalAdmision = ({ show, onHide, modo, setValue, getValues, watch, handleSubmit, onSubmit, loading, todayDate, seccionActiva, setSeccionActiva, register }) => {
-    const readOnly = modo === 'ver';
-    const [mostrarModalFamiliar, setMostrarModalFamiliar] = useState(false);
-    const showPrimaryModal = () => setMostrarModalFamiliar(true);
+const ModalAdmision = () => {
+    const { mostrarModal, setMostrarModal, modoFormulario, setValue, getValues, watch,
+        handleSubmit, onSubmit, loading, seccionActiva, setSeccionActiva, register, } = useContext(AppContext);
+
+    const readOnly = modoFormulario === 'ver';
 
     return (
-        <Modal show={show} onHide={onHide} size="xl" centered scrollable>
+        <Modal show={mostrarModal} onHide={() => setMostrarModal(false)} size="xl" centered scrollable>
             <Modal.Header closeButton>
-                <Modal.Title>{modo === 'ver' ? 'Ver Admisión' : 'Editar Admisión'}</Modal.Title>
+                <Modal.Title>{modoFormulario === 'ver' ? 'Ver Admisión' : 'Editar Admisión'}</Modal.Title>
             </Modal.Header>
             <Modal.Body>
                 {!readOnly && (
@@ -29,9 +30,9 @@ const ModalAdmision = ({ show, onHide, modo, setValue, getValues, watch, handleS
                             <Form.Group>
                                 <Form.Label>ID (Ficha Paciente)</Form.Label>
                                 <div className="input-group">
-                                    <Form.Control type="text" {...register('idFicha')} onKeyDown={showPrimaryModal} readOnly />
+                                    <Form.Control type="text" {...register('idFicha')} readOnly />
                                     <div className="input-group-append">
-                                        <span className="input-group-text" style={{ cursor: 'pointer' }} onClick={() => setMostrarModalFamiliar(true)}><BiSearch /></span>
+                                        <span className="input-group-text" style={{ cursor: 'pointer' }}><BiSearch /></span>
                                     </div>
                                 </div>
                             </Form.Group>
