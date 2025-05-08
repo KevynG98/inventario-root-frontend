@@ -19,12 +19,15 @@ const ModalAdmision = () => {
             <Modal.Body>
                 {!readOnly && (
                     <div className="d-flex justify-content-end mb-3">
-                        <Button type="submit" disabled={loading}>
+                        <Button
+                            onClick={handleSubmit(onSubmit)}
+                            disabled={loading}
+                        >
                             {loading ? 'Guardando...' : 'Guardar cambios'}
                         </Button>
                     </div>
                 )}
-                <Form onSubmit={handleSubmit(onSubmit)}>
+                <Form>
                     <Row className="mb-3">
                         <Col md={4}>
                             <Form.Group>
