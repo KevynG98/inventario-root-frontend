@@ -49,15 +49,16 @@ const ListadoAdmisiones = () => {
       <table className="table table-bordered table-sm">
         <thead className="table-primary text-dark fw-semibold">
           <tr>
-            <th>Admisión</th>
+            <th>Solicitud</th>
             <th>Fecha</th>
+            <th>Creado</th>
             <th>Paciente</th>
-            <th>Identificación</th>
-            <th>Género</th>
-            <th>Aseguradora</th>
+            <th>Edad</th>
+            <th>Genero</th>
             <th>Área</th>
-            <th>Cama</th>
-            <th>Médico</th>
+            <th>Identificacion</th>
+            <th>Cita</th>
+            <th>Observaciones</th>
             <th className="text-center">Acciones</th>
           </tr>
         </thead>
@@ -72,7 +73,8 @@ const ListadoAdmisiones = () => {
               <td>{admision.aseguradora}</td>
               <td>{admision.area}</td>
               <td>{admision.habitacion}</td>
-              <td>{admision.medico_tratante || '-'}</td>
+              <td>{admision.medico_tratante || 'Sin Cita'}</td>
+              <td></td>
               <td className="text-center">
                 <OverlayTrigger overlay={<Tooltip>Editar admisión</Tooltip>}>
                   <Button className="btn btn-outline-secondary btn-sm" onClick={() => handleEditar(admision.id_admision)}>
