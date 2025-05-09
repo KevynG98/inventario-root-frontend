@@ -1,5 +1,5 @@
 import React, { createContext, useEffect, useState } from 'react';
-import { getData } from '../../../apiService';
+import { getData, putData } from '../../../apiService';
 import { useForm } from 'react-hook-form';
 
 export const AppContext = createContext();
@@ -118,8 +118,22 @@ export const AppProvider = ({ children }) => {
         }
     };
 
-    const onSubmit = (data) => {
-        console.log("Formulario enviado:", data);
+    const onSubmit = async (data) => {
+        console.log("DATOS", data)
+        try {
+            const { status, data: response } = await putData(`admisiones/editar/${data.idFicha}/`, data);
+
+            if (status === 200) {
+                console.log('Actualizado correctamente:', response);
+                setMostrarModal(!mostrarModal)
+                // cerrar modal, recargar tabla, etc.
+            } else {
+                console.error('Error al actualizar:', response);
+            }
+        } catch (error) {
+            console.error('Error de red o servidor:', error);
+        }
+        getAdmisionesResumen()
     };
 
     useEffect(() => {
