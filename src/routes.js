@@ -23,6 +23,7 @@ const ListadoAdmisiones = React.lazy(() => import('./pages/admisiones/listadoAdm
 const EstadoHabitaciones = React.lazy(() => import('./pages/admisiones/estadoHabitacion/Index'))
 const ConsultaExterna = React.lazy(() => import('./pages/admisiones/consultaExterna/Index'))
 const AdmisionCaja = React.lazy(() => import('./pages/admisiones/caja/Index'))
+const AdmisionSeguro = React.lazy(() => import('./pages/admisiones/seguros/Index'))
 
 const UIBasicButton = React.lazy(() => import('./Demo/UIElements/Basic/Button'));
 const UIBasicBadges = React.lazy(() => import('./Demo/UIElements/Basic/Badges'));
@@ -67,6 +68,7 @@ const routes = [
     { path: '/dashboard/admisiones/consulta-externa', exact: true, name: 'Consulta Externa', component: ConsultaExterna },
     { path: '/dashboard/admisiones/caja', exact: true, name: 'Caja', component: AdmisionCaja },
     { path: '/dashboard/admisiones/estado-habitacion', exact: true, name: 'Estado Habitaciones', component: EstadoHabitaciones },
+    { path: '/dashboard/admisiones/seguros', exact: true, name: 'Estado Habitaciones', component: AdmisionSeguro },
     // -------------------------------------------------------------------------------------------------------------------------------
     { path: '/basic/button', exact: true, name: 'Basic Button', component: UIBasicButton },
     { path: '/basic/badges', exact: true, name: 'Basic Badges', component: UIBasicBadges },
