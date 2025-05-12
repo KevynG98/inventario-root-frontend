@@ -8,7 +8,7 @@ const ListadoAdmisiones = () => {
     admisionesData,
     setMostrarModal,
     getMovimientos,
-    setModoFormulario,
+    setIdAdmision,
     setValue,
   } = useContext(AppContext);
 
@@ -16,6 +16,7 @@ const ListadoAdmisiones = () => {
 
 
   const handleEditar = async (id) => {
+    setIdAdmision(id)
     await getMovimientos(id);
     setMostrarModal(true);
   };

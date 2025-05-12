@@ -14,6 +14,7 @@ export const AppProvider = ({ children }) => {
     const [loading, setLoading] = useState(false);
     const [seccionActiva, setSeccionActiva] = useState('datos-seguro');
     const [todayDate, setTodayDate] = useState('');
+    const [idAdmision, setIdAdmision] = useState(0)
 
     const getAdmisionesResumen = async (pagina = 1) => {
         try {
@@ -33,6 +34,27 @@ export const AppProvider = ({ children }) => {
             console.error('Error al cargar movimientos:', error);
         }
     }
+
+    const descargarPDF = async () => {
+        console.log(idAdmision)
+        try {
+            const response = await fetch(`http://localhost:8000/admisiones/estado-cuenta-imprimir/${idAdmision}/`, {
+                method: 'GET',
+            });
+
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `estado_cuenta_${idAdmision}.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+        } catch (error) {
+            console.error('Error al descargar PDF:', error);
+        }
+    };
 
     const onSubmit = async (data) => {
         console.log("DATOS", data)
@@ -79,6 +101,9 @@ export const AppProvider = ({ children }) => {
         getMovimientos,
         admisionesMovimientos,
         totalPublico,
+        idAdmision, 
+        setIdAdmision,
+        descargarPDF,
     }
 
     return (

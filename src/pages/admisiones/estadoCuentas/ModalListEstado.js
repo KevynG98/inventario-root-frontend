@@ -7,7 +7,8 @@ import { FiPrinter } from 'react-icons/fi';
 
 const ModalAdmision = () => {
     const { mostrarModal, setMostrarModal, modoFormulario, setValue, getValues, watch,
-        handleSubmit, onSubmit, loading, seccionActiva, setSeccionActiva, totalPublico, admisionesMovimientos } = useContext(AppContext);
+        handleSubmit, onSubmit, loading, seccionActiva, setSeccionActiva, totalPublico, admisionesMovimientos,
+        descargarPDF } = useContext(AppContext);
 
     const readOnly = modoFormulario === 'ver';
 
@@ -17,11 +18,16 @@ const ModalAdmision = () => {
                 <Modal.Title>Ver estado de cuenta</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-            <div className="d-flex justify-content-end mb-3">
+                <div className="d-flex justify-content-end mb-3">
                     <OverlayTrigger overlay={<Tooltip>Imprimir estado de cuenta</Tooltip>}>
-                        <Button className="btn btn-outline-secondary btn-sm" onClick={() => console.log("Imprimir")}>
+                        <Button
+                            className="btn btn-outline-secondary btn-sm"
+                            onClick={descargarPDF}
+                            disabled={admisionesMovimientos.length === 0}
+                        >
                             <FiPrinter />
                         </Button>
+
                     </OverlayTrigger>
                 </div>
 
