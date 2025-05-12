@@ -46,7 +46,7 @@ class Navigation extends Component {
               children: [
                 { title: 'Nueva Admision', url: '/dashboard/admisiones/nueva/', icon: <FiUserPlus />, roles: [1] },
                 { title: 'Listado de Admisiones', url: '/dashboard/admisiones/listar-admision', icon: <FiList />, roles: [1] },
-                { title: 'Estado de cuenta', url: '/dashboard/construccion/', icon: <FiFileText />, roles: [1] },
+                { title: 'Estado de cuenta', url: '/dashboard/admisiones/listar-admision-estados/', icon: <FiFileText />, roles: [1] },
                 { title: 'Egreso de Pacientes', url: '/dashboard/construccion/', icon: <FiLogOut />, roles: [1] },
                 { title: 'Consulta externa', url: '/dashboard/admisiones/consulta-externa/', icon: <FiUserCheck />, roles: [1] },
                 { title: 'Caja', url: '/dashboard/admisiones/caja/', icon: <FiCreditCard />, roles: [1] },
