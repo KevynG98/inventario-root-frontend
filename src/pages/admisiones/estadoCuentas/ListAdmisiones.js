@@ -6,23 +6,17 @@ import { FiEye, FiEdit, FiChevronDown, FiChevronRight } from 'react-icons/fi';
 const ListadoAdmisiones = () => {
   const {
     admisionesData,
-    cargarAdmision,
     setMostrarModal,
+    getMovimientos,
     setModoFormulario,
     setValue,
   } = useContext(AppContext);
 
   const [seccionesAbiertas, setSeccionesAbiertas] = useState({});
 
-  const handleVer = async (id) => {
-    await cargarAdmision(id);
-    setModoFormulario('ver');
-    setMostrarModal(true);
-  };
 
   const handleEditar = async (id) => {
-    await cargarAdmision(id);
-    setModoFormulario('editar');
+    await getMovimientos(id);
     setMostrarModal(true);
   };
 
