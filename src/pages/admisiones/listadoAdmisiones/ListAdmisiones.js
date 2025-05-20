@@ -70,7 +70,6 @@ const ListadoAdmisiones = () => {
                     <th>Fecha</th>
                     <th>Paciente</th>
                     <th>Identificación</th>
-                    <th>Género</th>
                     <th>Aseguradora</th>
                     <th>Área</th>
                     <th>Cama</th>
@@ -85,7 +84,6 @@ const ListadoAdmisiones = () => {
                       <td>{admision.fecha_admision}</td>
                       <td>{admision.paciente}</td>
                       <td>{admision.identificacion}</td>
-                      <td>{admision.genero}</td>
                       <td>{admision.aseguradora}</td>
                       <td>{admision.area}</td>
                       <td>{admision.habitacion}</td>

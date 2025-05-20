@@ -19,6 +19,7 @@ const FormularioAdmision = () => {
   const { guardarAdmision, loading } = useContext(AppContext);
 
   const { register, handleSubmit, watch, setValue, getValues } = useForm();
+  const [acompanantesVisibles, setAcompanantesVisibles] = useState([]);
   const [todayDate, setTodayDate] = useState('');
   const [mostrarModalFamiliar, setMostrarModalFamiliar] = useState(false);
   const [listaFamiliares, setListaFamiliares] = useState([]);
@@ -65,14 +66,80 @@ const FormularioAdmision = () => {
     setValue('familiares', actualizada);
   };
 
+  const transformarCampos = (data) => {
+    const output = {
+      ...data,
+      // Paciente
+      p_primer_nombre: data.nombre,
+      p_fecha_nacimiento: data.fechaNacimiento,
+      p_genero: data.genero,
+      p_estado_civil: data.estadoCivil,
+      p_tipo_identificacion: data.tipoIdentificacion,
+      p_numero_identificacion: data.numeroIdentificacion,
+      p_telefono: data.telefono1,
+
+      // Responsable
+      responsablePrimerNombre: data.resp_primerNombre,
+      responsablePrimerApellido: data.resp_primerApellido,
+      responsableTelefono1: data.resp_telefono1,
+      responsableTelefono2: data.resp_telefono2,
+      responsableEmail: data.resp_email,
+      responsableEmpresa: data.resp_empresa,
+      responsableOcupacion: data.resp_ocupacion,
+
+      // Acompañante directo
+      acompananteNombre: data.acompananteNombre,
+      acompananteTelefono: data.acompananteTelefono,
+
+      // Datos laborales del paciente
+      empresa: data.empresa,
+      direccionEmpresa: data.direccionEmpresa,
+      telefonoEmpresa1: data.telefonoEmpresa1,
+      telefonoEmpresa2: data.telefonoEmpresa2,
+      ocupacion: data.ocupacion,
+
+      // Datos del seguro
+      aseguradora: data.aseguradora,
+      listaPrecios: data.listaPrecios,
+      carnet: data.carnet,
+      certificado: data.certificado,
+      nombreTitular: data.nombreTitular,
+      coaseguro: data.coaseguro,
+      valorCopago: data.valorCopago,
+      valorDeducible: data.valorDeducible,
+
+      // Garantía de pago
+      tipoGarantia: data.tipoGarantia,
+      numeroTcCheque: data.numeroTcCheque,
+      nombreFactura: data.nombreFactura,
+      direccionFactura: data.direccionFactura,
+      correoFactura: data.correoFactura,
+    };
+
+    if (data.acompanantes) {
+      output.familiares = data.acompanantes;
+      delete output.acompanantes;
+    }
+
+    delete output.nombre;
+    delete output.fechaNacimiento;
+    delete output.genero;
+    delete output.estadoCivil;
+    delete output.tipoIdentificacion;
+    delete output.numeroIdentificacion;
+    delete output.telefono1;
+
+    return output;
+  };
+
   const onSubmit = async (data) => {
     console.log('Formulario enviado:', data);
     try {
-      data.familiares = listaFamiliares; // si estás usando familiares
-      const resultado = await guardarAdmision(data);
-      alert('Formulario guardado correctamente');
-    } catch (error) {
-      alert('Error al guardar el formulario');
+      const datosTransformados = transformarCampos(data);
+      const resultado = await guardarAdmision(datosTransformados);
+      alert('Guardado con éxito');
+    } catch (err) {
+      alert('Error al guardar');
     }
   };
 
@@ -86,7 +153,7 @@ const FormularioAdmision = () => {
     <Container className="p-4 bg-light rounded shadow-sm">
       {/* Encabezado */}
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h4 className="fw-bold text-dark">Ficha de Admisión</h4>
+        <h4 className="fw-bold text-dark">Ficha del Paciente</h4>
         <div className="d-flex align-items-center">
           <span className="mr-3 font-weight-bold">Fecha: {todayDate}</span>
           <Button variant="primary"><FiAlignJustify /><span> Listado</span></Button>
@@ -261,638 +328,214 @@ const FormularioAdmision = () => {
         </Row>
 
         <h5 className="text-primary mt-4">Datos del Seguro</h5>
+        <Row className="mb-3">
+          <Col md={4}>
+            <Form.Group>
+              <Form.Label>Aseguradora</Form.Label>
+              <Form.Control type="text" {...register("aseguradora")} />
+            </Form.Group>
+          </Col>
+          <Col md={4}>
+            <Form.Group>
+              <Form.Label>Número de póliza</Form.Label>
+              <Form.Control type="text" {...register("numeroPoliza")} />
+            </Form.Group>
+          </Col>
+          <Col md={4}>
+            <Form.Group>
+              <Form.Label>Carnet</Form.Label>
+              <Form.Control type="text" {...register("carnet")} />
+            </Form.Group>
+          </Col>
+        </Row>
 
-        <Nav variant="tabs" activeKey={seccionActiva} onSelect={(selectedKey) => setSeccionActiva(selectedKey)}>
-          <Nav.Item><Nav.Link eventKey="datos-seguro">Datos del Seguro</Nav.Link></Nav.Item>
-          <Nav.Item><Nav.Link eventKey="garantia">Garantía de Pago</Nav.Link></Nav.Item>
-          <Nav.Item><Nav.Link eventKey="laborales">Datos Laborales</Nav.Link></Nav.Item>
-          <Nav.Item><Nav.Link eventKey="responsable">Responsable</Nav.Link></Nav.Item>
-          <Nav.Item><Nav.Link eventKey="esposo">Esposo(a)</Nav.Link></Nav.Item>
-          {/* <Nav.Item><Nav.Link eventKey="cuenta">Estado de Cuenta</Nav.Link></Nav.Item>
-          <Nav.Item><Nav.Link eventKey="documentos">Documentos</Nav.Link></Nav.Item> */}
-        </Nav>
+        <Row className="mb-3">
+          <Col md={4}>
+            <Form.Group>
+              <Form.Label>Certificado</Form.Label>
+              <Form.Control type="text" {...register("certificado")} />
+            </Form.Group>
+          </Col>
+          <Col md={4}>
+            <Form.Group>
+              <Form.Label>Nombre del titular</Form.Label>
+              <Form.Control type="text" {...register("nombreTitular")} />
+            </Form.Group>
+          </Col>
+          <Col md={4}>
+            <Form.Group>
+              <Form.Label>% de Coaseguro</Form.Label>
+              <Form.Control type="number" step="0.01" {...register("coaseguro")} />
+            </Form.Group>
+          </Col>
+        </Row>
 
-        <div className="mt-3">
-          {seccionActiva === 'datos-seguro' && (
-            <>
-              <Row className="mb-3">
-                <Col md={4}>
-                  <Form.Group>
-                    <Form.Label>Aseguradora *</Form.Label>
-                    <Form.Control as="select" {...register('aseguradora')}>
-                      <option value="">Seleccione</option>
-                      <option value="aseg1">Aseguradora 1</option>
-                      <option value="aseg2">Aseguradora 2</option>
-                    </Form.Control>
-                  </Form.Group>
-                </Col>
-                <Col md={4}>
-                  <Form.Group>
-                    <Form.Label>Lista de precios *</Form.Label>
-                    <Form.Control as="select" {...register('listaPrecios')}>
-                      <option value="">Seleccione</option>
-                      <option value="lista1">Lista 1</option>
-                      <option value="lista2">Lista 2</option>
-                    </Form.Control>
-                  </Form.Group>
-                </Col>
-                <Col md={4}>
-                  <Form.Group>
-                    <Form.Label>Carnet</Form.Label>
-                    <Form.Control type="text" {...register('carnet')} />
-                  </Form.Group>
-                </Col>
-              </Row>
+        <Row className="mb-3">
+          <Col md={4}>
+            <Form.Group>
+              <Form.Label>Valor Copago</Form.Label>
+              <Form.Control type="number" step="0.01" {...register("valorCopago")} />
+            </Form.Group>
+          </Col>
+          <Col md={4}>
+            <Form.Group>
+              <Form.Label>Valor Deducible</Form.Label>
+              <Form.Control type="number" step="0.01" {...register("valorDeducible")} />
+            </Form.Group>
+          </Col>
+        </Row>
 
-              <Row className="mb-3">
-                <Col md={4}>
-                  <Form.Group>
-                    <Form.Label>Certificado</Form.Label>
-                    <Form.Control type="text" {...register('certificado')} />
-                  </Form.Group>
-                </Col>
-                <Col md={4}>
-                  <Form.Group>
-                    <Form.Label>Nombre del titular</Form.Label>
-                    <Form.Control type="text" {...register('nombreTitular')} />
-                  </Form.Group>
-                </Col>
-                <Col md={4}>
-                  <Form.Group>
-                    <Form.Label>% de CoAseguro</Form.Label>
-                    <Form.Control type="number" step="0.01" {...register('coaseguro')} />
-                  </Form.Group>
-                </Col>
-              </Row>
+        <h5 className="text-primary mt-4">Responsable de Cuenta</h5>
+        <Row className="mb-3">
+          <Col md={4}>
+            <Form.Group>
+              <Form.Label>Primer nombre</Form.Label>
+              <Form.Control type="text" {...register('resp_primerNombre')} />
+            </Form.Group>
+          </Col>
+          <Col md={4}>
+            <Form.Group>
+              <Form.Label>Primer apellido</Form.Label>
+              <Form.Control type="text" {...register('resp_primerApellido')} />
+            </Form.Group>
+          </Col>
+          <Col md={4}>
+            <Form.Group>
+              <Form.Label>NIT</Form.Label>
+              <Form.Control type="text" {...register('resp_nit')} />
+            </Form.Group>
+          </Col>
+        </Row>
 
-              <Row className="mb-3">
-                <Col md={4}>
-                  <Form.Group>
-                    <Form.Label>Valor Copago</Form.Label>
-                    <Form.Control type="number" step="0.01" {...register('valorCopago')} />
-                  </Form.Group>
-                </Col>
-                <Col md={4}>
-                  <Form.Group>
-                    <Form.Label>Valor Deducible</Form.Label>
-                    <Form.Control type="number" step="0.0001" {...register('valorDeducible')} />
-                  </Form.Group>
-                </Col>
-              </Row>
-            </>
-          )}
+        <h5 className="text-primary mt-4">Datos Laborales del Paciente</h5>
+        <Row className="mb-3">
+          <Col md={6}>
+            <Form.Group>
+              <Form.Label>Empresa</Form.Label>
+              <Form.Control type="text" {...register('empresa')} />
+            </Form.Group>
+          </Col>
+          <Col md={6}>
+            <Form.Group>
+              <Form.Label>Ocupación</Form.Label>
+              <Form.Control type="text" {...register('ocupacion')} />
+            </Form.Group>
+          </Col>
+        </Row>
 
-          {seccionActiva === 'garantia' && (
-            <>
-              <Row className="mb-3">
-                <Col md={4}>
-                  <Form.Group>
-                    <Form.Label>Garantía de Pago *</Form.Label>
-                    <Form.Control as="select" {...register('garantiaPago')}>
-                      <option value="">Seleccione ...</option>
-                      <option value="garantia1">Garantía 1</option>
-                      <option value="garantia2">Garantía 2</option>
-                    </Form.Control>
-                  </Form.Group>
-                </Col>
-                <Col md={4}>
-                  <Form.Group>
-                    <Form.Label># de TC / Cheque</Form.Label>
-                    <Form.Control type="text" {...register('tcCheque')} />
-                  </Form.Group>
-                </Col>
-                <Col md={4}>
-                  <Form.Group>
-                    <Form.Label>NIT</Form.Label>
-                    <Form.Control type="text" {...register('nit')} />
-                  </Form.Group>
-                </Col>
-              </Row>
+        <h5 className="text-primary mt-4">Datos Laborales del Acompañante</h5>
+        <Row className="mb-3">
+          <Col md={6}>
+            <Form.Group>
+              <Form.Label>Empresa</Form.Label>
+              <Form.Control type="text" {...register('acompananteEmpresa')} />
+            </Form.Group>
+          </Col>
+          <Col md={6}>
+            <Form.Group>
+              <Form.Label>Ocupación</Form.Label>
+              <Form.Control type="text" {...register('acompananteOcupacion')} />
+            </Form.Group>
+          </Col>
+        </Row>
 
-              <Row className="mb-3">
-                <Col md={4}>
-                  <Form.Group>
-                    <Form.Label>Nombre factura</Form.Label>
-                    <Form.Control type="text" {...register('nombreFactura')} />
-                  </Form.Group>
-                </Col>
-                <Col md={4}>
-                  <Form.Group>
-                    <Form.Label>Dirección factura</Form.Label>
-                    <Form.Control type="text" {...register('direccionFactura')} />
-                  </Form.Group>
-                </Col>
-                <Col md={4}>
-                  <Form.Group>
-                    <Form.Label>Correo Factura</Form.Label>
-                    <Form.Control type="email" {...register('correoFactura')} />
-                  </Form.Group>
-                </Col>
-              </Row>
-            </>
-          )}
+        <h5 className="text-primary mt-4">Datos del Seguro</h5>
+        <Row className="mb-3">
+          <Col md={4}>
+            <Form.Group>
+              <Form.Label>Aseguradora</Form.Label>
+              <Form.Control type="text" {...register('aseguradora')} />
+            </Form.Group>
+          </Col>
+          <Col md={4}>
+            <Form.Group>
+              <Form.Label>Número de póliza</Form.Label>
+              <Form.Control type="text" {...register('numeroPoliza')} />
+            </Form.Group>
+          </Col>
+        </Row>
 
-          {seccionActiva === 'laborales' && (
-            <>
-              <Row className="mb-3">
-                <Col md={4}>
-                  <Form.Group>
-                    <Form.Label>Empresa</Form.Label>
-                    <Form.Control type="text" {...register('empresa')} />
-                  </Form.Group>
-                </Col>
-                <Col md={4}>
-                  <Form.Group>
-                    <Form.Label>Dirección</Form.Label>
-                    <Form.Control type="text" {...register('direccionEmpresa')} />
-                  </Form.Group>
-                </Col>
-                <Col md={2}>
-                  <Form.Group>
-                    <Form.Label>Teléfono 1</Form.Label>
-                    <Form.Control type="text" {...register('telefonoEmpresa1')} />
-                  </Form.Group>
-                </Col>
-                <Col md={2}>
-                  <Form.Group>
-                    <Form.Label>Teléfono 2</Form.Label>
-                    <Form.Control type="text" {...register('telefonoEmpresa2')} />
-                  </Form.Group>
-                </Col>
-              </Row>
 
-              <Row className="mb-3">
-                <Col md={6}>
-                  <Form.Group>
-                    <Form.Label>Ocupación</Form.Label>
-                    <Form.Control type="text" {...register('ocupacion')} />
-                  </Form.Group>
-                </Col>
-              </Row>
-            </>
-          )}
 
-          {seccionActiva === 'responsable' && (
-            <>
-              <Row className="mb-3">
-                <Col md={3}>
-                  <Form.Group>
-                    <Form.Label>Primer nombre</Form.Label>
-                    <Form.Control type="text" {...register('resp_primerNombre')} />
-                  </Form.Group>
-                </Col>
-                <Col md={3}>
-                  <Form.Group>
-                    <Form.Label>Segundo nombre</Form.Label>
-                    <Form.Control type="text" {...register('resp_segundoNombre')} />
-                  </Form.Group>
-                </Col>
-                <Col md={3}>
-                  <Form.Group>
-                    <Form.Label>Primer apellido</Form.Label>
-                    <Form.Control type="text" {...register('resp_primerApellido')} />
-                  </Form.Group>
-                </Col>
-                <Col md={3}>
-                  <Form.Group>
-                    <Form.Label>Segundo apellido</Form.Label>
-                    <Form.Control type="text" {...register('resp_segundoApellido')} />
-                  </Form.Group>
-                </Col>
-              </Row>
 
-              <Row className="mb-3">
-                <Col md={3}>
-                  <Form.Group>
-                    <Form.Label>Tipo identificación</Form.Label>
-                    <Form.Control as="select" {...register('resp_tipoIdentificacion')}>
-                      <option value="">Seleccione</option>
-                      <option value="dpi">DPI</option>
-                      <option value="pasaporte">Pasaporte</option>
-                    </Form.Control>
-                  </Form.Group>
-                </Col>
-                <Col md={3}>
-                  <Form.Group>
-                    <Form.Label>Número de identificación</Form.Label>
-                    <Form.Control type="text" {...register('resp_numeroIdentificacion')} />
-                  </Form.Group>
-                </Col>
-                <Col md={3}>
-                  <Form.Group>
-                    <Form.Label>Fecha de nacimiento</Form.Label>
-                    <Form.Control type="date" {...register('resp_fechaNacimiento')} />
-                  </Form.Group>
-                </Col>
-                <Col md={3}>
-                  <Form.Group>
-                    <Form.Label>Edad</Form.Label>
-                    <Form.Control type="number" {...register('resp_edad')} />
-                  </Form.Group>
-                </Col>
-              </Row>
 
-              <Row className="mb-3">
-                <Col md={3}>
-                  <Form.Group>
-                    <Form.Label>Género</Form.Label>
-                    <Form.Control as="select" {...register('resp_genero')}>
-                      <option value="">Seleccione</option>
-                      <option value="masculino">Masculino</option>
-                      <option value="femenino">Femenino</option>
-                    </Form.Control>
-                  </Form.Group>
-                </Col>
-                <Col md={3}>
-                  <Form.Group>
-                    <Form.Label>Relación con el paciente</Form.Label>
-                    <Form.Control as="select" {...register('resp_relacionPaciente')}>
-                      <option value="">Seleccione</option>
-                      <option value="padre">Padre</option>
-                      <option value="madre">Madre</option>
-                      <option value="conyuge">Cónyuge</option>
-                      <option value="otro">Otro</option>
-                    </Form.Control>
-                  </Form.Group>
-                </Col>
-                <Col md={3}>
-                  <Form.Group>
-                    <Form.Label>Ocupación</Form.Label>
-                    <Form.Control type="text" {...register('resp_ocupacion')} />
-                  </Form.Group>
-                </Col>
-                <Col md={3}>
-                  <Form.Group>
-                    <Form.Label>Domicilio</Form.Label>
-                    <Form.Control type="text" {...register('resp_domicilio')} />
-                  </Form.Group>
-                </Col>
-              </Row>
-
-              <Row className="mb-3">
-                <Col md={3}>
-                  <Form.Group>
-                    <Form.Label>Empresa</Form.Label>
-                    <Form.Control type="text" {...register('resp_empresa')} />
-                  </Form.Group>
-                </Col>
-                <Col md={3}>
-                  <Form.Group>
-                    <Form.Label>Dirección</Form.Label>
-                    <Form.Control type="text" {...register('resp_direccion')} />
-                  </Form.Group>
-                </Col>
-                <Col md={3}>
-                  <Form.Group>
-                    <Form.Label>Teléfono 1</Form.Label>
-                    <Form.Control type="text" {...register('resp_telefono1')} />
-                  </Form.Group>
-                </Col>
-                <Col md={3}>
-                  <Form.Group>
-                    <Form.Label>Teléfono 2</Form.Label>
-                    <Form.Control type="text" {...register('resp_telefono2')} />
-                  </Form.Group>
-                </Col>
-              </Row>
-
-              <Row className="mb-3">
-                <Col md={3}>
-                  <Form.Group>
-                    <Form.Label>Contacto</Form.Label>
-                    <Form.Control type="text" {...register('resp_contacto')} />
-                  </Form.Group>
-                </Col>
-                <Col md={4}>
-                  <Form.Group>
-                    <Form.Label>Correo electrónico</Form.Label>
-                    <Form.Control type="email" {...register('resp_email')} />
-                  </Form.Group>
-                </Col>
-              </Row>
-            </>
-          )}
-
-          {seccionActiva === 'esposo' && (
-            <>
-              <Row className="mb-3">
-                <Col md={4}>
-                  <Form.Group>
-                    <Form.Label>Nombre</Form.Label>
-                    <Form.Control type="text" {...register('esposo_nombre')} />
-                  </Form.Group>
-                </Col>
-                <Col md={2}>
-                  <Form.Group>
-                    <Form.Label>Género</Form.Label>
-                    <Form.Control as="select" {...register('esposo_genero')}>
-                      <option value="">Seleccione</option>
-                      <option value="masculino">Masculino</option>
-                      <option value="femenino">Femenino</option>
-                    </Form.Control>
-                  </Form.Group>
-                </Col>
-                <Col md={3}>
-                  <Form.Group>
-                    <Form.Label>Tipo de identificación</Form.Label>
-                    <Form.Control as="select" {...register('esposo_tipoIdentificacion')}>
-                      <option value="">Seleccione</option>
-                      <option value="dpi">DPI</option>
-                      <option value="pasaporte">Pasaporte</option>
-                    </Form.Control>
-                  </Form.Group>
-                </Col>
-                <Col md={3}>
-                  <Form.Group>
-                    <Form.Label>Número de identificación</Form.Label>
-                    <Form.Control type="text" {...register('esposo_numeroIdentificacion')} />
-                  </Form.Group>
-                </Col>
-              </Row>
-
-              <Row className="mb-3">
-                <Col md={3}>
-                  <Form.Group>
-                    <Form.Label>Fecha de nacimiento</Form.Label>
-                    <Form.Control type="date" {...register('esposo_fechaNacimiento')} />
-                  </Form.Group>
-                </Col>
-                <Col md={1}>
-                  <Form.Group>
-                    <Form.Label>Edad</Form.Label>
-                    <Form.Control type="number" {...register('esposo_edad')} />
-                  </Form.Group>
-                </Col>
-                <Col md={4}>
-                  <Form.Group>
-                    <Form.Label>Teléfono 1</Form.Label>
-                    <Form.Control type="text" {...register('esposo_telefono1')} />
-                  </Form.Group>
-                </Col>
-                <Col md={4}>
-                  <Form.Group>
-                    <Form.Label>Teléfono 2</Form.Label>
-                    <Form.Control type="text" {...register('esposo_telefono2')} />
-                  </Form.Group>
-                </Col>
-              </Row>
-
-              <Row className="mb-3">
-                <Col md={4}>
-                  <Form.Group>
-                    <Form.Label>Domicilio</Form.Label>
-                    <Form.Control type="text" {...register('esposo_domicilio')} />
-                  </Form.Group>
-                </Col>
-                <Col md={4}>
-                  <Form.Group>
-                    <Form.Label>Ocupación</Form.Label>
-                    <Form.Control type="text" {...register('esposo_ocupacion')} />
-                  </Form.Group>
-                </Col>
-                <Col md={4}>
-                  <Form.Group>
-                    <Form.Label>Empresa</Form.Label>
-                    <Form.Control type="text" {...register('esposo_empresa')} />
-                  </Form.Group>
-                </Col>
-              </Row>
-
-              <Row className="mb-3">
-                <Col md={6}>
-                  <Form.Group>
-                    <Form.Label>Dirección</Form.Label>
-                    <Form.Control type="text" {...register('esposo_direccion')} />
-                  </Form.Group>
-                </Col>
-                <Col md={6}>
-                  <Form.Group>
-                    <Form.Label>Correo electrónico</Form.Label>
-                    <Form.Control type="email" {...register('esposo_email')} />
-                  </Form.Group>
-                </Col>
-              </Row>
-            </>
-          )}
-
-          {/* {seccionActiva === 'cuenta' && <h1>Estado de Cuenta</h1>}
-          {seccionActiva === 'documentos' && <h1>Documentos</h1>} */}
+        <h5 className="text-primary mt-4">Acompañantes</h5>
+        <div className="mb-3">
+          {[1, 2, 3, 4].map((n) => (
+            <Button
+              key={n}
+              variant="outline-primary"
+              className="mr-2"
+              onClick={() => {
+                if (!acompanantesVisibles.includes(n)) {
+                  setAcompanantesVisibles([...acompanantesVisibles, n]);
+                }
+              }}
+            >
+              Acompañante No. {n}
+            </Button>
+          ))}
         </div>
+
+        {acompanantesVisibles.map((n) => (
+          <div key={n}>
+            <h6 className="text-primary">Acompañante No. {n}</h6>
+            <Row className="mb-3">
+              <Col md={6}>
+                <Form.Group>
+                  <Form.Label>Nombre</Form.Label>
+                  <Form.Control type="text" {...register(`acompanantes.${n - 1}.nombre`)} />
+                </Form.Group>
+              </Col>
+              <Col md={3}>
+                <Form.Group>
+                  <Form.Label>Teléfono</Form.Label>
+                  <Form.Control type="text" {...register(`acompanantes.${n - 1}.telefono`)} />
+                </Form.Group>
+              </Col>
+              <Col md={3}>
+                <Form.Group>
+                  <Form.Label>Tipo de familiar</Form.Label>
+                  <Form.Control as="select" {...register(`acompanantes.${n - 1}.tipo`)}>
+                    <option value="">Seleccione</option>
+                    <option value="padre">Padre</option>
+                    <option value="madre">Madre</option>
+                    <option value="hijo">Hijo/a</option>
+                    <option value="hermano">Hermano/a</option>
+                    <option value="abuelo">Abuelo/a</option>
+                    <option value="tio">Tío/a</option>
+                    <option value="amigo">Amigo/a</option>
+                    <option value="otro">Otro</option>
+                  </Form.Control>
+                </Form.Group>
+              </Col>
+            </Row>
+            <Row className="mb-3">
+              <Col md={4}>
+                <Form.Group>
+                  <Form.Label>Dirección</Form.Label>
+                  <Form.Control type="text" {...register(`acompanantes.${n - 1}.direccion`)} />
+                </Form.Group>
+              </Col>
+              <Col md={4}>
+                <Form.Group>
+                  <Form.Label>Empresa</Form.Label>
+                  <Form.Control type="text" {...register(`acompanantes.${n - 1}.empresa`)} />
+                </Form.Group>
+              </Col>
+              <Col md={4}>
+                <Form.Group>
+                  <Form.Label>Ocupación</Form.Label>
+                  <Form.Control type="text" {...register(`acompanantes.${n - 1}.ocupacion`)} />
+                </Form.Group>
+              </Col>
+            </Row>
+          </div>
+        ))}
 
       </Form>
 
-      {/* Modal de familiar */}
-      <Modal show={mostrarModalFamiliar} onHide={() => setMostrarModalFamiliar(false)} centered size="xl">
-        <Modal.Header closeButton>
-          <Modal.Title>Ficha del Paciente</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Form
-            onSubmit={(e) => {
-              e.preventDefault();
 
-              // 1. Obtener los datos del familiar antes de limpiar
-              const datosFamiliar = {
-                nombre: getValues('f_nombre'),
-                direccion: getValues('f_direccion'),
-                correo: getValues('f_correo'),
-                telefono1: getValues('f_telefono1'),
-                telefono2: getValues('f_telefono2'),
-                empresa: getValues('f_empresa'),
-                direccion_empresa: getValues('f_direccion_empresa'),
-                ocupacion: getValues('f_ocupacion'),
-                fecha_nacimiento: getValues('f_fecha_nacimiento'),
-                tipo_identificacion: getValues('f_tipo_identificacion'),
-                numero_identificacion: getValues('f_numero_identificacion'),
-                edad: calcularEdad(getValues('f_fecha_nacimiento')),
-                tipo_familiar: getValues('f_tipo_familiar'),
-              };
-
-              const nuevoFamiliar = {
-                ...datosFamiliar,
-              };
-
-              console.log(nuevoFamiliar)
-
-              // 2. Agregar a la lista
-              agregarFamiliar(nuevoFamiliar);
-
-              // 3. Limpiar los campos del familiar
-              const camposFamiliar = [
-                'f_nombre', 'f_direccion', 'f_correo', 'f_telefono1', 'f_telefono2',
-                'f_empresa', 'f_direccion_empresa', 'f_ocupacion'
-              ];
-              camposFamiliar.forEach((campo) => setValue(campo, ''));
-
-              // 4. Copiar datos del paciente (prefijo p_) al formulario principal
-              const camposPaciente = [
-                { origen: 'p_primer_nombre', destino: 'nombre' },
-                { origen: 'p_direccion', destino: 'direccion' },
-                { origen: 'p_correo', destino: 'correo' },
-                { origen: 'p_telefono', destino: 'telefono1' },
-                { origen: 'p_fecha_nacimiento', destino: 'fechaNacimiento' },
-                { origen: 'p_tipo_identificacion', destino: 'tipoIdentificacion' },
-                { origen: 'p_numero_identificacion', destino: 'numeroIdentificacion' },
-              ];
-
-              camposPaciente.forEach(({ origen, destino }) => {
-                const valor = getValues(origen);
-                setValue(destino, valor);
-              });
-
-              // 5. Calcular edad y colocarla
-              if (getValues('p_fecha_nacimiento')) {
-                setValue('edad', calcularEdad(getValues('p_fecha_nacimiento')));
-              }
-            }}
-
-          >
-
-            {/* Campos del paciente */}
-            < Row className="mb-3" >
-              <Col md={3}><Form.Label>Primer nombre</Form.Label><Form.Control {...register('p_primer_nombre')} /></Col>
-              <Col md={3}><Form.Label>Segundo nombre</Form.Label><Form.Control {...register('p_segundo_nombre')} /></Col>
-              <Col md={3}><Form.Label>Primer Apellido</Form.Label><Form.Control {...register('p_primer_apellido')} /></Col>
-              <Col md={3}><Form.Label>Segundo Apellido</Form.Label><Form.Control {...register('p_segundo_apellido')} /></Col>
-            </Row>
-            <Row className="mb-3">
-              <Col md={2}><Form.Label>Género</Form.Label><Form.Control as="select" {...register('p_genero')}>
-                <option value="">Seleccione</option><option>Masculino</option><option>Femenino</option></Form.Control></Col>
-              <Col md={2}><Form.Label>Estado Civil</Form.Label><Form.Control as="select" {...register('p_estado_civil')}>
-                <option value="">Seleccione</option><option>Soltero</option><option>Casado</option><option>Divorciado</option><option>Viudo</option>
-              </Form.Control></Col>
-              <Col md={3}><Form.Label>Apellido de casada</Form.Label><Form.Control {...register('p_apellido_casada')} /></Col>
-              <Col md={2}><Form.Label>Teléfono</Form.Label><Form.Control {...register('p_telefono')} /></Col>
-            </Row>
-            <Row className="mb-3">
-              <Col md={3}><Form.Label>Fecha Nacimiento</Form.Label><Form.Control type="date" {...register('p_fecha_nacimiento')} /></Col>
-              <Col md={1}><Form.Label>Edad</Form.Label><Form.Control value={watch('p_fecha_nacimiento') ? calcularEdad(watch('p_fecha_nacimiento')) : ''} disabled /></Col>
-              <Col md={3}><Form.Label>Tipo de Identificación</Form.Label><Form.Control as="select" {...register('p_tipo_identificacion')}>
-                <option value="">Seleccione</option><option>DPI</option><option>PASAPORTE</option></Form.Control></Col>
-              <Col md={5}><Form.Label>Número de Identificación</Form.Label><Form.Control {...register('p_numero_identificacion')} /></Col>
-            </Row>
-
-            {/* Campos del familiar */}
-            <hr />
-            <h6 className="mt-3">Datos del Familiar</h6>
-
-            <Row className="mb-3">
-              <Col md={4}>
-                <Form.Label>Nombre</Form.Label>
-                <Form.Control {...register('f_nombre')} />
-              </Col>
-              <Col md={4}>
-                <Form.Label>Fecha Nacimiento</Form.Label>
-                <Form.Control type="date" {...register('f_fecha_nacimiento')} />
-              </Col>
-              <Col md={2}>
-                <Form.Label>Edad</Form.Label>
-                <Form.Control
-                  type="number"
-                  disabled
-                  value={watch('f_fecha_nacimiento') ? calcularEdad(watch('f_fecha_nacimiento')) : ''}
-                />
-              </Col>
-              <Col md={2}>
-                <Form.Label>Tipo identificación</Form.Label>
-                <Form.Control as="select" {...register('f_tipo_identificacion')}>
-                  <option value="">Seleccione</option>
-                  <option>DPI</option>
-                  <option>PASAPORTE</option>
-                </Form.Control>
-              </Col>
-            </Row>
-
-            <Row className="mb-3">
-              <Col md={4}>
-                <Form.Label>Número de Identificación</Form.Label>
-                <Form.Control {...register('f_numero_identificacion')} />
-              </Col>
-              <Col md={4}>
-                <Form.Label>Dirección</Form.Label>
-                <Form.Control {...register('f_direccion')} />
-              </Col>
-              <Col md={4}>
-                <Form.Label>Correo electrónico</Form.Label>
-                <Form.Control type="email" {...register('f_correo')} />
-              </Col>
-            </Row>
-
-            <Row className="mb-3">
-              <Col md={3}>
-                <Form.Label>Teléfono 1</Form.Label>
-                <Form.Control {...register('f_telefono1')} />
-              </Col>
-              <Col md={3}>
-                <Form.Label>Teléfono 2</Form.Label>
-                <Form.Control {...register('f_telefono2')} />
-              </Col>
-              <Col md={3}>
-                <Form.Label>Empresa en donde labora</Form.Label>
-                <Form.Control {...register('f_empresa')} />
-              </Col>
-              <Col md={3}>
-                <Form.Label>Ocupación</Form.Label>
-                <Form.Control {...register('f_ocupacion')} />
-              </Col>
-            </Row>
-
-            <Row className="mb-3">
-              <Col md={4}>
-                <Form.Label>Tipo de Familiar</Form.Label>
-                <Form.Control as="select" {...register('f_tipo_familiar')}>
-                  <option value="">Seleccione</option>
-                  <option value="padre">Padre</option>
-                  <option value="madre">Madre</option>
-                  <option value="hijo">Hijo/a</option>
-                  <option value="hermano">Hermano/a</option>
-                  <option value="tio">Tío/a</option>
-                  <option value="sobrino">Sobrino/a</option>
-                  <option value="abuelo">Abuelo/a</option>
-                  <option value="amigo">Amigo/a</option>
-                  <option value="otro">Otro</option>
-                </Form.Control>
-              </Col>
-            </Row>
-
-            <div className="d-flex justify-content-end">
-              <Button variant="secondary" onClick={() => setMostrarModalFamiliar(false)} className="me-2">Cancelar</Button>
-              <Button type="submit" variant="primary">Agregar</Button>
-              <Button variant="success" className="ms-2" onClick={() => setMostrarModalFamiliar(false)}>Guardar</Button>
-            </div>
-          </Form>
-
-          {/* Tabla de familiares */}
-          {listaFamiliares.length > 0 && (
-            <div className="mt-4">
-              <h6>Familiares agregados: {listaFamiliares.length}</h6>
-              <table className="table table-bordered table-sm">
-                <thead className="table-light">
-                  <tr>
-                    <th>Nombre</th>
-                    <th>Identificación</th>
-                    <th>Edad</th>
-                    <th>Teléfono</th>
-                    <th>Tipo</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {listaFamiliares.map((f, idx) => (
-                    <tr key={idx}>
-                      <td>{f.nombre}</td>
-                      <td>{f.numero_identificacion}</td>
-                      <td>{f.edad}</td>
-                      <td>{f.telefono1}</td>
-                      <td>{f.tipo_familiar}</td>
-                    </tr>
-                  ))}
-                </tbody>
-
-              </table>
-            </div>
-          )}
-        </Modal.Body>
-      </Modal >
     </Container >
   );
 };

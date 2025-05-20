@@ -31,7 +31,7 @@ export const AppProvider = ({ children }) => {
             setTodayDate(data.fecha);
 
             //ID
-            setValue('idFicha', data.paciente.id)
+            setValue('idFicha', data.id)
             // PACIENTE
             setValue('nombre', data.paciente.primer_nombre);
             setValue('fechaNacimiento', data.paciente.fecha_nacimiento);
