@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, { Component } from 'react';
 import windowSize from 'react-window-size';
 
 import Aux from "../../../../../../hoc/_Aux";
@@ -12,7 +12,7 @@ class NavSearch extends Component {
     };
 
     searchOnHandler = () => {
-        this.setState({isOpen: true});
+        this.setState({ isOpen: true });
         const searchInterval = setInterval(() => {
             if (this.state.searchWidth >= 91) {
                 clearInterval(searchInterval);
@@ -30,7 +30,7 @@ class NavSearch extends Component {
     searchOffHandler = () => {
         const searchInterval = setInterval(() => {
             if (this.state.searchWidth < 0) {
-                this.setState({isOpen: false});
+                this.setState({ isOpen: false });
                 clearInterval(searchInterval);
                 return false;
             }
@@ -50,19 +50,20 @@ class NavSearch extends Component {
         }
 
         return (
-            <Aux>
-                <div id="main-search" className={searchClass.join(' ')}>
-                    <div className="input-group">
-                        <input type="text" id="m-search" className="form-control" placeholder="Search . . ." style={{width: this.state.searchString}}/>
-                        <a href={DEMO.BLANK_LINK} className="input-group-append search-close" onClick={this.searchOffHandler}>
-                            <i className="feather icon-x input-group-text"/>
-                        </a>
-                        <span className="input-group-append search-btn btn btn-primary" onClick={this.searchOnHandler}>
-                        <i className="feather icon-search input-group-text"/>
-                    </span>
-                    </div>
-                </div>
-            </Aux>
+            // <Aux>
+            //     <div id="main-search" className={searchClass.join(' ')}>
+            //         <div className="input-group">
+            //             <input type="text" id="m-search" className="form-control" placeholder="Search . . ." style={{ width: this.state.searchString }} />
+            //             <a href={DEMO.BLANK_LINK} className="input-group-append search-close" onClick={this.searchOffHandler}>
+            //                 <i className="feather icon-x input-group-text" />
+            //             </a>
+            //             <span className="input-group-append search-btn btn btn-primary" onClick={this.searchOnHandler}>
+            //                 <i className="feather icon-search input-group-text" />
+            //             </span>
+            //         </div>
+            //     </div>
+            // </Aux>
+            <div></div>
         );
     }
 }
