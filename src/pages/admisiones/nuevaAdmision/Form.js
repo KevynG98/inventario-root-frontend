@@ -16,7 +16,7 @@ import { AppContext } from './Context';
 
 const FormularioAdmision = () => {
 
-  const { guardarAdmision, loading } = useContext(AppContext);
+  const { guardarAdmision, loading, listarHabitaciones } = useContext(AppContext);
 
   const { register, handleSubmit, watch, setValue, getValues } = useForm();
   const [acompanantesVisibles, setAcompanantesVisibles] = useState([]);
@@ -309,8 +309,11 @@ const FormularioAdmision = () => {
               <Form.Label>Habitación</Form.Label>
               <Form.Control as="select" {...register('habitacion')}>
                 <option>Seleccione</option>
-                <option>HABITACION 1</option>
-                <option>HABITACION 2</option>
+                {listarHabitaciones.map((data, index) => (
+                  <option key={index} value={data.id}>
+                    {`${data.codigo} - nivel: ${data.nivel}`}
+                  </option>
+                ))}
               </Form.Control>
             </Form.Group>
           </Col>

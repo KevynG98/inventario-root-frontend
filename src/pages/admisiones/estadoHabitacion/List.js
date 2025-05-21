@@ -1,7 +1,7 @@
 import React, { useContext, useState } from 'react';
 import { AppContext } from './Context';
 import { Button, OverlayTrigger, Tooltip } from 'react-bootstrap';
-import { FiEye, FiChevronDown, FiChevronRight } from 'react-icons/fi';
+import { FiEye, FiChevronDown, FiChevronRight, FiChevronLeft } from 'react-icons/fi';
 
 const ListadoHabitaciones = () => {
   const {
@@ -10,6 +10,10 @@ const ListadoHabitaciones = () => {
     setMostrarModal,
     setModoFormulario,
     setValue,
+    nextPage,
+    nullNextPage,
+    prevPage,
+    nullPrevPage
   } = useContext(AppContext);
 
   const [seccionesAbiertas, setSeccionesAbiertas] = useState({});
@@ -129,6 +133,10 @@ const ListadoHabitaciones = () => {
           </div>
         );
       })}
+      <div className="d-flex justify-content-end">
+        <Button onClick={prevPage} disabled={nullPrevPage === null}><FiChevronLeft /></Button>
+        <Button onClick={nextPage} disabled={nullNextPage === null }><FiChevronRight /></Button>
+      </div>
     </div>
   );
 };

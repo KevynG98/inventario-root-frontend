@@ -1,11 +1,26 @@
-import React, { createContext, useState } from 'react';
-import { postData } from '../../../apiService'
+import React, { createContext, useEffect, useState } from 'react';
+import { postData, getData } from '../../../apiService'
 
 export const AppContext = createContext();
 
 export const AppProvider = ({ children }) => {
     const [state, setState] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [listarHabitaciones, setListarHabitaciones] = useState([])
+
+    const getHabitaciones = async () => {
+        setLoading(true);
+        try {
+            const response = await getData('habitaciones/');
+            console.log('HABITACIONES: ', response.data);
+            setListarHabitaciones(response.data)
+        } catch (error) {
+            console.error('Fallo al obtener habitaciones:', error);
+            throw error;
+        } finally {
+            setLoading(false);
+        }
+    }
 
     const guardarAdmision = async (formulario) => {
         setLoading(true);
@@ -55,8 +70,13 @@ export const AppProvider = ({ children }) => {
         return obj;
     };
 
+    useEffect(() => {
+        getHabitaciones()
+    }, [])
+
     const values = {
         state,
+        listarHabitaciones,
         setState,
         guardarAdmision,
         loading,

@@ -61,7 +61,7 @@ const SignUp1 = () => {
         <div
           className="d-none d-md-flex flex-column justify-content-center align-items-center w-50"
           style={{
-            backgroundColor: '#007bff',
+            backgroundColor: '#ccf4fc',
             backgroundSize: 'cover',
             backgroundPosition: 'center'
           }}

@@ -14,15 +14,28 @@ export const AppProvider = ({ children }) => {
     const [seccionActiva, setSeccionActiva] = useState('datos-seguro');
     const [todayDate, setTodayDate] = useState('');
     const [mostrarSelectArea, setMostrarSelectArea] = useState([]);
+    const [page, setPage] = useState(1);
+    const [nullNextPage, setNullNextPage] = useState(null)
+    const [nullPrevPage, setPrevNextPage] = useState(null)
 
-    const getHabitacion = async (pagina = 1) => {
+    const getHabitacion = async () => {
         try {
-            const response = await getData(`admisiones/habitaciones-listar/?page=${pagina}`);
+            const response = await getData(`habitaciones/habitaciones-listar/?page=${page}`);
             setHabitacionData(response.data.results);
+            setNullNextPage(response.data.next)
+            setPrevNextPage(response.data.previous)
         } catch (error) {
             console.error('Error al cargar admisiones:', error);
         }
     };
+
+    const nextPage = () => {
+        setPage(prev => prev + 1);
+    }
+
+    const prevPage = () => {
+        setPage(prev => prev - 1);
+    }
 
     const cargarHabitacion = async (id) => {
         try {
@@ -127,7 +140,7 @@ export const AppProvider = ({ children }) => {
         getHabitacion();
         const rolesGuardados = JSON.parse(localStorage.getItem('rolesUsuario') || '[]');
         setMostrarSelectArea(rolesGuardados);
-    }, []);
+    }, [page]);
 
     const values = {
         habitacionData,
@@ -147,7 +160,11 @@ export const AppProvider = ({ children }) => {
         watch,
         onSubmit,
         errors,
-        mostrarSelectArea
+        nextPage,
+        mostrarSelectArea,
+        nullNextPage,
+        nullPrevPage,
+        prevPage
     }
 
     return (
