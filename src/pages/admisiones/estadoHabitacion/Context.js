@@ -14,6 +14,7 @@ export const AppProvider = ({ children }) => {
     const [seccionActiva, setSeccionActiva] = useState('datos-seguro');
     const [todayDate, setTodayDate] = useState('');
     const [mostrarSelectArea, setMostrarSelectArea] = useState([]);
+    // paginacion
     const [page, setPage] = useState(1);
     const [nullNextPage, setNullNextPage] = useState(null)
     const [nullPrevPage, setPrevNextPage] = useState(null)

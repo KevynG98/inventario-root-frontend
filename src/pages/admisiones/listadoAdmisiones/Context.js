@@ -13,37 +13,63 @@ export const AppProvider = ({ children }) => {
     const [loading, setLoading] = useState(false);
     const [seccionActiva, setSeccionActiva] = useState('datos-seguro');
     const [todayDate, setTodayDate] = useState('');
+    //paginacion
+    const [page, setPage] = useState(1);
+    const [nullNextPage, setNullNextPage] = useState(null)
+    const [nullPrevPage, setPrevNextPage] = useState(null)
 
-    const getAdmisionesResumen = async (pagina = 1) => {
+    const getAdmisionesResumen = async () => {
         try {
-            const response = await getData(`admisiones/admisiones-resumen/?page=${pagina}`);
+            const response = await getData(`admisiones/admisiones-resumen/?page=${page}`);
             setAdmisionesData(response.data.results);
+            setNullNextPage(response.data.next)
+            setPrevNextPage(response.data.previous)
         } catch (error) {
             console.error('Error al cargar admisiones:', error);
         }
     };
 
+    const nextPage = () => {
+        setPage(prev => prev + 1);
+    }
+
+    const prevPage = () => {
+        setPage(prev => prev - 1);
+    }
+
     const cargarAdmision = async (id) => {
         try {
             const { data } = await getData(`admisiones/${id}/`);
-            console.log(data)
-            // Fecha
+            console.log("DATOS CRUDOS", data)
             setTodayDate(data.fecha);
 
-            //ID
-            setValue('idFicha', data.id)
+            // ID
+            setValue('idFicha', data.id);
+
             // PACIENTE
             setValue('nombre', data.paciente.primer_nombre);
+            setValue('primerNombre', data.paciente.primer_nombre);
+            setValue('segundoNombre', data.paciente.segundo_nombre);
+            setValue('primerApellido', data.paciente.primer_apellido);
+            setValue('segundoApellido', data.paciente.segundo_apellido);
+            setValue('apellidoCasada', data.paciente.apellido_casada);
+            setValue('genero', data.paciente.genero);
+            setValue('estadoCivil', data.paciente.estado_civil);
+            setValue('tipoSangre', data.paciente.tipo_sangre || ''); // No está en el JSON, dejar vacío si no hay
             setValue('fechaNacimiento', data.paciente.fecha_nacimiento);
             setValue('edad', data.paciente.edad);
+            setValue('tipoIdentificacion', data.paciente.tipo_identificacion);
+            setValue('numeroIdentificacion', data.paciente.numero_identificacion);
             setValue('direccion', data.paciente.direccion);
             setValue('telefono1', data.paciente.telefono1);
             setValue('telefono2', data.paciente.telefono2);
             setValue('correo', data.paciente.correo);
+            setValue('nit', data.paciente.nit);
             setValue('observacion', data.paciente.observacion);
             setValue('religion', data.paciente.religion);
-            setValue('tipoIdentificacion', data.paciente.tipo_identificacion);
-            setValue('numeroIdentificacion', data.paciente.numero_identificacion);
+
+            // Checkbox responsable de cuenta (si tienes lógica, usa data.responsableCuenta o similar)
+            setValue('responsableCuenta', false);
 
             // ACOMPANANTE
             setValue('acompananteNombre', data.acompanante?.nombre);
@@ -113,6 +139,7 @@ export const AppProvider = ({ children }) => {
             setValue('esposo_empresa', data.esposo?.empresa);
             setValue('esposo_direccion', data.esposo?.direccion);
             setValue('esposo_email', data.esposo?.email);
+
         } catch (error) {
             console.error('Error al cargar admisión:', error);
         }
@@ -138,7 +165,7 @@ export const AppProvider = ({ children }) => {
 
     useEffect(() => {
         getAdmisionesResumen();
-    }, []);
+    }, [page]);
 
     const values = {
         admisionesData,
@@ -157,6 +184,10 @@ export const AppProvider = ({ children }) => {
         getValues,
         watch,
         onSubmit,
+        nullNextPage,
+        nullPrevPage,
+        nextPage,
+        prevPage
     }
 
     return (

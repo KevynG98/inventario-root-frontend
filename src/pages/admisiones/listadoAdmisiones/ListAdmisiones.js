@@ -1,7 +1,7 @@
 import React, { useContext, useState } from 'react';
 import { AppContext } from './Context';
 import { Button, OverlayTrigger, Tooltip } from 'react-bootstrap';
-import { FiEye, FiEdit, FiChevronDown, FiChevronRight } from 'react-icons/fi';
+import { FiEye, FiEdit, FiChevronDown, FiChevronRight, FiChevronLeft } from 'react-icons/fi';
 
 const ListadoAdmisiones = () => {
   const {
@@ -10,6 +10,10 @@ const ListadoAdmisiones = () => {
     setMostrarModal,
     setModoFormulario,
     setValue,
+    nullNextPage,
+    nullPrevPage,
+    nextPage,
+    prevPage
   } = useContext(AppContext);
 
   const [seccionesAbiertas, setSeccionesAbiertas] = useState({});
@@ -108,6 +112,10 @@ const ListadoAdmisiones = () => {
           </div>
         );
       })}
+      <div className="d-flex justify-content-end">
+        <Button onClick={prevPage} disabled={nullPrevPage === null}><FiChevronLeft /></Button>
+        <Button onClick={nextPage} disabled={nullNextPage === null }><FiChevronRight /></Button>
+      </div>
     </div>
   );
 };
