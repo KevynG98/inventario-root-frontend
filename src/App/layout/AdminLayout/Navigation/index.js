@@ -59,7 +59,7 @@ class Navigation extends Component {
               icon: <FiBox />,
               roles: [1, 2],
               children: [
-                { title: 'Proveedores', url: '/dashboard/futuro/', icon: <FiTruck />, roles: [1, 2] },
+                { title: 'Proveedores', url: '/dashboard/inventario/proveedores', icon: <FiTruck />, roles: [1, 2] },
                 { title: 'Marcas', url: '/dashboard/futuro/', icon: <FiPackage />, roles: [1, 2] },
                 { title: 'Unidades de Medidas', url: '/dashboard/futuro/', icon: <FiGrid />, roles: [1, 2] },
                 { title: 'Categorias', url: '/dashboard/futuro/', icon: <FiClipboard />, roles: [1, 2] },

@@ -12,7 +12,6 @@ const Roles = React.lazy(() => import('./pages/roles/Index'));
 const Products = React.lazy(() => import('./pages/products/Index'));
 const Doctor = React.lazy(() => import('./pages/doctor/Index'));
 const Enfermero = React.lazy(() => import('./pages/enfermero/Index'));
-const Inventario = React.lazy(() => import('./pages/inventario/Index'));
 const Error404 = React.lazy(() => import('./pages/404/Index'));
 const Construccion = React.lazy(() => import('./pages/construccion/Index'));
 const Futuro = React.lazy(() => import('./pages/futuro/Index'));
@@ -25,6 +24,8 @@ const EstadoHabitaciones = React.lazy(() => import('./pages/admisiones/estadoHab
 const ConsultaExterna = React.lazy(() => import('./pages/admisiones/consultaExterna/Index'))
 const AdmisionCaja = React.lazy(() => import('./pages/admisiones/caja/Index'))
 const AdmisionSeguro = React.lazy(() => import('./pages/admisiones/seguros/Index'))
+/* Inventarios */
+const InventarioProveedores = React.lazy(() => import('./pages/inventarios/proveedores/Index'))
 
 const UIBasicButton = React.lazy(() => import('./Demo/UIElements/Basic/Button'));
 const UIBasicBadges = React.lazy(() => import('./Demo/UIElements/Basic/Badges'));
@@ -58,7 +59,6 @@ const routes = [
     { path: '/dashboard/products', exact: true, name: 'Roles', component: userPermissions.some(item => [1, 2].includes(item)) ? Products : Error404 },
     { path: '/dashboard/doctor', exact: true, name: 'Roles', component: userPermissions.some(item => [1, 2].includes(item)) ? Doctor : Error404 },
     { path: '/dashboard/enfermero', exact: true, name: 'Roles', component: userPermissions.some(item => [1, 3].includes(item)) ? Enfermero : Error404 },
-    { path: '/dashboard/inventario', exact: true, name: 'Roles', component: userPermissions.some(item => [1, 2].includes(item)) ? Inventario : Error404 },
     { path: '/dashboard/404', exact: true, name: '404', component: Error404 },
     { path: '/dashboard/construccion', exact: true, name: '404', component: Construccion },
     { path: '/dashboard/futuro', exact: true, name: '404', component: Futuro },
@@ -71,6 +71,8 @@ const routes = [
     { path: '/dashboard/admisiones/caja', exact: true, name: 'Caja', component: AdmisionCaja },
     { path: '/dashboard/admisiones/estado-habitacion', exact: true, name: 'Estado Habitaciones', component: EstadoHabitaciones },
     { path: '/dashboard/admisiones/seguros', exact: true, name: 'Estado Habitaciones', component: AdmisionSeguro },
+    /*Inventario*/
+    { path: '/dashboard/inventario/proveedores', exact: true, name: 'Inventario Proveedores', component: InventarioProveedores },
     // -------------------------------------------------------------------------------------------------------------------------------
     { path: '/basic/button', exact: true, name: 'Basic Button', component: UIBasicButton },
     { path: '/basic/badges', exact: true, name: 'Basic Badges', component: UIBasicBadges },
