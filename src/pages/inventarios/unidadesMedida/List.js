@@ -3,7 +3,7 @@ import { OverlayTrigger, Tooltip, Button } from 'react-bootstrap';
 import { FiEye, FiEdit, FiChevronLeft, FiChevronRight, FiTrash2 } from 'react-icons/fi';
 import { useMyContext } from './Context';
 
-const Marcas = () => {
+const Medidas = () => {
   const {
     data,
     abrirModalCrear,
@@ -21,12 +21,13 @@ const Marcas = () => {
 
   return (
     <div className="mb-4">
-      <h5 className="mb-3">Listado de Marcas</h5>
-      <Button onClick={abrirModalCrear}>Nueva Marca</Button>
+      <h5 className="mb-3">Unidades de Medida</h5>
+      <Button onClick={abrirModalCrear}>Nueva Medida</Button>
       <table className="table table-bordered table-sm mt-2">
         <thead className="table-primary text-dark fw-semibold">
           <tr>
             <th className="text-center">ID</th>
+            <th className="text-center">Siglas</th>
             <th className="text-center">Nombre</th>
             <th className="text-center">Estado</th>
             <th className="text-center">Acciones</th>
@@ -36,20 +37,21 @@ const Marcas = () => {
           {data.map((prov, idx) => (
             <tr key={idx}>
               <td>{prov.id}</td>
+              <td>{prov.siglas}</td>
               <td>{prov.nombre}</td>
               <td>{prov.estado === 'alta' ? 'Alta' : 'Baja'}</td>
               <td className="text-center">
-                <OverlayTrigger overlay={<Tooltip>Ver Marca</Tooltip>}>
+                <OverlayTrigger overlay={<Tooltip>Ver medida</Tooltip>}>
                   <Button className="btn btn-outline-secondary btn-sm me-1" onClick={() => handleVer(prov)}>
                     <FiEye />
                   </Button>
                 </OverlayTrigger>
-                <OverlayTrigger overlay={<Tooltip>Editar marca</Tooltip>}>
+                <OverlayTrigger overlay={<Tooltip>Editar medida</Tooltip>}>
                   <Button className="btn btn-outline-secondary btn-sm" onClick={() => handleEditar(prov)}>
                     <FiEdit />
                   </Button>
                 </OverlayTrigger>
-                <OverlayTrigger overlay={<Tooltip>Eliminar marca</Tooltip>}>
+                <OverlayTrigger overlay={<Tooltip>Eliminar medida</Tooltip>}>
                   <Button className="btn btn-outline-secondary btn-sm" onClick={() => eliminarProveedor(prov.id)}>
                     <FiTrash2 />
                   </Button>
@@ -67,4 +69,4 @@ const Marcas = () => {
   );
 };
 
-export default Marcas;
+export default Medidas;

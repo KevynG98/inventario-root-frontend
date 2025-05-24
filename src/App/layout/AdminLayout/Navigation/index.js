@@ -61,7 +61,7 @@ class Navigation extends Component {
               children: [
                 { title: 'Proveedores', url: '/dashboard/inventario/proveedores', icon: <FiTruck />, roles: [1, 2] },
                 { title: 'Marcas', url: '/dashboard/inventario/marcas', icon: <FiPackage />, roles: [1, 2] },
-                { title: 'Unidades de Medidas', url: '/dashboard/futuro/', icon: <FiGrid />, roles: [1, 2] },
+                { title: 'Unidades de Medidas', url: '/dashboard/inventario/unidades-medida', icon: <FiGrid />, roles: [1, 2] },
                 { title: 'Categorias', url: '/dashboard/futuro/', icon: <FiClipboard />, roles: [1, 2] },
                 { title: 'Listado SKU', url: '/dashboard/futuro/', icon: <FiList />, roles: [1, 2] },
                 { title: 'Actualizacion de precio', url: '/dashboard/futuro/', icon: <FiEdit3 />, roles: [1, 2] },
