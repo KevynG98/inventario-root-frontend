@@ -26,6 +26,7 @@ const AdmisionCaja = React.lazy(() => import('./pages/admisiones/caja/Index'))
 const AdmisionSeguro = React.lazy(() => import('./pages/admisiones/seguros/Index'))
 /* Inventarios */
 const InventarioProveedores = React.lazy(() => import('./pages/inventarios/proveedores/Index'))
+const inventarioMarca = React.lazy(() => import('./pages/inventarios/marcas/Index'))
 
 const UIBasicButton = React.lazy(() => import('./Demo/UIElements/Basic/Button'));
 const UIBasicBadges = React.lazy(() => import('./Demo/UIElements/Basic/Badges'));
@@ -73,6 +74,7 @@ const routes = [
     { path: '/dashboard/admisiones/seguros', exact: true, name: 'Estado Habitaciones', component: AdmisionSeguro },
     /*Inventario*/
     { path: '/dashboard/inventario/proveedores', exact: true, name: 'Inventario Proveedores', component: InventarioProveedores },
+    { path: '/dashboard/inventario/marcas', exact: true, name: 'Inventario Marcas', component: inventarioMarca },
     // -------------------------------------------------------------------------------------------------------------------------------
     { path: '/basic/button', exact: true, name: 'Basic Button', component: UIBasicButton },
     { path: '/basic/badges', exact: true, name: 'Basic Badges', component: UIBasicBadges },
