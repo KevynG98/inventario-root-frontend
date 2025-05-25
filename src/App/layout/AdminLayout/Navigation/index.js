@@ -111,7 +111,7 @@ class Navigation extends Component {
               children: [
                 { title: 'Admisiones', url: '/dashboard/futuro/', icon: <FiUserPlus />, roles: [1, 2] },
                 { title: 'Facturacion', url: '/dashboard/futuro/', icon: <FiDollarSign />, roles: [1, 2] },
-                { title: 'Habitaciones', url: '/dashboard/futuro/', icon: <FiGrid />, roles: [1, 2] },
+                { title: 'Habitaciones', url: '/dashboard/mantenimiento/habitaciones', icon: <FiGrid />, roles: [1, 2] },
                 { title: 'Usuarios', url: '/dashboard/users/', icon: <FiUsers />, roles: [1, 2] },
                 { title: 'Medicos', url: '/dashboard/futuro/', icon: <FiUser />, roles: [1, 2] },
                 { title: 'Directorio Extensiones', url: '/dashboard/futuro/', icon: <FiBookOpen />, roles: [1, 2] },
