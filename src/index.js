@@ -12,6 +12,8 @@ import config from './config';
 import 'react-notifications/lib/notifications.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
+//Programador Kevyn Giron
+
 const store = createStore(reducer);
 
 const app = (

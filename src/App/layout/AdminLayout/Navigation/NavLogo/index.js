@@ -10,14 +10,16 @@ const navLogo = (props) => {
 
     return (
         <Aux>
-            <div className="navbar-brand header-logo">
-                 <a href={DEMO.BLANK_LINK} className="b-brand">
+            <div className="navbar-brand header-logo" style={{ backgroundColor: '#2f3e5a' }}>
+                <a href={DEMO.BLANK_LINK} className="b-brand">
                     <div className="b-bg">
                         <i className="feather icon-trending-up" />
                     </div>
                     <span className="b-title">Hospital Naranjo</span>
-                 </a>
-                <a href={DEMO.BLANK_LINK} className={toggleClass.join(' ')} id="mobile-collapse" onClick={props.onToggleNavigation}><span /></a>
+                </a>
+                <a href={DEMO.BLANK_LINK} className={toggleClass.join(' ')} id="mobile-collapse" onClick={props.onToggleNavigation}>
+                    <span />
+                </a>
             </div>
         </Aux>
     );
