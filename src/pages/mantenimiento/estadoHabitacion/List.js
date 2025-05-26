@@ -1,7 +1,7 @@
 import React, { useContext, useState } from 'react';
 import { AppContext } from './Context';
 import { Button, OverlayTrigger, Tooltip } from 'react-bootstrap';
-import { FiEye, FiChevronDown, FiChevronRight, FiChevronLeft } from 'react-icons/fi';
+import { FiEye, FiEdit, FiTrash2, FiChevronDown, FiChevronRight, FiChevronLeft } from 'react-icons/fi';
 
 const ListadoHabitaciones = () => {
   const {
@@ -9,15 +9,22 @@ const ListadoHabitaciones = () => {
     cargarHabitacion,
     setMostrarModal,
     setModoFormulario,
-    setValue,
     nextPage,
     nullNextPage,
     prevPage,
-    nullPrevPage
+    nullPrevPage,
+    eliminarHabitacion,
+    limpiarFormularioHabitacion
   } = useContext(AppContext);
 
   const [seccionesAbiertas, setSeccionesAbiertas] = useState({});
   const [nivelesAbiertos, setNivelesAbiertos] = useState({});
+
+  const handleVer = async (id) => {
+    await cargarHabitacion(id);
+    setModoFormulario('ver');
+    setMostrarModal(true);
+  };
 
   const handleEditar = async (id) => {
     await cargarHabitacion(id);
@@ -42,24 +49,38 @@ const ListadoHabitaciones = () => {
     }));
   };
 
-  const agrupadoPorAreaYNivel = habitacionData.reduce((acc, admision) => {
-    const area = admision.area || 'SIN ÁREA';
-    const nivel = admision.nivel || 'SIN NIVEL';
+  const agrupadoPorAreaYNivel = habitacionData.reduce((acc, habitacion) => {
+    const area = habitacion.area || 'SIN ÁREA';
+    const nivel = habitacion.nivel || 'SIN NIVEL';
     if (!acc[area]) acc[area] = {};
     if (!acc[area][nivel]) acc[area][nivel] = [];
-    acc[area][nivel].push(admision);
+    acc[area][nivel].push(habitacion);
     return acc;
   }, {});
 
   return (
     <div className="mt-4">
-      <h5 className="mb-3">Listado de habitaciones</h5>
+      <div className="d-flex justify-content-between align-items-center mb-3">
+        <h5 className="mb-0">Listado de habitaciones</h5>
+        <Button
+          variant="dark"
+          size="sm"
+          onClick={() => {
+            setModoFormulario('crear');
+            setMostrarModal(true);
+            limpiarFormularioHabitacion();
+          }}
+        >
+          + Nueva habitación
+        </Button>
+      </div>
+
       <div className="mb-3 w-25">
         <input type="text" placeholder="Buscar..." className="form-control shadow-sm" />
       </div>
 
       {Object.entries(agrupadoPorAreaYNivel).map(([areaKey, niveles]) => {
-        const estaAreaAbierta = seccionesAbiertas[areaKey] ?? false;
+        const estaAreaAbierta = seccionesAbiertas[areaKey] ?? true;
 
         return (
           <div key={areaKey} className="mb-4">
@@ -74,8 +95,8 @@ const ListadoHabitaciones = () => {
 
             {estaAreaAbierta && (
               <>
-                {Object.entries(niveles).map(([nivelKey, admisiones]) => {
-                  const estaNivelAbierto = nivelesAbiertos[areaKey]?.[nivelKey] ?? false;
+                {Object.entries(niveles).map(([nivelKey, habitaciones]) => {
+                  const estaNivelAbierto = nivelesAbiertos[areaKey]?.[nivelKey] ?? true;
 
                   return (
                     <div key={nivelKey} className="mt-3">
@@ -92,31 +113,47 @@ const ListadoHabitaciones = () => {
                         <table className="table table-bordered table-sm">
                           <thead className="table-primary text-dark fw-semibold">
                             <tr>
-                              <th>Codigo</th>
-                              <th>Area</th>
+                              <th>Código</th>
+                              <th>Área</th>
                               <th>Nivel</th>
                               <th>Estado</th>
-                              <th>Admision</th>
+                              <th>Admisión</th>
                               <th>Paciente</th>
                               <th className="text-center">Acciones</th>
                             </tr>
                           </thead>
                           <tbody>
-                            {admisiones.map((admision, idx) => (
+                            {habitaciones.map((hab, idx) => (
                               <tr key={idx}>
-                                <td>{admision.codigo}</td>
-                                <td>{admision.area}</td>
-                                <td>{admision.nivel}</td>
-                                <td>{admision.estado}</td>
-                                <td>{admision.admision}</td>
-                                <td>{admision.paciente}</td>
+                                <td>{hab.codigo}</td>
+                                <td>{hab.area}</td>
+                                <td>{hab.nivel}</td>
+                                <td>{hab.estado}</td>
+                                <td>{hab.admision}</td>
+                                <td>{hab.paciente}</td>
                                 <td className="text-center">
-                                  <OverlayTrigger overlay={<Tooltip>Ver admisión</Tooltip>}>
+                                  <OverlayTrigger overlay={<Tooltip>Ver habitación</Tooltip>}>
                                     <Button
-                                      className="btn btn-outline-secondary btn-sm"
-                                      onClick={() => handleEditar(admision.id)}
+                                      className="btn btn-outline-secondary btn-sm me-1"
+                                      onClick={() => handleVer(hab.id)}
                                     >
                                       <FiEye />
+                                    </Button>
+                                  </OverlayTrigger>
+                                  <OverlayTrigger overlay={<Tooltip>Editar habitación</Tooltip>}>
+                                    <Button
+                                      className="btn btn-outline-secondary btn-sm me-1"
+                                      onClick={() => handleEditar(hab.id)}
+                                    >
+                                      <FiEdit />
+                                    </Button>
+                                  </OverlayTrigger>
+                                  <OverlayTrigger overlay={<Tooltip>Eliminar habitación</Tooltip>}>
+                                    <Button
+                                      className="btn btn-outline-danger btn-sm"
+                                      onClick={() => eliminarHabitacion(hab.id)}
+                                    >
+                                      <FiTrash2 />
                                     </Button>
                                   </OverlayTrigger>
                                 </td>
@@ -135,7 +172,7 @@ const ListadoHabitaciones = () => {
       })}
       <div className="d-flex justify-content-end">
         <Button onClick={prevPage} disabled={nullPrevPage === null}><FiChevronLeft /></Button>
-        <Button onClick={nextPage} disabled={nullNextPage === null }><FiChevronRight /></Button>
+        <Button onClick={nextPage} disabled={nullNextPage === null}><FiChevronRight /></Button>
       </div>
     </div>
   );
