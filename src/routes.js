@@ -30,6 +30,9 @@ const inventarioMarca = React.lazy(() => import('./pages/inventarios/marcas/Inde
 const InventarioUnidadesMedida = React.lazy(() => import('./pages/inventarios/unidadesMedida/Index'))
 const InventarioCategorias = React.lazy(() => import('./pages/inventarios/categorias/Index'))
 
+/* Mantenimiento */
+const MantenimientoHabitacion = React.lazy(() => import('./pages/mantenimiento/estadoHabitacion/Index'))
+
 const UIBasicButton = React.lazy(() => import('./Demo/UIElements/Basic/Button'));
 const UIBasicBadges = React.lazy(() => import('./Demo/UIElements/Basic/Badges'));
 const UIBasicBreadcrumbPagination = React.lazy(() => import('./Demo/UIElements/Basic/BreadcrumbPagination'));
@@ -79,6 +82,8 @@ const routes = [
     { path: '/dashboard/inventario/marcas', exact: true, name: 'Inventario Marcas', component: inventarioMarca },
     { path: '/dashboard/inventario/unidades-medida', exact: true, name: 'Inventario Marcas', component: InventarioUnidadesMedida },
     { path: '/dashboard/inventario/categorias', exact: true, name: 'Inventario Marcas', component: InventarioCategorias },
+    /*Mantenimiento*/
+    { path: '/dashboard/mantenimiento/habitaciones', exact: true, name: 'Inventario Marcas', component: MantenimientoHabitacion },
     // -------------------------------------------------------------------------------------------------------------------------------
     { path: '/basic/button', exact: true, name: 'Basic Button', component: UIBasicButton },
     { path: '/basic/badges', exact: true, name: 'Basic Badges', component: UIBasicBadges },
