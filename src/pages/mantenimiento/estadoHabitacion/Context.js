@@ -76,17 +76,17 @@ export const AppProvider = ({ children }) => {
     const actualizarHabitacion = async (id, data) => {
         try {
             const response = await putData(`habitaciones/habitaciones-actualizar/${id}/`, data);
-            console.log('Habitación actualizada:', response.data);
+            console.log('✅ Habitación actualizada:', response.data);
             getHabitacion();
         } catch (error) {
-            console.error('Error al actualizar habitación:', error);
+            console.error('❌ Error al actualizar habitación:', error.response?.data || error);
         }
-    };
+    };    
 
     const cargarHabitacion = async (id) => {
         try {
             const { data } = await getData(`habitaciones/${id}/`);
-
+            console.log(data)
             setValue('idFicha', data.id);  // ID importante para editar
             setValue('codigo', data.codigo);
             setValue('area', data.area);
@@ -104,9 +104,16 @@ export const AppProvider = ({ children }) => {
         try {
             if (modoFormulario === 'editar') {
                 await actualizarHabitacion(data.idFicha, {
+                    codigo: data.codigo,
+                    area: data.area,
+                    nivel: data.nivel,
                     estado: data.nuevo_estado,
-                    observacion: data.observacion,
+                    admision: data.admision || null,
+                    paciente: data.paciente || '',
+                    observacion: data.observacion || ''
                 });
+                NotificationManager.success("Habitación actualizada con éxito", "Éxito", 3000);
+    
             } else if (modoFormulario === 'crear') {
                 await postData('habitaciones/habitaciones-crear/', {
                     codigo: data.codigo,
@@ -117,17 +124,16 @@ export const AppProvider = ({ children }) => {
                     nivel: data.nivel,
                     observacion: data.observacion || ''
                 });
-                NotificationManager.success("Habitación eliminada con éxito", "Éxito", 3000);
+                NotificationManager.success("Habitación creada con éxito", "Éxito", 3000);
             }
-
+    
             setMostrarModal(false);
             getHabitacion();
         } catch (error) {
-            console.error('Error al guardar habitación:', error);
-            NotificationManager.error("Hubo un error al crear", "Error", 3000);
+            console.error('Error al guardar habitación:', error.response?.data || error);
+            NotificationManager.error("Hubo un error al guardar", "Error", 3000);
         }
-    };
-
+    };    
 
     useEffect(() => {
         getHabitacion();

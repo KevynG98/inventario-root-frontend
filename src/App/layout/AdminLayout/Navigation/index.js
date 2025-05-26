@@ -128,6 +128,7 @@ class Navigation extends Component {
         icon: <FiBarChart2 />,
         roles: [1, 2],
         children: [
+          { title: 'Historial General', url: '/dashboard/reportes/historial-general', icon: <FiFileText />, roles: [1, 2] },
           { title: 'Imprimir Expediente', url: '/dashboard/futuro/', icon: <FiFileText />, roles: [1, 2] },
           { title: 'Historico de Admisiones', url: '/dashboard/futuro/', icon: <FiArchive />, roles: [1, 2] },
           { title: 'Facturacion', url: '/dashboard/futuro/', icon: <FiDollarSign />, roles: [1, 2] },
