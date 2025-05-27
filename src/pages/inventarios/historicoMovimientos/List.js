@@ -85,7 +85,7 @@ const Marcas = () => {
 
             return (
               <tr key={idx}>
-                <td className="text-center">{item.id}</td>
+                <td className="text-center">{idx + 1}</td>
                 <td>{new Date(item.fecha).toLocaleString()}</td>
                 <td>{item.usuario || 'Anónimo'}</td>
                 <td className="text-center">

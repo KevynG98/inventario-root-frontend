@@ -13,7 +13,7 @@ import {
   FiHome, FiUsers, FiSettings, FiShield, FiPackage, FiBox, FiThermometer, FiUserPlus,
   FiList, FiFileText, FiEdit3, FiLogOut, FiUserCheck, FiCreditCard, FiGrid, FiTruck,
   FiClipboard, FiHeart, FiFilePlus, FiArchive, FiUser, FiCalendar, FiFileMinus,
-  FiDollarSign, FiBookOpen, FiBarChart2, FiMonitor, FiDatabase
+  FiDollarSign, FiBookOpen, FiBarChart2, FiMonitor, FiDatabase,
 } from 'react-icons/fi';
 
 class Navigation extends Component {
@@ -68,10 +68,11 @@ class Navigation extends Component {
           { title: 'Marcas', url: '/dashboard/inventario/marcas', icon: <FiPackage />, roles: [1, 2] },
           { title: 'Unidades de Medidas', url: '/dashboard/inventario/unidades-medida', icon: <FiGrid />, roles: [1, 2] },
           { title: 'Categorias', url: '/dashboard/inventario/categorias', icon: <FiClipboard />, roles: [1, 2] },
+          { title: 'Bodegas', url: '/dashboard/inventario/bodegas', icon: <FiPackage />, roles: [1, 2] },
           { title: 'Gestion SKU', url: '/dashboard/futuro/', icon: <FiList />, roles: [1, 2] },
           { title: 'Actualizacion de precio', url: '/dashboard/futuro/', icon: <FiEdit3 />, roles: [1, 2] },
           { title: 'Examenes', url: '/dashboard/futuro/', icon: <FiHeart />, roles: [1, 2] },
-          { title: 'Historico de Movimientos', url: '/dashboard/futuro/', icon: <FiArchive />, roles: [1, 2] },
+          { title: 'Historico de Movimientos', url: '/dashboard/inventario/movimientos', icon: <FiArchive />, roles: [1, 2] },
           { title: 'Consignacion', url: '/dashboard/futuro/', icon: <FiPackage />, roles: [1, 2] },
           { title: 'Controlados', url: '/dashboard/futuro/', icon: <FiShield />, roles: [1, 2] }
         ]

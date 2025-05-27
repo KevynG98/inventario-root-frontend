@@ -29,6 +29,8 @@ const InventarioProveedores = React.lazy(() => import('./pages/inventarios/prove
 const inventarioMarca = React.lazy(() => import('./pages/inventarios/marcas/Index'))
 const InventarioUnidadesMedida = React.lazy(() => import('./pages/inventarios/unidadesMedida/Index'))
 const InventarioCategorias = React.lazy(() => import('./pages/inventarios/categorias/Index'))
+const InventarioMovimiento = React.lazy(() => import('./pages/inventarios/historicoMovimientos/Index'))
+const InventarioBodega = React.lazy(() => import('./pages/inventarios/bodegas/Index'))
 
 /* Mantenimiento */
 const MantenimientoHabitacion = React.lazy(() => import('./pages/mantenimiento/estadoHabitacion/Index'))
@@ -85,6 +87,8 @@ const routes = [
     { path: '/dashboard/inventario/marcas', exact: true, name: 'Inventario Marcas', component: inventarioMarca },
     { path: '/dashboard/inventario/unidades-medida', exact: true, name: 'Inventario Marcas', component: InventarioUnidadesMedida },
     { path: '/dashboard/inventario/categorias', exact: true, name: 'Inventario Marcas', component: InventarioCategorias },
+    { path: '/dashboard/inventario/movimientos', exact: true, name: 'Inventario Movimientos', component: InventarioMovimiento },
+    { path: '/dashboard/inventario/bodegas', exact: true, name: 'Inventario Bodega', component: InventarioBodega },
     /*Mantenimiento*/
     { path: '/dashboard/mantenimiento/habitaciones', exact: true, name: 'Inventario Marcas', component: MantenimientoHabitacion },
     /*Reportes*/
