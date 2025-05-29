@@ -22,7 +22,7 @@ const Marcas = () => {
 
   return (
     <div className="mb-4">
-      <h5 className="mb-3">Historial de cambios</h5>
+      <h5 className="mb-3">Historial de movimientos</h5>
 
       <div className="d-flex align-items-end gap-3 mb-3">
         <div>
