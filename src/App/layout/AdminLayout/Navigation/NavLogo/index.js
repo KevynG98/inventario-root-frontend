@@ -17,9 +17,9 @@ const navLogo = (props) => {
                     </div>
                     <span className="b-title">Hospital Naranjo</span>
                 </a>
-                <a href={DEMO.BLANK_LINK} className={toggleClass.join(' ')} id="mobile-collapse" onClick={props.onToggleNavigation}>
+                {/* <a href={DEMO.BLANK_LINK} className={toggleClass.join(' ')} id="mobile-collapse" onClick={props.onToggleNavigation}>
                     <span />
-                </a>
+                </a> */}
             </div>
         </Aux>
     );
