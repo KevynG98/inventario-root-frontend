@@ -27,7 +27,7 @@ const Users = () => {
 
   const [search, setSearch] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 5; // Tamaño que usas en tu backend para paginación
+  const pageSize = 5;
 
   const totalPages = Math.ceil(pagination.count / pageSize);
 
@@ -102,87 +102,83 @@ const Users = () => {
   return (
     <div className="p-3 bg-light">
       {/* Título y Fecha */}
-      <div className="d-flex justify-content-between align-items-center mb-2">
+      <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-3 gap-2">
         <h4 className="fw-bold text-dark mb-0">Consulta io</h4>
         <span className="fw-semibold text-dark">{formatFecha()}</span>
       </div>
 
       {/* Barra de control */}
-      <div className="row align-items-center mb-3">
-        <div className="col-md-3 d-flex justify-content-start">
-          <Button variant="primary" onClick={openCreateUserModal}>
-            Add +
-          </Button>
-        </div>
+      <div className="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-3">
+        <Button variant="primary" onClick={openCreateUserModal}>
+          Add +
+        </Button>
 
-        <div className="col-md-6">
-          <InputGroup>
-            <Form.Control
-              type="text"
-              placeholder="Búsqueda rápida"
-              value={search}
-              onChange={handleSearch}
-            />
-            <InputGroup.Text>
-              <BiSearch />
-            </InputGroup.Text>
-          </InputGroup>
-        </div>
+        <InputGroup style={{ flex: 1 }}>
+          <Form.Control
+            type="text"
+            placeholder="Búsqueda rápida"
+            value={search}
+            onChange={handleSearch}
+          />
+          <InputGroup.Text>
+            <BiSearch />
+          </InputGroup.Text>
+        </InputGroup>
 
-        <div className="col-md-3 d-flex justify-content-end">
-          <Dropdown>
-            <Dropdown.Toggle variant="outline-secondary" id="dropdown-basic">
-              <FiSettings style={{ marginRight: '6px' }} />
-              <span>Exportar</span>
-            </Dropdown.Toggle>
+        <Dropdown>
+          <Dropdown.Toggle variant="outline-secondary" id="dropdown-basic">
+            <FiSettings style={{ marginRight: '6px' }} />
+            <span>Exportar</span>
+          </Dropdown.Toggle>
 
-            <Dropdown.Menu>
-              <Dropdown.Item disabled>PDF</Dropdown.Item>
-              <Dropdown.Item disabled>WORD</Dropdown.Item>
-              <Dropdown.Item disabled>Excel</Dropdown.Item>
-              <Dropdown.Item disabled>XML</Dropdown.Item>
-              <Dropdown.Item disabled>CSV</Dropdown.Item>
-              <Dropdown.Item disabled>RTF</Dropdown.Item>
-              <Dropdown.Item disabled>Imprimir</Dropdown.Item>
-            </Dropdown.Menu>
-          </Dropdown>
-        </div>
+          <Dropdown.Menu>
+            <Dropdown.Item disabled>PDF</Dropdown.Item>
+            <Dropdown.Item disabled>WORD</Dropdown.Item>
+            <Dropdown.Item disabled>Excel</Dropdown.Item>
+            <Dropdown.Item disabled>XML</Dropdown.Item>
+            <Dropdown.Item disabled>CSV</Dropdown.Item>
+            <Dropdown.Item disabled>RTF</Dropdown.Item>
+            <Dropdown.Item disabled>Imprimir</Dropdown.Item>
+          </Dropdown.Menu>
+        </Dropdown>
       </div>
 
       {/* Tabla */}
-      <Table striped hover responsive>
-        <thead>
-          <tr>
-            <th style={{ width: '50px' }}></th>
-            <th>Usuario</th>
-            <th>Nombre</th>
-            <th>E-mail</th>
-            <th>Activo</th>
-          </tr>
-        </thead>
-        <tbody>
-          {data.map((item) => (
-            <tr key={item.id}>
-              <td>
-                <Button
-                  size="sm"
-                  variant="outline-primary"
-                  onClick={() => openViewUserModal(item.username)}
-                >
-                  <FiEdit3 />
-                </Button>
-              </td>
-              <td>{item.username}</td>
-              <td>{item.first_name} {item.last_name}</td>
-              <td>{item.email || ''}</td>
-              <td>{item.is_active ? 'Sí' : 'No'}</td>
+      <div className="table-responsive">
+        <Table striped hover>
+          <thead>
+            <tr>
+              <th style={{ width: '50px' }}></th>
+              <th>Usuario</th>
+              <th>Nombre</th>
+              <th>E-mail</th>
+              <th>Activo</th>
             </tr>
-          ))}
-        </tbody>
-      </Table>
+          </thead>
+          <tbody>
+            {data.map((item) => (
+              <tr key={item.id}>
+                <td>
+                  <Button
+                    size="sm"
+                    variant="outline-primary"
+                    onClick={() => openViewUserModal(item.username)}
+                  >
+                    <FiEdit3 />
+                  </Button>
+                </td>
+                <td>{item.username}</td>
+                <td>{item.first_name} {item.last_name}</td>
+                <td>{item.email || ''}</td>
+                <td>{item.is_active ? 'Sí' : 'No'}</td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
+      </div>
 
       {/* Paginación */}
-      <div className="d-flex justify-content-center align-items-center gap-2">
+      <div className="d-flex justify-content-center align-items-center flex-wrap gap-2 mt-3">
         <Button
           variant="outline-secondary"
           size="sm"
@@ -207,4 +203,4 @@ const Users = () => {
   );
 };
 
-export default Users
+export default Users;

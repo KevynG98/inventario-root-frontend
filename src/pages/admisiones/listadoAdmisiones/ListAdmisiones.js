@@ -47,7 +47,7 @@ const ListadoAdmisiones = () => {
   return (
     <div className="mt-4">
       <h5 className="mb-3">Listado de pacientes ingresados</h5>
-      <div className="mb-3 w-25">
+      <div className="mb-3 w-100 w-md-25">
         <input type="text" placeholder="Buscar..." className="form-control shadow-sm" />
       </div>
 
@@ -67,54 +67,56 @@ const ListadoAdmisiones = () => {
             </div>
 
             {estaAbierta && (
-              <table className="table table-bordered table-sm mt-2">
-                <thead className="table-primary text-dark fw-semibold">
-                  <tr>
-                    <th>Admisión</th>
-                    <th>Fecha</th>
-                    <th>Paciente</th>
-                    <th>Identificación</th>
-                    <th>Aseguradora</th>
-                    <th>Área</th>
-                    <th>Cama</th>
-                    <th>Médico</th>
-                    <th className="text-center">Acciones</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {admisiones.map((admision, idx) => (
-                    <tr key={idx}>
-                      <td>{admision.id_admision}</td>
-                      <td>{admision.fecha_admision}</td>
-                      <td>{admision.paciente}</td>
-                      <td>{admision.identificacion}</td>
-                      <td>{admision.aseguradora}</td>
-                      <td>{admision.area}</td>
-                      <td>{admision.habitacion}</td>
-                      <td>{admision.medico_tratante || '-'}</td>
-                      <td className="text-center">
-                        <OverlayTrigger overlay={<Tooltip>Ver admisión</Tooltip>}>
-                          <Button className="btn btn-outline-secondary btn-sm me-1" onClick={() => handleVer(admision.id_admision)}>
-                            <FiEye />
-                          </Button>
-                        </OverlayTrigger>
-                        <OverlayTrigger overlay={<Tooltip>Editar admisión</Tooltip>}>
-                          <Button className="btn btn-outline-secondary btn-sm" onClick={() => handleEditar(admision.id_admision)}>
-                            <FiEdit />
-                          </Button>
-                        </OverlayTrigger>
-                      </td>
+              <div className="table-responsive mt-2">
+                <table className="table table-bordered table-sm">
+                  <thead className="table-primary text-dark fw-semibold">
+                    <tr>
+                      <th>Admisión</th>
+                      <th>Fecha</th>
+                      <th>Paciente</th>
+                      <th>Identificación</th>
+                      <th>Aseguradora</th>
+                      <th>Área</th>
+                      <th>Cama</th>
+                      <th>Médico</th>
+                      <th className="text-center">Acciones</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {admisiones.map((admision, idx) => (
+                      <tr key={idx}>
+                        <td>{admision.id_admision}</td>
+                        <td>{admision.fecha_admision}</td>
+                        <td>{admision.paciente}</td>
+                        <td>{admision.identificacion}</td>
+                        <td>{admision.aseguradora}</td>
+                        <td>{admision.area}</td>
+                        <td>{admision.habitacion}</td>
+                        <td>{admision.medico_tratante || '-'}</td>
+                        <td className="text-center">
+                          <OverlayTrigger overlay={<Tooltip>Ver admisión</Tooltip>}>
+                            <Button className="btn btn-outline-secondary btn-sm me-1" onClick={() => handleVer(admision.id_admision)}>
+                              <FiEye />
+                            </Button>
+                          </OverlayTrigger>
+                          <OverlayTrigger overlay={<Tooltip>Editar admisión</Tooltip>}>
+                            <Button className="btn btn-outline-secondary btn-sm" onClick={() => handleEditar(admision.id_admision)}>
+                              <FiEdit />
+                            </Button>
+                          </OverlayTrigger>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             )}
           </div>
         );
       })}
       <div className="d-flex justify-content-end">
         <Button onClick={prevPage} disabled={nullPrevPage === null}><FiChevronLeft /></Button>
-        <Button onClick={nextPage} disabled={nullNextPage === null }><FiChevronRight /></Button>
+        <Button onClick={nextPage} disabled={nullNextPage === null}><FiChevronRight /></Button>
       </div>
     </div>
   );

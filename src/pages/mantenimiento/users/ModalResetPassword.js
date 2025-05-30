@@ -12,7 +12,6 @@ const ModalResetPassword = () => {
   const [showConfirm, setShowConfirm] = useState(false);
   const [isMismatch, setIsMismatch] = useState(false);
 
-  // Buscar el usuario actual
   const userData = username ? data.find((u) => u.username === username) : null;
   const userId = userData?.id;
 
@@ -41,11 +40,13 @@ const ModalResetPassword = () => {
 
   return (
     <Modal show={showResetPassword} onHide={closeResetPasswordModal} centered>
+      <Modal.Header closeButton>
+        <Modal.Title>Restablecer contraseña</Modal.Title>
+      </Modal.Header>
       <Modal.Body className="p-4">
-        <h5 className="fw-bold mb-4">Restablecer contraseña</h5>
         <Form onSubmit={handleSubmit}>
           {/* Nueva contraseña */}
-          <Form.Group className="mb-3 position-relative">
+          <Form.Group className="mb-3">
             <Form.Label>Nueva contraseña</Form.Label>
             <div className="d-flex align-items-center">
               <Form.Control
@@ -65,7 +66,7 @@ const ModalResetPassword = () => {
           </Form.Group>
 
           {/* Confirmar contraseña */}
-          <Form.Group className="mb-3 position-relative">
+          <Form.Group className="mb-3">
             <Form.Label>Confirmar contraseña</Form.Label>
             <div className="d-flex align-items-center">
               <Form.Control

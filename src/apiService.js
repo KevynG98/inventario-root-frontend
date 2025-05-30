@@ -112,4 +112,4 @@ const putData = async (url, data) => {
 
 
 export default apiClient;
-export { postData, getData, deleteData, putData };
+export { postData, getData, deleteData, putData, API_URL };

@@ -25,7 +25,9 @@ function ComponentProvider({ children, history }) {
                 console.log("RESPUESTA: ", response.data)
                 localStorage.setItem("user", JSON.stringify(response.data.user));
                 setData1(response.data);
+                setIsLoading(false);
                 history.push("/dashboard/default");
+                
             } else {
                 setError(`Error ${response?.status || "desconocido"}`);
             }

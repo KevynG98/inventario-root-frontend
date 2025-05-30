@@ -217,19 +217,24 @@ const FormularioAdmision = () => {
   return (
     <Container className="p-4 bg-light rounded shadow-sm">
       {/* Encabezado */}
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h4 className="fw-bold text-dark">Ficha del Paciente</h4>
-        <div className="d-flex align-items-center">
-          <span className="mr-3 font-weight-bold">Fecha: {todayDate}</span>
-          <Button variant="primary"><FiAlignJustify /><span> Listado</span></Button>
-          <Button
-            variant="primary"
-            className="mr-2"
-            disabled={loading}
-            onClick={handleSubmit(onSubmit)}
-          >
-            {loading ? 'Guardando...' : 'Guardar'}
-          </Button>
+      <div className="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-2">
+        <h4 className="fw-bold text-dark m-0">Ficha del Paciente</h4>
+
+        <div className="d-flex flex-column flex-md-row align-items-start align-items-md-center gap-2">
+        <span className="fw-bold mr-3">Fecha: {todayDate}</span>
+
+          <div className="d-flex gap-2">
+            <Button variant="primary">
+              <FiAlignJustify /> <span>Listado</span>
+            </Button>
+            <Button
+              variant="primary"
+              disabled={loading}
+              onClick={handleSubmit(onSubmit)}
+            >
+              {loading ? 'Guardando...' : 'Guardar'}
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -487,30 +492,22 @@ const FormularioAdmision = () => {
         </div>
 
         {/* Acompañantes */}
-        <div className="p-3 rounded border mb-3" style={{ backgroundColor: '#ededed' }}>
+        <div className="p-4 rounded border mb-3" style={{ backgroundColor: '#ededed' }}>
           <h5 className="text-primary mt-2">Acompañantes</h5>
 
           <Tabs defaultActiveKey="acompanante1" id="tabs-acompanantes" className="mb-3">
             {[1, 2, 3, 4].map((n) => (
               <Tab key={n} eventKey={`acompanante${n}`} title={`Acompañante ${n}`}>
-                <div
-                  className="p-4 mt-3"
-                  style={{
-                    backgroundColor: '#ededed',
-                    borderRadius: '12px',
-                    width: '100%',
-                    minHeight: '100%',
-                  }}
-                >
-                  <h6 className="text-primary">Datos del Acompañante</h6>
+                <div className="pt-2">
+                  <h6 className="text-primary">{`Datos del Acompañante ${n}`}</h6>
                   <Row className="mb-3">
-                    <Col md={4}>
+                    <Col xs={12} md={4}>
                       <Form.Group>
                         <Form.Label>Nombre</Form.Label>
                         <Form.Control type="text" {...register(`acompanantes.${n - 1}.nombre`)} />
                       </Form.Group>
                     </Col>
-                    <Col md={4}>
+                    <Col xs={12} md={4}>
                       <Form.Group>
                         <Form.Label>Tipo de Identificación</Form.Label>
                         <Form.Control as="select" {...register(`acompanantes.${n - 1}.tipoIdentificacion`)}>
@@ -520,7 +517,7 @@ const FormularioAdmision = () => {
                         </Form.Control>
                       </Form.Group>
                     </Col>
-                    <Col md={4}>
+                    <Col xs={12} md={4}>
                       <Form.Group>
                         <Form.Label>Número de Identificación</Form.Label>
                         <Form.Control type="text" {...register(`acompanantes.${n - 1}.numeroIdentificacion`)} />
@@ -529,19 +526,19 @@ const FormularioAdmision = () => {
                   </Row>
 
                   <Row className="mb-3">
-                    <Col md={4}>
+                    <Col xs={12} md={4}>
                       <Form.Group>
                         <Form.Label>Fecha de Nacimiento</Form.Label>
                         <Form.Control type="date" {...register(`acompanantes.${n - 1}.fechaNacimiento`)} />
                       </Form.Group>
                     </Col>
-                    <Col md={2}>
+                    <Col xs={12} md={2}>
                       <Form.Group>
                         <Form.Label>Edad</Form.Label>
                         <Form.Control type="text" disabled {...register(`acompanantes.${n - 1}.edad`)} />
                       </Form.Group>
                     </Col>
-                    <Col md={3}>
+                    <Col xs={12} md={3}>
                       <Form.Group>
                         <Form.Label>Género</Form.Label>
                         <Form.Control as="select" {...register(`acompanantes.${n - 1}.genero`)}>
@@ -551,7 +548,7 @@ const FormularioAdmision = () => {
                         </Form.Control>
                       </Form.Group>
                     </Col>
-                    <Col md={3}>
+                    <Col xs={12} md={3}>
                       <Form.Group>
                         <Form.Label>Correo</Form.Label>
                         <Form.Control type="email" {...register(`acompanantes.${n - 1}.correo`)} />
@@ -560,13 +557,13 @@ const FormularioAdmision = () => {
                   </Row>
 
                   <Row className="mb-3">
-                    <Col md={4}>
+                    <Col xs={12} md={4}>
                       <Form.Group>
                         <Form.Label>NIT</Form.Label>
                         <Form.Control type="text" {...register(`acompanantes.${n - 1}.nit`)} />
                       </Form.Group>
                     </Col>
-                    <Col md={4}>
+                    <Col xs={12} md={4}>
                       <Form.Group>
                         <Form.Label>Tipo de Familiar</Form.Label>
                         <Form.Control as="select" {...register(`acompanantes.${n - 1}.tipo`)}>
@@ -582,34 +579,35 @@ const FormularioAdmision = () => {
                         </Form.Control>
                       </Form.Group>
                     </Col>
-                    <Col md={4} className="d-flex align-items-center">
-                      <Form.Check
-                        type="checkbox"
-                        className="me-2"
-                        {...register(`acompanantes.${n - 1}.responsableCuenta`)}
-                        id={`responsableCuenta${n}`}
-                      />
-                      <Form.Label htmlFor={`responsableCuenta${n}`} className="mb-0">
-                        Responsable de Cuenta
-                      </Form.Label>
+                    <Col xs={12} md={4}>
+                      <Form.Group className="d-flex align-items-center gap-2 mt-4">
+                        <Form.Check
+                          type="checkbox"
+                          {...register(`acompanantes.${n - 1}.responsableCuenta`)}
+                          id={`responsableCuenta${n}`}
+                        />
+                        <Form.Label htmlFor={`responsableCuenta${n}`} className="mb-0">
+                          Responsable de Cuenta
+                        </Form.Label>
+                      </Form.Group>
                     </Col>
                   </Row>
 
                   <h6 className="text-primary">Datos Laborales del Acompañante</h6>
                   <Row className="mb-3">
-                    <Col md={4}>
+                    <Col xs={12} md={4}>
                       <Form.Group>
                         <Form.Label>Dirección</Form.Label>
                         <Form.Control type="text" {...register(`acompanantes.${n - 1}.direccionLaboral`)} />
                       </Form.Group>
                     </Col>
-                    <Col md={4}>
+                    <Col xs={12} md={4}>
                       <Form.Group>
                         <Form.Label>Teléfono Empresa</Form.Label>
                         <Form.Control type="text" {...register(`acompanantes.${n - 1}.telefonoEmpresa`)} />
                       </Form.Group>
                     </Col>
-                    <Col md={4}>
+                    <Col xs={12} md={4}>
                       <Form.Group>
                         <Form.Label>Contacto</Form.Label>
                         <Form.Control type="text" {...register(`acompanantes.${n - 1}.contacto`)} />
@@ -618,13 +616,13 @@ const FormularioAdmision = () => {
                   </Row>
 
                   <Row className="mb-3">
-                    <Col md={6}>
+                    <Col xs={12} md={6}>
                       <Form.Group>
                         <Form.Label>Correo Contacto</Form.Label>
                         <Form.Control type="email" {...register(`acompanantes.${n - 1}.correoContacto`)} />
                       </Form.Group>
                     </Col>
-                    <Col md={6}>
+                    <Col xs={12} md={6}>
                       <Form.Group>
                         <Form.Label>Teléfono Contacto</Form.Label>
                         <Form.Control type="text" {...register(`acompanantes.${n - 1}.telefonoContacto`)} />

@@ -1,27 +1,42 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import '../../../assets/scss/style.scss';
 import { useForm } from 'react-hook-form';
 import { useComponentContext } from './context';
 import ModalCarga from './Modal';
-import logo from '../../../assets/images/hospistal/el-naranjo.png'; // Asegúrate de colocar la imagen ahí
+import logo from '../../../assets/images/hospistal/el-naranjo.png';
+import Swal from 'sweetalert2';
 
 const SignUp1 = () => {
   const { register, handleSubmit, formState: { errors } } = useForm();
   const { data1, isLoading, error, sendData, modalAction, show } = useComponentContext();
 
+  useEffect(() => {
+    if (isLoading) {
+      Swal.fire({
+        title: 'Cargando...',
+        text: 'Espere mientras se cargan los datos',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
+    } else {
+      Swal.close();
+    }
+  }, [isLoading]);
+
   const onSubmit = (data) => {
-    console.log('Formulario enviado', data);
     sendData(data);
     modalAction();
-    console.log("Response: ", data1);
   };
 
   return (
     <>
-      <div className="d-flex vh-100">
-        {/* Columna izquierda: formulario */}
-        <div className="d-flex flex-column justify-content-center align-items-center bg-light w-50 p-5">
+      <div className="d-flex flex-column flex-md-row vh-100">
+        {/* Columna izquierda */}
+        <div className="d-flex flex-column justify-content-center align-items-center bg-light w-100 w-md-50 p-4 p-md-5">
           <h3 className="mb-4 fw-bold text-dark text-center">Inicio de Sesión al Sistema</h3>
 
           <form onSubmit={handleSubmit(onSubmit)} style={{ width: '100%', maxWidth: '400px' }}>
@@ -57,11 +72,11 @@ const SignUp1 = () => {
           </form>
         </div>
 
-        {/* Columna derecha: imagen/logo */}
+        {/* Columna derecha */}
         <div
-          className="d-none d-md-flex flex-column justify-content-center align-items-center w-50"
+          className="d-none d-md-flex flex-column justify-content-center align-items-center w-100"
           style={{
-            backgroundColor: '#ccf4fc',
+            backgroundColor: '#c6f4fc',
             backgroundSize: 'cover',
             backgroundPosition: 'center'
           }}
@@ -69,8 +84,6 @@ const SignUp1 = () => {
           <img src={logo} alt="Logo EPEQ" style={{ maxWidth: '280px', width: '80%' }} />
         </div>
       </div>
-
-      {show && <ModalCarga />}
     </>
   );
 };

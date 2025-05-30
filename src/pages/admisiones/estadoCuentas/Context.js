@@ -1,5 +1,5 @@
 import React, { createContext, useEffect, useState } from 'react';
-import { getData, putData } from '../../../apiService';
+import { getData, putData, API_URL } from '../../../apiService';
 import { useForm } from 'react-hook-form';
 
 export const AppContext = createContext();
@@ -38,10 +38,10 @@ export const AppProvider = ({ children }) => {
     const descargarPDF = async () => {
         console.log(idAdmision)
         try {
-            const response = await fetch(`http://localhost:8000/admisiones/estado-cuenta-imprimir/${idAdmision}/`, {
+            const response = await fetch(`${API_URL}admisiones/estado-cuenta-imprimir/${idAdmision}/`, {
                 method: 'GET',
             });
-
+            console.log(response)
             const blob = await response.blob();
             const url = window.URL.createObjectURL(blob);
 

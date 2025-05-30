@@ -7,7 +7,6 @@ global.jQuery = $;
 
 const DashboardDefault = React.lazy(() => import('./Demo/Dashboard/Default'));
 
-const Users = React.lazy(() => import('./pages/users/Index'));
 const Roles = React.lazy(() => import('./pages/roles/Index'));
 const Products = React.lazy(() => import('./pages/products/Index'));
 const Doctor = React.lazy(() => import('./pages/doctor/Index'));
@@ -35,6 +34,7 @@ const InventarioSku = React.lazy(() => import('./pages/inventarios/gestionSku/In
 const InventarioStock = React.lazy(() => import('./pages/inventarios/stock/Index'))
 /* Mantenimiento */
 const MantenimientoHabitacion = React.lazy(() => import('./pages/mantenimiento/estadoHabitacion/Index'))
+const Users = React.lazy(() => import('./pages/mantenimiento/users/Index'));
 
 /* Reportes */
 const HIstorialGeneral = React.lazy(() => import('./pages/reportes/historialGeneral/Index'))
@@ -65,7 +65,7 @@ const userPermissions = user?.roles?.map(role => role.id) || [];
 console.log("PERMISIONS: ", userPermissions); // Ejemplo: [1]
 
 const routes = [
-    { path: '/dashboard/default', exact: true, name: 'Default', component: userPermissions.some(item => [1, 2, 3].includes(item)) ? DashboardDefault : Error404 },
+    { path: '/dashboard/default', exact: true, name: 'Default', component: DashboardDefault},
     { path: '/dashboard/users', exact: true, name: 'Users', component: userPermissions.some(item => [0, 1].includes(item)) ? Users : Error404 },
     { path: '/dashboard/roles', exact: true, name: 'Roles', component: userPermissions.some(item => [0, 1].includes(item)) ? Roles : Error404 },
     { path: '/dashboard/products', exact: true, name: 'Roles', component: userPermissions.some(item => [1, 2].includes(item)) ? Products : Error404 },

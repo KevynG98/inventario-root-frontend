@@ -54,8 +54,17 @@ const ListadoHabitaciones = () => {
   return (
     <div className="mt-4">
       <h5 className="mb-3">Listado de habitaciones</h5>
-      <div className="mb-3 w-25">
-        <input type="text" placeholder="Buscar..." className="form-control shadow-sm" />
+
+      <div className="mb-3">
+        <div className="row">
+          <div className="col-12">
+            <input
+              type="text"
+              placeholder="Buscar..."
+              className="form-control shadow-sm w-100"
+            />
+          </div>
+        </div>
       </div>
 
       {Object.entries(agrupadoPorAreaYNivel).map(([areaKey, niveles]) => {
@@ -89,41 +98,43 @@ const ListadoHabitaciones = () => {
                       </div>
 
                       {estaNivelAbierto && (
-                        <table className="table table-bordered table-sm">
-                          <thead className="table-primary text-dark fw-semibold">
-                            <tr>
-                              <th>Codigo</th>
-                              <th>Area</th>
-                              <th>Nivel</th>
-                              <th>Estado</th>
-                              <th>Admision</th>
-                              <th>Paciente</th>
-                              <th className="text-center">Acciones</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {admisiones.map((admision, idx) => (
-                              <tr key={idx}>
-                                <td>{admision.codigo}</td>
-                                <td>{admision.area}</td>
-                                <td>{admision.nivel}</td>
-                                <td>{admision.estado}</td>
-                                <td>{admision.admision}</td>
-                                <td>{admision.paciente}</td>
-                                <td className="text-center">
-                                  <OverlayTrigger overlay={<Tooltip>Ver admisión</Tooltip>}>
-                                    <Button
-                                      className="btn btn-outline-secondary btn-sm"
-                                      onClick={() => handleEditar(admision.id)}
-                                    >
-                                      <FiEye />
-                                    </Button>
-                                  </OverlayTrigger>
-                                </td>
+                        <div className="table-responsive">
+                          <table className="table table-bordered table-sm">
+                            <thead className="table-primary text-dark fw-semibold">
+                              <tr>
+                                <th>Codigo</th>
+                                <th>Area</th>
+                                <th>Nivel</th>
+                                <th>Estado</th>
+                                <th>Admision</th>
+                                <th>Paciente</th>
+                                <th className="text-center">Acciones</th>
                               </tr>
-                            ))}
-                          </tbody>
-                        </table>
+                            </thead>
+                            <tbody>
+                              {admisiones.map((admision, idx) => (
+                                <tr key={idx}>
+                                  <td>{admision.codigo}</td>
+                                  <td>{admision.area}</td>
+                                  <td>{admision.nivel}</td>
+                                  <td>{admision.estado}</td>
+                                  <td>{admision.admision}</td>
+                                  <td>{admision.paciente}</td>
+                                  <td className="text-center">
+                                    <OverlayTrigger overlay={<Tooltip>Ver admisión</Tooltip>}>
+                                      <Button
+                                        className="btn btn-outline-secondary btn-sm"
+                                        onClick={() => handleEditar(admision.id)}
+                                      >
+                                        <FiEye />
+                                      </Button>
+                                    </OverlayTrigger>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
                       )}
                     </div>
                   );
@@ -133,9 +144,10 @@ const ListadoHabitaciones = () => {
           </div>
         );
       })}
+
       <div className="d-flex justify-content-end">
         <Button onClick={prevPage} disabled={nullPrevPage === null}><FiChevronLeft /></Button>
-        <Button onClick={nextPage} disabled={nullNextPage === null }><FiChevronRight /></Button>
+        <Button onClick={nextPage} disabled={nullNextPage === null}><FiChevronRight /></Button>
       </div>
     </div>
   );

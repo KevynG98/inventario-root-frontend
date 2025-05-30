@@ -17,7 +17,7 @@ const staticRoutes = [
         icon: <FiUserPlus />,
         roles: [1],
         children: [
-            { title: 'Nueva Admision', url: '/dashboard/admisiones/nueva/', icon: <FiUserPlus />, roles: [1] },
+            { title: 'Nueva Admision', url: '/dashboard/admisiones/nueva/', icon: <FiUserPlus />},
             { title: 'Listado de Admisiones', url: '/dashboard/admisiones/listar-admision', icon: <FiList />, roles: [1] },
             { title: 'Estado de cuenta', url: '/dashboard/admisiones/listar-admision-estados/', icon: <FiFileText />, roles: [1] },
             { title: 'Egreso de Pacientes', url: '/dashboard/construccion/', icon: <FiLogOut />, roles: [1] },

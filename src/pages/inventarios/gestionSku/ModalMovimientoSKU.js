@@ -18,13 +18,13 @@ const ModalMovimientoSKU = () => {
 
     useEffect(() => {
         if (!showModalMovimiento) {
-          reset(); // limpia el formulario
-          setOrigenSeleccionado('');
-          setDestinoSeleccionado('');
+            reset();
+            setOrigenSeleccionado('');
+            setDestinoSeleccionado('');
         }
-      }, [showModalMovimiento]);
+    }, [showModalMovimiento, reset]);
 
-    if (!skuActivo) return null;  
+    if (!skuActivo) return null;
 
     return (
         <Modal show={showModalMovimiento} onHide={() => setShowModalMovimiento(false)} size="lg" centered>
@@ -36,30 +36,32 @@ const ModalMovimientoSKU = () => {
 
             <Modal.Body>
                 <h6 className="text-primary fw-bold mb-3">Stock por bodega</h6>
-                <Table bordered size="sm" className="text-center">
-                    <thead className="table-primary">
-                        <tr>
-                            {bodega.map((b, i) => (
-                                <th key={i}>{b.nombre}</th>
-                            ))}
-                            <th>Total</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            {bodega.map((b, i) => {
-                                const stock = skuActivo.bodegas?.find(x => x.nombre_bodega === b.nombre);
-                                return <td key={i}>{stock ? stock.cantidad : 0}</td>;
-                            })}
-                            <td className="fw-bold text-primary">
-                                {bodega.reduce((acc, b) => {
+                <div className="table-responsive">
+                    <Table bordered size="sm" className="text-center mb-0">
+                        <thead className="table-primary">
+                            <tr>
+                                {bodega.map((b, i) => (
+                                    <th key={i}>{b.nombre}</th>
+                                ))}
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                {bodega.map((b, i) => {
                                     const stock = skuActivo.bodegas?.find(x => x.nombre_bodega === b.nombre);
-                                    return acc + (stock?.cantidad ?? 0);
-                                }, 0)}
-                            </td>
-                        </tr>
-                    </tbody>
-                </Table>
+                                    return <td key={i}>{stock ? stock.cantidad : 0}</td>;
+                                })}
+                                <td className="fw-bold text-primary">
+                                    {bodega.reduce((acc, b) => {
+                                        const stock = skuActivo.bodegas?.find(x => x.nombre_bodega === b.nombre);
+                                        return acc + (stock?.cantidad ?? 0);
+                                    }, 0)}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </Table>
+                </div>
 
                 <h6 className="text-primary fw-bold mt-4 mb-2">Mover producto</h6>
                 <Form onSubmit={handleSubmit((data) => {
@@ -74,9 +76,7 @@ const ModalMovimientoSKU = () => {
                                     as="select"
                                     {...register("bodega_origen")}
                                     value={origenSeleccionado}
-                                    onChange={(e) => {
-                                        setOrigenSeleccionado(e.target.value);
-                                    }}
+                                    onChange={(e) => setOrigenSeleccionado(e.target.value)}
                                     required
                                 >
                                     <option value="">Seleccione</option>
@@ -96,9 +96,7 @@ const ModalMovimientoSKU = () => {
                                     as="select"
                                     {...register("bodega_destino")}
                                     value={destinoSeleccionado}
-                                    onChange={(e) => {
-                                        setDestinoSeleccionado(e.target.value);
-                                    }}
+                                    onChange={(e) => setDestinoSeleccionado(e.target.value)}
                                     required
                                 >
                                     <option value="">Seleccione</option>
@@ -110,13 +108,19 @@ const ModalMovimientoSKU = () => {
                                 </Form.Control>
                             </Form.Group>
                         </Col>
-                        
+
                         <Col md={3}>
                             <Form.Group>
                                 <Form.Label>Cantidad</Form.Label>
-                                <Form.Control type="number" min={1} {...register("cantidad")} required />
+                                <Form.Control
+                                    type="number"
+                                    min={1}
+                                    {...register("cantidad")}
+                                    required
+                                />
                             </Form.Group>
                         </Col>
+
                         <Col md={1} className="d-flex align-items-end">
                             <Button type="submit" variant="primary" className="w-100">➤</Button>
                         </Col>

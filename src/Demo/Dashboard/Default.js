@@ -2,13 +2,16 @@ import React from 'react';
 import { Container } from 'react-bootstrap';
 
 import Aux from '../../hoc/_Aux';
-import welcomeImage from '../../assets/images/hospistal/hospital_narnajo.png'; // Asegurate que la ruta sea correcta
+import welcomeImage from '../../assets/images/hospistal/hospital_narnajo.png';
 
 const Dashboard = () => {
   return (
     <Aux>
-      <Container className="d-flex flex-column justify-content-center align-items-center text-center vh-100 bg-light">
-        {/* Animación y estilos embebidos */}
+      <Container
+        fluid
+        className="vh-100 d-flex flex-column justify-content-center align-items-center bg-light text-center px-3"
+      >
+        {/* Animación embebida */}
         <style>
           {`
             .fade-in {
@@ -25,11 +28,15 @@ const Dashboard = () => {
             }
           `}
         </style>
-        <h2 className="text-primary fw-bold fade-in">Bienvenido al sistema del Hospital Naranjo</h2>
+
+        <h2 className="text-primary font-weight-bold fade-in mb-4">
+          Bienvenido al sistema del Hospital Naranjo
+        </h2>
+
         <img
           src={welcomeImage}
           alt="Bienvenida Hospital"
-          className="fade-in"
+          className="fade-in img-fluid"
           style={{
             marginBottom: '30px',
             borderRadius: '12px',

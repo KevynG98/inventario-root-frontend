@@ -60,7 +60,7 @@ const ListadoHabitaciones = () => {
 
   return (
     <div className="mt-4">
-      <div className="d-flex justify-content-between align-items-center mb-3">
+      <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-3">
         <h5 className="mb-0">Listado de habitaciones</h5>
         <Button
           variant="dark"
@@ -75,7 +75,7 @@ const ListadoHabitaciones = () => {
         </Button>
       </div>
 
-      <div className="mb-3 w-25">
+      <div className="mb-3" style={{ maxWidth: '300px' }}>
         <input type="text" placeholder="Buscar..." className="form-control shadow-sm" />
       </div>
 
@@ -110,57 +110,59 @@ const ListadoHabitaciones = () => {
                       </div>
 
                       {estaNivelAbierto && (
-                        <table className="table table-bordered table-sm">
-                          <thead className="table-primary text-dark fw-semibold">
-                            <tr>
-                              <th>Código</th>
-                              <th>Área</th>
-                              <th>Nivel</th>
-                              <th>Estado</th>
-                              <th>Admisión</th>
-                              <th>Paciente</th>
-                              <th className="text-center">Acciones</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {habitaciones.map((hab, idx) => (
-                              <tr key={idx}>
-                                <td>{hab.codigo}</td>
-                                <td>{hab.area}</td>
-                                <td>{hab.nivel}</td>
-                                <td>{hab.estado}</td>
-                                <td>{hab.admision}</td>
-                                <td>{hab.paciente}</td>
-                                <td className="text-center">
-                                  <OverlayTrigger overlay={<Tooltip>Ver habitación</Tooltip>}>
-                                    <Button
-                                      className="btn btn-outline-secondary btn-sm me-1"
-                                      onClick={() => handleVer(hab.id)}
-                                    >
-                                      <FiEye />
-                                    </Button>
-                                  </OverlayTrigger>
-                                  <OverlayTrigger overlay={<Tooltip>Editar habitación</Tooltip>}>
-                                    <Button
-                                      className="btn btn-outline-secondary btn-sm me-1"
-                                      onClick={() => handleEditar(hab.id)}
-                                    >
-                                      <FiEdit />
-                                    </Button>
-                                  </OverlayTrigger>
-                                  <OverlayTrigger overlay={<Tooltip>Eliminar habitación</Tooltip>}>
-                                    <Button
-                                      className="btn btn-outline-danger btn-sm"
-                                      onClick={() => eliminarHabitacion(hab.id)}
-                                    >
-                                      <FiTrash2 />
-                                    </Button>
-                                  </OverlayTrigger>
-                                </td>
+                        <div className="table-responsive">
+                          <table className="table table-bordered table-sm">
+                            <thead className="table-primary text-dark fw-semibold">
+                              <tr>
+                                <th>Código</th>
+                                <th>Área</th>
+                                <th>Nivel</th>
+                                <th>Estado</th>
+                                <th>Admisión</th>
+                                <th>Paciente</th>
+                                <th className="text-center">Acciones</th>
                               </tr>
-                            ))}
-                          </tbody>
-                        </table>
+                            </thead>
+                            <tbody>
+                              {habitaciones.map((hab, idx) => (
+                                <tr key={idx}>
+                                  <td>{hab.codigo}</td>
+                                  <td>{hab.area}</td>
+                                  <td>{hab.nivel}</td>
+                                  <td>{hab.estado}</td>
+                                  <td>{hab.admision}</td>
+                                  <td>{hab.paciente}</td>
+                                  <td className="text-center">
+                                    <OverlayTrigger overlay={<Tooltip>Ver habitación</Tooltip>}>
+                                      <Button
+                                        className="btn btn-outline-secondary btn-sm me-1"
+                                        onClick={() => handleVer(hab.id)}
+                                      >
+                                        <FiEye />
+                                      </Button>
+                                    </OverlayTrigger>
+                                    <OverlayTrigger overlay={<Tooltip>Editar habitación</Tooltip>}>
+                                      <Button
+                                        className="btn btn-outline-secondary btn-sm me-1"
+                                        onClick={() => handleEditar(hab.id)}
+                                      >
+                                        <FiEdit />
+                                      </Button>
+                                    </OverlayTrigger>
+                                    <OverlayTrigger overlay={<Tooltip>Eliminar habitación</Tooltip>}>
+                                      <Button
+                                        className="btn btn-outline-danger btn-sm"
+                                        onClick={() => eliminarHabitacion(hab.id)}
+                                      >
+                                        <FiTrash2 />
+                                      </Button>
+                                    </OverlayTrigger>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
                       )}
                     </div>
                   );
@@ -170,7 +172,7 @@ const ListadoHabitaciones = () => {
           </div>
         );
       })}
-      <div className="d-flex justify-content-end">
+      <div className="d-flex justify-content-end mt-3">
         <Button onClick={prevPage} disabled={nullPrevPage === null}><FiChevronLeft /></Button>
         <Button onClick={nextPage} disabled={nullNextPage === null}><FiChevronRight /></Button>
       </div>
