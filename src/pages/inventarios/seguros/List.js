@@ -1,9 +1,9 @@
 import React from 'react';
 import { OverlayTrigger, Tooltip, Button } from 'react-bootstrap';
-import { FiEye, FiEdit, FiChevronLeft, FiChevronRight, FiTrash2, FiTruck } from 'react-icons/fi';
+import { FiEye, FiEdit, FiChevronLeft, FiChevronRight, FiTrash2 } from 'react-icons/fi';
 import { useMyContext } from './Context';
 
-const Medidas = () => {
+const Bodegas = () => {
   const {
     data,
     abrirModalCrear,
@@ -13,8 +13,7 @@ const Medidas = () => {
     nextPage,
     nullPrevPage,
     nullNextPage,
-    eliminarProveedor,
-    abrirModalMovimiento
+    eliminarProveedor
   } = useMyContext();
 
   const handleVer = (prov) => abrirModalVer(prov);
@@ -22,7 +21,7 @@ const Medidas = () => {
 
   return (
     <div className="mb-4">
-      <h5 className="mb-3">Gestión de Inventarios</h5>
+      <h5 className="mb-3">Listado de Seguros</h5>
 
       <div className="mb-3">
         <div className="row g-2">
@@ -35,7 +34,7 @@ const Medidas = () => {
           </div>
           <div className="col-12 col-md-2">
             <Button className="w-100" onClick={abrirModalCrear}>
-              Nuevo Producto
+              Nuevo seguro
             </Button>
           </div>
         </div>
@@ -43,49 +42,32 @@ const Medidas = () => {
 
       <div className="table-responsive">
         <table className="table table-bordered table-sm mt-2">
-          <thead className="table-primary text-dark fw-semibold text-center">
+          <thead className="table-primary text-dark fw-semibold">
             <tr>
-              <th>Interno</th>
-              <th>Código</th>
-              <th>Nombre</th>
-              <th>Marca</th>
-              <th>Medida</th>
-              <th>Categoría</th>
-              <th>Sub Categoría</th>
-              <th>Estado</th>
-              <th>Acciones</th>
+              <th className="text-center">ID</th>
+              <th className="text-center">Nombre Bodega</th>
+              <th className="text-center">Acciones</th>
             </tr>
           </thead>
           <tbody>
-            {data.map((sku, idx) => (
+            {data.map((prov, idx) => (
               <tr key={idx}>
-                <td>{sku.id}</td>
-                <td>{sku.codigo_sku}</td>
-                <td>{sku.nombre}</td>
-                <td>{sku.marca}</td>
-                <td>{sku.unidad_despacho}</td>
-                <td>{sku.categoria}</td>
-                <td>{sku.subcategoria}</td>
-                <td>{sku.estado === 'alta' ? 'ALTA' : 'BAJA'}</td>
+                <td>{prov.id}</td>
+                <td>{prov.nombre}</td>
                 <td className="text-center">
-                  <OverlayTrigger overlay={<Tooltip>Ver</Tooltip>}>
-                    <Button className="btn btn-outline-secondary btn-sm me-1" onClick={() => handleVer(sku)}>
+                  <OverlayTrigger overlay={<Tooltip>Ver Bodega</Tooltip>}>
+                    <Button className="btn btn-outline-secondary btn-sm me-1" onClick={() => handleVer(prov)}>
                       <FiEye />
                     </Button>
                   </OverlayTrigger>
-                  <OverlayTrigger overlay={<Tooltip>Editar</Tooltip>}>
-                    <Button className="btn btn-outline-secondary btn-sm me-1" onClick={() => handleEditar(sku)}>
+                  <OverlayTrigger overlay={<Tooltip>Editar Bodega</Tooltip>}>
+                    <Button className="btn btn-outline-secondary btn-sm me-1" onClick={() => handleEditar(prov)}>
                       <FiEdit />
                     </Button>
                   </OverlayTrigger>
-                  <OverlayTrigger overlay={<Tooltip>Eliminar</Tooltip>}>
-                    <Button className="btn btn-outline-secondary btn-sm me-1" onClick={() => eliminarProveedor(sku.id)}>
+                  <OverlayTrigger overlay={<Tooltip>Eliminar Bodega</Tooltip>}>
+                    <Button className="btn btn-outline-secondary btn-sm" onClick={() => eliminarProveedor(prov.id)}>
                       <FiTrash2 />
-                    </Button>
-                  </OverlayTrigger>
-                  <OverlayTrigger overlay={<Tooltip>Movimiento</Tooltip>}>
-                    <Button className="btn btn-outline-secondary btn-sm" onClick={() => abrirModalMovimiento(sku)}>
-                      <FiTruck />
                     </Button>
                   </OverlayTrigger>
                 </td>
@@ -107,4 +89,4 @@ const Medidas = () => {
   );
 };
 
-export default Medidas;
+export default Bodegas;

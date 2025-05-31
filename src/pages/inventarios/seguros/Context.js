@@ -10,7 +10,6 @@ export const ContextProvider = ({ children }) => {
   const [show, setShow] = useState(false);
   const [modoFormulario, setModoFormulario] = useState('crear'); // 'crear', 'editar' o 'ver'
   const [proveedorSeleccionado, setProveedorSeleccionado] = useState(null);
-  const [bodega, setBodega] = useState([]);
 
   //paginacion
   const [page, setPage] = useState(1);
@@ -27,7 +26,7 @@ export const ContextProvider = ({ children }) => {
 
   const cargarDatos = async () => {
     try {
-      const response = await getData(`inventario/skus-con-bodegas/?page=${page}`);
+      const response = await getData(`inventario/seguros/?page=${page}`);
       //console.log(response.data)
       setData(response.data.results);
       setNullNextPage(response.data.next)
@@ -37,20 +36,10 @@ export const ContextProvider = ({ children }) => {
     }
   }
 
-  const cargarBodega = async () => {
-    try {
-      const response = await getData(`inventario/bodegas/?page_size=20`);
-      //console.log(response.data.results)
-      setBodega(response.data.results);
-    } catch (error) {
-      console.error('Error al cargar admisiones:', error);
-    }
-  }
-
   const enviarDatos = async (data) => {
     console.log("DATOS", data)
     try {
-      const response = await postData("inventario/marcas-crear/", data);
+      const response = await postData("inventario/seguros-crear/", data);
       if (response?.status === 201 && response.data) {
         NotificationManager.success("Marca Creada", "Éxito", 3000);
         showModal()
@@ -66,7 +55,7 @@ export const ContextProvider = ({ children }) => {
 
   const actualizarProveedor = async (datos) => {
     try {
-      const response = await putData(`inventario/marcas-actualizar/${datos.id}/`, datos);
+      const response = await putData(`inventario/seguros-actualizar/${datos.id}/`, datos);
 
       if (response.status === 200 || response.status === 204) {
         console.log("Proveedor actualizado con éxito:", response.data);
@@ -84,7 +73,7 @@ export const ContextProvider = ({ children }) => {
   const eliminarProveedor = async (id) => {
     const confirmed = await Swal.fire({
       title: '¿Estás seguro?',
-      text: 'Esta acción eliminará permanentemente la marca.',
+      text: 'Esta acción eliminará permanentemente el seguro.',
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#3085d6',
@@ -95,7 +84,7 @@ export const ContextProvider = ({ children }) => {
 
     if (confirmed.isConfirmed) {
       try {
-        const response = await deleteData(`inventario/marcas-eliminar/${id}/`);
+        const response = await deleteData(`inventario/seguros-eliminar/${id}/`);
         console.log('Proveedor eliminado:', response.status);
         NotificationManager.success("Marca eliminada con éxito", "Éxito", 3000);
 
@@ -128,25 +117,9 @@ export const ContextProvider = ({ children }) => {
     showModal();
   };
 
-  const actualizarBodegaSKU = async (skuId, datos) => {
-    try {
-      const response = await putData(`inventario/skus-actualizar/${skuId}/`, datos);
-      if (response.status === 200 || response.status === 204) {
-        NotificationManager.success("Stock actualizado", "Éxito", 3000);
-        cargarDatos();
-      } else {
-        NotificationManager.error("No se pudo actualizar el stock", "Error", 3000);
-      }
-    } catch (error) {
-      console.error("Error al actualizar bodega:", error);
-      NotificationManager.error("Error al actualizar bodega", "Error", 3000);
-    }
-  };  
-
 
   useEffect(() => {
     cargarDatos()
-    cargarBodega()
   }, [page]);
 
   const values = {
@@ -166,9 +139,7 @@ export const ContextProvider = ({ children }) => {
     abrirModalCrear,
     abrirModalVer,
     actualizarProveedor,
-    eliminarProveedor,
-    bodega,
-    actualizarBodegaSKU
+    eliminarProveedor
   };
 
   return <MyContext.Provider value={values}>{children}</MyContext.Provider>;

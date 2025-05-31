@@ -151,7 +151,7 @@ const ModalMedidas = () => {
                 <Form.Control type="number" {...register('cantidad')} disabled={readOnly} />
               </Form.Group>
             </Col>
-            <Col md={4}>
+            {/* <Col md={4}>
               <Form.Group className="mb-3">
                 <Form.Label>Agregar cantidad a {bodega[0]?.nombre}</Form.Label>
                 <Form.Control
@@ -161,7 +161,7 @@ const ModalMedidas = () => {
                   placeholder="Ej: 50"
                 />
               </Form.Group>
-            </Col>
+            </Col> */}
           </Row>
 
           <Row className="mt-2">

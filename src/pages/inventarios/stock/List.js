@@ -1,24 +1,74 @@
-import React from 'react';
-import { OverlayTrigger, Tooltip, Button } from 'react-bootstrap';
-import { FiEye, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
+import React, { useState } from 'react';
+import { Button, Form } from 'react-bootstrap';
 import { useMyContext } from './Context';
+import { FiChevronLeft, FiChevronRight, FiEye, FiPlus } from 'react-icons/fi';
+import { OverlayTrigger, Tooltip } from 'react-bootstrap';
 
 const Marcas = () => {
   const {
     data,
-    abrirModalVer,
-    prevPage,
+    bodega,
     nextPage,
-    nullPrevPage,
+    prevPage,
     nullNextPage,
-    bodega
+    nullPrevPage,
+    actualizarBodegaSKU,
+    abrirModalVer
   } = useMyContext();
 
-  const handleVer = (prov) => abrirModalVer(prov);
+  const [inputs, setInputs] = useState({});
+  const [mostrarColumnaAgregar, setMostrarColumnaAgregar] = useState(false);
+
+  const handleInputChange = (skuId, value) => {
+    setInputs(prev => ({ ...prev, [skuId]: value }));
+  };
+
+  const handleGuardar = async (sku) => {
+    const cantidadAdicional = parseInt(inputs[sku.id]);
+    if (isNaN(cantidadAdicional) || cantidadAdicional <= 0) return;
+
+    // Clonar bodegas existentes
+    const nuevasBodegas = sku.bodegas.map(b => {
+      if (b.nombre_bodega === bodega[0]?.nombre) {
+        return {
+          ...b,
+          cantidad: b.cantidad + cantidadAdicional
+        };
+      }
+      return b;
+    });
+
+    // Si la bodega no existe todavía, agregarla
+    if (!nuevasBodegas.find(b => b.nombre_bodega === bodega[0]?.nombre)) {
+      nuevasBodegas.push({
+        nombre_bodega: bodega[0]?.nombre,
+        cantidad: cantidadAdicional
+      });
+    }
+
+    const payload = {
+      ...sku,
+      bodegas: nuevasBodegas
+    };
+
+    await actualizarBodegaSKU(sku.id, payload);
+    setInputs(prev => ({ ...prev, [sku.id]: '' }));
+  };
 
   return (
     <div className="mb-4">
-      <h5 className="mb-3">Inventario</h5>
+      <div className="d-flex justify-content-between align-items-center mb-3">
+        <h5 className="mb-0">Stock</h5>
+        <Button
+          variant="outline-primary"
+          size="sm"
+          onClick={() => setMostrarColumnaAgregar(prev => !prev)}
+        >
+          <FiPlus className="me-1" />
+          {mostrarColumnaAgregar ? 'Ocultar Agregar' : 'Agregar a Principal'}
+        </Button>
+      </div>
+
       <div className="table-responsive">
         <table className="table table-bordered table-sm mt-2 mb-0">
           <thead className="table-primary text-dark fw-semibold">
@@ -29,7 +79,9 @@ const Marcas = () => {
               {bodega.map((b, idx) => (
                 <th key={idx} className="text-center">{b.nombre}</th>
               ))}
-              <th className="text-center">Total</th>
+              {mostrarColumnaAgregar && (
+                <th className="text-center">Agregar a Principal</th>
+              )}
               <th className="text-center">Acciones</th>
             </tr>
           </thead>
@@ -50,10 +102,10 @@ const Marcas = () => {
                     let textColor = '#155724';
 
                     if (cantidad <= 25) {
-                      backgroundColor = '#f8d7da'; // rojo pastel
+                      backgroundColor = '#f8d7da';
                       textColor = '#721c24';
                     } else if (cantidad <= 100) {
-                      backgroundColor = '#fff3cd'; // amarillo pastel
+                      backgroundColor = '#fff3cd';
                       textColor = '#856404';
                     }
 
@@ -67,30 +119,36 @@ const Marcas = () => {
                       </td>
                     );
                   })}
-                  <td
-                    className="text-center fw-bold"
-                    style={{
-                      backgroundColor:
-                        total <= 25
-                          ? '#f8d7da'
-                          : total <= 100
-                            ? '#fff3cd'
-                            : '#d4edda',
-                      color:
-                        total <= 25
-                          ? '#721c24'
-                          : total <= 100
-                            ? '#856404'
-                            : '#155724',
-                    }}
-                  >
-                    {total}
-                  </td>
+
+                  {mostrarColumnaAgregar && (
+                    <td className="text-center align-middle">
+                      <div
+                        className="d-flex justify-content-center align-items-center gap-2"
+                        style={{ flexWrap: 'wrap', minWidth: 180 }}
+                      >
+                        <Form.Control
+                          type="number"
+                          min="1"
+                          style={{ width: '90px' }}
+                          value={inputs[sku.id] || ''}
+                          onChange={(e) => handleInputChange(sku.id, e.target.value)}
+                        />
+                        <Button
+                          variant="success"
+                          size="sm"
+                          onClick={() => handleGuardar(sku)}
+                        >
+                          Guardar
+                        </Button>
+                      </div>
+                    </td>
+                  )}
+
                   <td className="text-center">
                     <OverlayTrigger overlay={<Tooltip>Ver SKU</Tooltip>}>
                       <Button
-                        className="btn btn-outline-secondary btn-sm me-1"
-                        onClick={() => handleVer(sku)}
+                        className="btn btn-outline-secondary btn-sm"
+                        onClick={() => abrirModalVer(sku)}
                       >
                         <FiEye />
                       </Button>
@@ -102,6 +160,7 @@ const Marcas = () => {
           </tbody>
         </table>
       </div>
+
       <div className="d-flex justify-content-end mt-2">
         <Button onClick={prevPage} disabled={nullPrevPage === null}><FiChevronLeft /></Button>
         <Button onClick={nextPage} disabled={nullNextPage === null}><FiChevronRight /></Button>
