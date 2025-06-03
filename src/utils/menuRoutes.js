@@ -38,9 +38,8 @@ const staticRoutes = [
             { title: 'Categorias', url: '/dashboard/inventario/categorias', icon: <FiClipboard />, roles: [1, 2] },
             { title: 'Bodegas', url: '/dashboard/inventario/bodegas', icon: <FiPackage />, roles: [1, 2] },
             { title: 'Gestion de Inventarios', url: '/dashboard/inventario/sku', icon: <FiList />, roles: [1, 2] },
-            { title: 'Seguros', url: '/dashboard/inventario/seguros', icon: <FiList />, roles: [1, 2] },
             { title: 'Stock', url: '/dashboard/inventario/stock', icon: <FiList />, roles: [1, 2] },
-            { title: 'Actualizacion de precio', url: '/dashboard/futuro/', icon: <FiEdit3 />, roles: [1, 2] },
+            { title: 'Actualizacion de precio', url: '/dashboard/inventario/precios', icon: <FiEdit3 />, roles: [1, 2] },
             { title: 'Examenes', url: '/dashboard/futuro/', icon: <FiHeart />, roles: [1, 2] },
             { title: 'Historico de Movimientos', url: '/dashboard/inventario/movimientos', icon: <FiArchive />, roles: [1, 2] },
             { title: 'Consignacion', url: '/dashboard/futuro/', icon: <FiPackage />, roles: [1, 2] },
@@ -92,6 +91,14 @@ const staticRoutes = [
             { title: 'Medicos', url: '/dashboard/futuro/', icon: <FiUser />, roles: [1, 2] },
             { title: 'Directorio Extensiones', url: '/dashboard/futuro/', icon: <FiBookOpen />, roles: [1, 2] },
             { title: 'Costos Emergencias', url: '/dashboard/futuro/', icon: <FiDollarSign />, roles: [1, 2] }
+        ]
+    },
+    {
+        title: 'Seguros',
+        icon: <FiSettings />,
+        roles: [1, 2],
+        children: [
+            { title: 'Seguros', url: '/dashboard/inventario/seguros', icon: <FiList />, roles: [1, 2] },
         ]
     },
     {

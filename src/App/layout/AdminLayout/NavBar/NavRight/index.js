@@ -6,13 +6,23 @@ import ChatList from './ChatList';
 import Aux from "../../../../../hoc/_Aux";
 
 import Avatar1 from '../../../../../assets/images/user/avatar-1.jpg';
+import { logout } from '../../../../../apiService';
 
 class NavRight extends Component {
   state = {
     listOpen: false
   };
 
-  handleLogout = () => {
+  handleLogout = async () => {
+    try {
+      await logout(); // ✅ llama tu nuevo wrapper con axios
+    } catch (error) {
+      // puede fallar si el token ya expiró o fue borrado, no pasa nada
+      console.warn('No se pudo registrar el cierre de sesión:', error);
+    }
+
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
     window.location.href = '/auth/signin-1';
   };
 

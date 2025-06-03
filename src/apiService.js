@@ -110,6 +110,22 @@ const putData = async (url, data) => {
   return { status: response.status, data: json };
 };
 
+const logout = async () => {
+  try {
+    const authToken = getAuthToken();
+    const headers = {
+      ...(authToken && { 'Authorization': `Token ${authToken}` }),
+      'Content-Type': 'application/json',
+    };
+
+    const response = await apiClient.post('user/logout/', {}, { headers });
+
+    return response;
+  } catch (error) {
+    console.error('Error al cerrar sesión:', error.response ? error.response.data : error);
+    throw error;
+  }
+};
 
 export default apiClient;
-export { postData, getData, deleteData, putData, API_URL };
+export { postData, getData, deleteData, putData, API_URL, logout };

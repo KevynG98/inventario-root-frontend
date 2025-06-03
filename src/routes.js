@@ -33,6 +33,7 @@ const InventarioBodega = React.lazy(() => import('./pages/inventarios/bodegas/In
 const InventarioSku = React.lazy(() => import('./pages/inventarios/gestionSku/Index'))
 const InventarioStock = React.lazy(() => import('./pages/inventarios/stock/Index'))
 const InventarioSeguros = React.lazy(() => import('./pages/inventarios/seguros/Index'))
+const InventarioPrecios = React.lazy(() => import('./pages/inventarios/actualizarPrecio/Index'))
 /* Mantenimiento */
 const MantenimientoHabitacion = React.lazy(() => import('./pages/mantenimiento/estadoHabitacion/Index'))
 const Users = React.lazy(() => import('./pages/mantenimiento/users/Index'));
@@ -94,6 +95,7 @@ const routes = [
     { path: '/dashboard/inventario/sku', exact: true, name: 'Inventario Bodega', component: InventarioSku },
     { path: '/dashboard/inventario/stock', exact: true, name: 'Inventario Bodega', component: InventarioStock },
     { path: '/dashboard/inventario/seguros', exact: true, name: 'Seguros', component: InventarioSeguros },
+    { path: '/dashboard/inventario/precios', exact: true, name: 'Precios', component: InventarioPrecios },
     /*Mantenimiento*/
     { path: '/dashboard/mantenimiento/habitaciones', exact: true, name: 'Inventario Marcas', component: MantenimientoHabitacion },
     /*Reportes*/
