@@ -1,10 +1,12 @@
 import React from 'react';
 import { ContextProvider } from './Context';
-import Proveedores from './List.js';
+import Bodegas from './List.js';
+import ModalDirectorio from './ModalMarca.js';
 
 const Index = () => (
   <ContextProvider>
-    <Proveedores />
+    <Bodegas />
+    <ModalDirectorio />
   </ContextProvider>
 );
 

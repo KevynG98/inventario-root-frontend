@@ -2,8 +2,8 @@ import axios from 'axios';
 
 axios.defaults.withCredentials = true;
 
-//const API_URL = 'http://127.0.0.1:8000/';
-const API_URL = 'http://192.168.1.18:8000/';
+const DEV = true; // Cambia a false para producción
+const API_URL = DEV ? process.env.REACT_APP_API_URL_DEV : process.env.REACT_APP_API_URL_PROD;
 
 const apiClient = axios.create({
   baseURL: API_URL,

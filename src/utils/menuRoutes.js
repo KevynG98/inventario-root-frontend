@@ -87,20 +87,21 @@ const staticRoutes = [
             { title: 'Admisiones', url: '/dashboard/futuro/', icon: <FiUserPlus />, roles: [1, 2] },
             { title: 'Facturacion', url: '/dashboard/futuro/', icon: <FiDollarSign />, roles: [1, 2] },
             { title: 'Habitaciones', url: '/dashboard/mantenimiento/habitaciones', icon: <FiGrid />, roles: [1, 2] },
-            { title: 'Usuarios', url: '/dashboard/users/', icon: <FiUsers />, roles: [1, 2] },
+            { title: 'Usuarios', url: '/dashboard/mantenimiento/users/', icon: <FiUsers />, roles: [1, 2] },
             { title: 'Medicos', url: '/dashboard/futuro/', icon: <FiUser />, roles: [1, 2] },
-            { title: 'Directorio Extensiones', url: '/dashboard/futuro/', icon: <FiBookOpen />, roles: [1, 2] },
-            { title: 'Costos Emergencias', url: '/dashboard/futuro/', icon: <FiDollarSign />, roles: [1, 2] }
+            { title: 'Directorio Extensiones', url: '/dashboard/mantenimiento/extensiones', icon: <FiBookOpen />, roles: [1, 2] },
+            //{ title: 'Costos Emergencias', url: '/dashboard/futuro/', icon: <FiDollarSign />, roles: [1, 2] },
+            { title: 'Seguros', url: '/dashboard/mantenimiento/seguros', icon: <FiList />, roles: [1, 2] },
         ]
     },
-    {
-        title: 'Seguros',
-        icon: <FiSettings />,
-        roles: [1, 2],
-        children: [
-            { title: 'Seguros', url: '/dashboard/inventario/seguros', icon: <FiList />, roles: [1, 2] },
-        ]
-    },
+    // {
+    //     title: 'Seguros',
+    //     icon: <FiSettings />,
+    //     roles: [1, 2],
+    //     children: [
+    //         { title: 'Seguros', url: '/dashboard/inventario/seguros', icon: <FiList />, roles: [1, 2] },
+    //     ]
+    // },
     {
         title: 'Reportes',
         icon: <FiBarChart2 />,
@@ -110,9 +111,9 @@ const staticRoutes = [
             { title: 'Imprimir Expediente', url: '/dashboard/futuro/', icon: <FiFileText />, roles: [1, 2] },
             { title: 'Historico de Admisiones', url: '/dashboard/futuro/', icon: <FiArchive />, roles: [1, 2] },
             { title: 'Facturacion', url: '/dashboard/futuro/', icon: <FiDollarSign />, roles: [1, 2] },
-            { title: 'Usuarios', url: '/dashboard/futuro/', icon: <FiUsers />, roles: [1, 2] },
+            { title: 'Usuarios', url: '/dashboard/reportes/users', icon: <FiUsers />, roles: [1, 2] },
             { title: 'Medicos', url: '/dashboard/futuro/', icon: <FiUser />, roles: [1, 2] },
-            { title: 'Inventarios', url: '/dashboard/futuro/', icon: <FiDatabase />, roles: [1, 2] },
+            { title: 'Inventarios', url: '/dashboard/reportes/inventarios', icon: <FiDatabase />, roles: [1, 2] },
             { title: 'Caja', url: '/dashboard/futuro/', icon: <FiCreditCard />, roles: [1, 2] },
             { title: 'Honorarios Medicos', url: '/dashboard/futuro/', icon: <FiDollarSign />, roles: [1, 2] },
             { title: 'Listado de SKU Cobrados', url: '/dashboard/futuro/', icon: <FiList />, roles: [1, 2] },

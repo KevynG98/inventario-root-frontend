@@ -32,14 +32,17 @@ const InventarioMovimiento = React.lazy(() => import('./pages/inventarios/histor
 const InventarioBodega = React.lazy(() => import('./pages/inventarios/bodegas/Index'))
 const InventarioSku = React.lazy(() => import('./pages/inventarios/gestionSku/Index'))
 const InventarioStock = React.lazy(() => import('./pages/inventarios/stock/Index'))
-const InventarioSeguros = React.lazy(() => import('./pages/inventarios/seguros/Index'))
 const InventarioPrecios = React.lazy(() => import('./pages/inventarios/actualizarPrecio/Index'))
 /* Mantenimiento */
 const MantenimientoHabitacion = React.lazy(() => import('./pages/mantenimiento/estadoHabitacion/Index'))
 const Users = React.lazy(() => import('./pages/mantenimiento/users/Index'));
+const InventarioSeguros = React.lazy(() => import('./pages/mantenimiento/seguros/Index'));
+const DirectorioExtensiones = React.lazy(() => import('./pages/mantenimiento/directorioExtensiones/Index'));
 
 /* Reportes */
 const HIstorialGeneral = React.lazy(() => import('./pages/reportes/historialGeneral/Index'))
+const UsersReporte = React.lazy(() => import('./pages/reportes/usuarios/Index'));
+const InventarioReporte = React.lazy(() => import('./pages/reportes/inventarios/Index'));
 
 const UIBasicButton = React.lazy(() => import('./Demo/UIElements/Basic/Button'));
 const UIBasicBadges = React.lazy(() => import('./Demo/UIElements/Basic/Badges'));
@@ -68,7 +71,7 @@ console.log("PERMISIONS: ", userPermissions); // Ejemplo: [1]
 
 const routes = [
     { path: '/dashboard/default', exact: true, name: 'Default', component: DashboardDefault},
-    { path: '/dashboard/users', exact: true, name: 'Users', component: userPermissions.some(item => [0, 1].includes(item)) ? Users : Error404 },
+    //{ path: '/dashboard/users', exact: true, name: 'Users', component: userPermissions.some(item => [0, 1].includes(item)) ? Users : Error404 },
     { path: '/dashboard/roles', exact: true, name: 'Roles', component: userPermissions.some(item => [0, 1].includes(item)) ? Roles : Error404 },
     { path: '/dashboard/products', exact: true, name: 'Roles', component: userPermissions.some(item => [1, 2].includes(item)) ? Products : Error404 },
     { path: '/dashboard/doctor', exact: true, name: 'Roles', component: userPermissions.some(item => [1, 2].includes(item)) ? Doctor : Error404 },
@@ -94,12 +97,16 @@ const routes = [
     { path: '/dashboard/inventario/bodegas', exact: true, name: 'Inventario Bodega', component: InventarioBodega },
     { path: '/dashboard/inventario/sku', exact: true, name: 'Inventario Bodega', component: InventarioSku },
     { path: '/dashboard/inventario/stock', exact: true, name: 'Inventario Bodega', component: InventarioStock },
-    { path: '/dashboard/inventario/seguros', exact: true, name: 'Seguros', component: InventarioSeguros },
     { path: '/dashboard/inventario/precios', exact: true, name: 'Precios', component: InventarioPrecios },
     /*Mantenimiento*/
     { path: '/dashboard/mantenimiento/habitaciones', exact: true, name: 'Inventario Marcas', component: MantenimientoHabitacion },
+    { path: '/dashboard/mantenimiento/seguros', exact: true, name: 'Seguros', component: InventarioSeguros },
+    { path: '/dashboard/mantenimiento/users', exact: true, name: 'Users', component: userPermissions.some(item => [0, 1].includes(item)) ? Users : Error404 },
+    { path: '/dashboard/mantenimiento/extensiones', exact: true, name: 'Seguros', component: DirectorioExtensiones },
     /*Reportes*/
     { path: '/dashboard/reportes/historial-general', exact: true, name: 'Inventario Marcas', component: HIstorialGeneral },
+    { path: '/dashboard/reportes/users', exact: true, name: 'Inventario Marcas', component: UsersReporte },
+    { path: '/dashboard/reportes/inventarios', exact: true, name: 'Inventario Marcas', component: InventarioReporte },
     // -------------------------------------------------------------------------------------------------------------------------------
     { path: '/basic/button', exact: true, name: 'Basic Button', component: UIBasicButton },
     { path: '/basic/badges', exact: true, name: 'Basic Badges', component: UIBasicBadges },

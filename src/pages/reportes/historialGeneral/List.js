@@ -1,6 +1,6 @@
 import React from 'react';
-import { OverlayTrigger, Tooltip, Button, Badge } from 'react-bootstrap';
-import { FiEye, FiEdit, FiChevronLeft, FiChevronRight, FiTrash2 } from 'react-icons/fi';
+import { Button } from 'react-bootstrap';
+import { FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import { useMyContext } from './Context';
 
 const Marcas = () => {
@@ -10,19 +10,22 @@ const Marcas = () => {
     nextPage,
     nullPrevPage,
     nullNextPage,
-    abrirModalEditar,
-    abrirModalVer,
     setFechaInicio,
     setFechaFin,
     cargarDatos,
     fechaFin,
     fechaInicio,
-    setPage
+    exportarHistorialPDF
   } = useMyContext();
 
   return (
     <div className="mb-4">
-      <h5 className="mb-3">Historial de cambios</h5>
+      <div className="d-flex justify-content-between align-items-center mb-3">
+        <h5 className="mb-0">Historial de cambios</h5>
+        <Button variant="success" size="sm" onClick={exportarHistorialPDF}>
+          Descargar PDF
+        </Button>
+      </div>
 
       <div className="d-flex align-items-end gap-3 mb-3">
         <div>
@@ -50,18 +53,6 @@ const Marcas = () => {
             }}
           />
         </div>
-
-        {/* <div>
-          <button
-            className="btn btn-sm btn-outline-secondary"
-            onClick={() => {
-              setFechaInicio('');
-              setPage(1)
-            }}
-          >
-            Limpiar fecha
-          </button>
-        </div> */}
       </div>
 
       <table className="table table-bordered table-sm mt-2">
@@ -110,8 +101,12 @@ const Marcas = () => {
       </table>
 
       <div className="d-flex justify-content-end">
-        <Button onClick={prevPage} disabled={nullPrevPage === null}><FiChevronLeft /></Button>
-        <Button onClick={nextPage} disabled={nullNextPage === null}><FiChevronRight /></Button>
+        <Button onClick={prevPage} disabled={nullPrevPage === null}>
+          <FiChevronLeft />
+        </Button>
+        <Button onClick={nextPage} disabled={nullNextPage === null}>
+          <FiChevronRight />
+        </Button>
       </div>
     </div>
   );

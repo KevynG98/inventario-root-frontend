@@ -24,7 +24,7 @@ export const ContextProvider = ({ children }) => {
 
   const cargarDatos = async () => {
     try {
-      let url = `auditoria/historial-api/?page=${page}&page_size=${pageSize}`;
+      let url = `inventario/skus/?page=${page}`;
       if (fechaInicio) url += `&fecha_inicio=${fechaInicio}`;
       if (fechaFin) url += `&fecha_fin=${fechaFin}`;
 
@@ -37,11 +37,9 @@ export const ContextProvider = ({ children }) => {
     }
   };
 
-  const exportarHistorialPDF = async () => {
+  const exportarInventarioPDF = async () => {
     try {
-      let url = `${API_URL}auditoria/historial-exportar-pdf/?`;
-      if (fechaInicio) url += `fecha_inicio=${fechaInicio}&`;
-      if (fechaFin) url += `fecha_fin=${fechaFin}`;
+      const url = `${API_URL}auditoria/inventario-exportar-pdf/`; // ⚠️ Ajustá la URL real si es distinta
 
       const authToken = localStorage.getItem('token');
       const headers = {
@@ -66,8 +64,7 @@ export const ContextProvider = ({ children }) => {
 
       const a = document.createElement('a');
       a.href = urlBlob;
-      const nombreArchivo = `historial_api_${fechaInicio || 'inicio'}_a_${fechaFin || 'hoy'}.pdf`;
-      a.download = nombreArchivo.replace(/:/g, '-');
+      a.download = `inventario_${new Date().toISOString().slice(0, 16).replace(/[:T]/g, '-')}.pdf`;
       document.body.appendChild(a);
       a.click();
       a.remove();
@@ -94,7 +91,7 @@ export const ContextProvider = ({ children }) => {
     nullNextPage,
     nullPrevPage,
     cargarDatos,
-    exportarHistorialPDF,
+    exportarInventarioPDF,
   };
 
   return <MyContext.Provider value={values}>{children}</MyContext.Provider>;
