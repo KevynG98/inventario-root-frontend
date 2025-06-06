@@ -17,28 +17,59 @@ const ModalProveedor = () => {
   const [key, setKey] = useState('contables');
   const readOnly = modoFormulario === 'ver';
 
+  const [cuentas, setCuentas] = useState([
+    { banco: '', tipo: '', numero: '' },
+    { banco: '', tipo: '', numero: '' },
+  ]);
+
+  const agregarCuenta = () => {
+    setCuentas([...cuentas, { banco: '', tipo: '', numero: '' }]);
+  };
+
+  const eliminarCuenta = (index) => {
+    if (cuentas.length > 1) {
+      const nuevas = cuentas.filter((_, i) => i !== index);
+      setCuentas(nuevas);
+    }
+  };
+
+  const handleChangeCuenta = (index, campo, valor) => {
+    const nuevas = [...cuentas];
+    nuevas[index][campo] = valor;
+    setCuentas(nuevas);
+  };
+
   useEffect(() => {
     if (modoFormulario === 'crear') {
-      reset(); // limpia todos los campos
+      reset();
+      setCuentas([{ banco: '', tipo: '', numero: '' }, { banco: '', tipo: '', numero: '' }]);
     }
 
     if ((modoFormulario === 'editar' || modoFormulario === 'ver') && proveedorSeleccionado) {
       Object.entries(proveedorSeleccionado).forEach(([key, value]) => {
-        setValue(key, value);
+        if (key !== 'cuentas_bancarias') {
+          setValue(key, value);
+        }
       });
+
+      if (proveedorSeleccionado.cuentas_bancarias) {
+        setCuentas(proveedorSeleccionado.cuentas_bancarias);
+      }
     }
   }, [modoFormulario, proveedorSeleccionado, reset, setValue]);
 
-
   const onSubmit = (data) => {
+    const dataFinal = {
+      ...data,
+      cuentas_bancarias: cuentas,
+    };
+
     if (modoFormulario === 'crear') {
-      enviarDatos(data);
+      enviarDatos(dataFinal);
     } else if (modoFormulario === 'editar') {
-      console.log("Datos editados", data);
-      actualizarProveedor(data)
+      actualizarProveedor(dataFinal);
     }
   };
-
 
   return (
     <Modal show={show} onHide={showModal} size="xl" centered scrollable>
@@ -159,8 +190,66 @@ const ModalProveedor = () => {
               </div>
             </Tab>
 
-            <Tab eventKey="contactos" title="Contactos">
+            {/* <Tab eventKey="contactos" title="Contactos">
               <p>Contenido de contactos (puedes agregarlo luego).</p>
+            </Tab> */}
+
+            <Tab eventKey="cuentas" title="Cuentas Bancarias">
+              {cuentas.map((cuenta, index) => (
+                <div key={index} className="row mb-3 align-items-end">
+                  <Form.Group className="col-md-4">
+                    <Form.Label>Banco</Form.Label>
+                    <Form.Control
+                      type="text"
+                      value={cuenta.banco}
+                      disabled={readOnly}
+                      onChange={(e) => handleChangeCuenta(index, 'banco', e.target.value)}
+                    />
+                  </Form.Group>
+                  <Form.Group className="col-md-3">
+                    <Form.Label>Tipo de Cuenta</Form.Label>
+                    <Form.Control
+                      as="select"
+                      value={cuenta.tipo}
+                      disabled={readOnly}
+                      onChange={(e) => handleChangeCuenta(index, 'tipo', e.target.value)}
+                    >
+                      <option value="">Seleccione</option>
+                      <option value="Monetaria">Monetaria</option>
+                      <option value="Ahorro">Ahorro</option>
+                    </Form.Control>
+                  </Form.Group>
+                  <Form.Group className="col-md-4">
+                    <Form.Label>Número de Cuenta</Form.Label>
+                    <Form.Control
+                      type="text"
+                      value={cuenta.numero}
+                      disabled={readOnly}
+                      onChange={(e) => handleChangeCuenta(index, 'numero', e.target.value)}
+                    />
+                  </Form.Group>
+                  <div className="col-md-1 text-right">
+                    {!readOnly && (
+                      <Button
+                        variant="outline-danger"
+                        size="sm"
+                        className="rounded-circle p-0 d-flex align-items-center justify-content-center"
+                        style={{ width: '32px', height: '32px' }}
+                        onClick={() => eliminarCuenta(index)}
+                        disabled={cuentas.length === 1}
+                        title={cuentas.length === 1 ? "Debe haber al menos una cuenta" : "Eliminar cuenta"}
+                      >
+                        <span style={{ fontSize: '1.1rem', lineHeight: 1 }}>×</span>
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              ))}
+              {!readOnly && (
+                <Button variant="secondary" onClick={agregarCuenta}>
+                  Agregar otra cuenta
+                </Button>
+              )}
             </Tab>
           </Tabs>
 
