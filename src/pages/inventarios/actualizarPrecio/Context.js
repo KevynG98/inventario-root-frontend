@@ -9,6 +9,8 @@ export const PreciosProvider = ({ children }) => {
   const [precios, setPrecios] = useState([]);
   const [showModalPrecios, setShowModalPrecios] = useState(false);
   const [skuActivo, setSkuActivo] = useState(null);
+  const [sku, setSku] = useState('');
+  const [descripcionSku, setDescripcionSku] = useState('');
 
   const cargarSkus = async () => {
     try {
@@ -43,6 +45,9 @@ export const PreciosProvider = ({ children }) => {
   };
 
   const abrirModalEditarPrecios = (sku) => {
+    console.log('Abriendo modal para SKU:', sku);
+    setSku(sku.codigo_sku);
+    setDescripcionSku(sku.descripcion_estado_cuenta);
     const preciosSKU = precios.filter((p) => p.sku === sku.id);
     setSkuActivo({ ...sku, precios: preciosSKU });
     setShowModalPrecios(true);
@@ -101,6 +106,8 @@ export const PreciosProvider = ({ children }) => {
         crearPrecio,
         eliminarPrecio,
         cargarSeguros,
+        sku,
+        descripcionSku,
       }}
     >
       {children}

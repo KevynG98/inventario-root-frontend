@@ -22,7 +22,7 @@ const Medidas = () => {
 
   return (
     <div className="mb-4">
-      <h5 className="mb-3">Gestión de Inventarios</h5>
+      <h5 className="mb-3">Gestión de SKU</h5>
 
       <div className="mb-3">
         <div className="row g-2">
@@ -66,7 +66,7 @@ const Medidas = () => {
                 <td>{sku.unidad_despacho}</td>
                 <td>{sku.categoria}</td>
                 <td>{sku.subcategoria}</td>
-                <td>{sku.estado === 'alta' ? 'ALTA' : 'BAJA'}</td>
+                <td>{sku.estado === 'alta' ? 'Disponible' : 'No Disponible'}</td>
                 <td className="text-center">
                   <OverlayTrigger overlay={<Tooltip>Ver</Tooltip>}>
                     <Button className="btn btn-outline-secondary btn-sm me-1" onClick={() => handleVer(sku)}>

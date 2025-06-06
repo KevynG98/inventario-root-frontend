@@ -12,6 +12,8 @@ const ModalPrecios = () => {
     actualizarPrecio,
     crearPrecio,
     eliminarPrecio,
+    sku,
+    descripcionSku,
   } = usePreciosContext();
 
   const [precios, setPrecios] = useState([]);
@@ -82,7 +84,10 @@ const ModalPrecios = () => {
   return (
     <Modal show={showModalPrecios} onHide={handleClose} size="lg">
       <Modal.Header closeButton>
-        <Modal.Title>Editar precios por seguro</Modal.Title>
+        <div className="d-flex flex-column">
+          <Modal.Title>Editar precios de {sku}</Modal.Title>
+          <p className="text-muted mb-0">{descripcionSku}</p>
+        </div>
       </Modal.Header>
       <Modal.Body>
         <Table bordered responsive size="sm">

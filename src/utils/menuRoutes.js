@@ -37,7 +37,7 @@ const staticRoutes = [
             { title: 'Unidades de Medidas', url: '/dashboard/inventario/unidades-medida', icon: <FiGrid />, roles: [1, 2] },
             { title: 'Categorias', url: '/dashboard/inventario/categorias', icon: <FiClipboard />, roles: [1, 2] },
             { title: 'Bodegas', url: '/dashboard/inventario/bodegas', icon: <FiPackage />, roles: [1, 2] },
-            { title: 'Gestion de Inventarios', url: '/dashboard/inventario/sku', icon: <FiList />, roles: [1, 2] },
+            { title: 'Gestión de SKU', url: '/dashboard/inventario/sku', icon: <FiList />, roles: [1, 2] },
             { title: 'Stock', url: '/dashboard/inventario/stock', icon: <FiList />, roles: [1, 2] },
             { title: 'Actualizacion de precio', url: '/dashboard/inventario/precios', icon: <FiEdit3 />, roles: [1, 2] },
             { title: 'Examenes', url: '/dashboard/futuro/', icon: <FiHeart />, roles: [1, 2] },

@@ -89,21 +89,27 @@ export const ContextProvider = ({ children }) => {
   }
 
   const enviarDatos = async (data) => {
-    console.log("DATOS", data)
+    console.log("DATOS", data);
     try {
       const response = await postData("inventario/skus-crear/", data);
       if (response?.status === 201 && response.data) {
-        NotificationManager.success("Marca Creada", "Éxito", 3000);
-        showModal()
+        NotificationManager.success("SKU creado", "Éxito", 3000);
+        showModal();
       } else {
         NotificationManager.error("Algo salió mal", "Error", 5000);
-        console.log("Algo salió mal", "Error", 5000)
       }
     } catch (err) {
-      console.error('Error al crear usuario:', err);
+      const detail = err.response?.data;
+      if (detail?.codigo_sku?.[0]) {
+        NotificationManager.error(`Código duplicado: ${detail.codigo_sku[0]}`, "Error", 5000);
+      } else {
+        NotificationManager.error("Error desconocido al crear", "Error", 5000);
+      }
+      console.error('Error al crear usuario:', detail || err);
     }
-    cargarDatos()
-  }
+    cargarDatos();
+  };
+
 
   const actualizarProveedor = async (datos) => {
     try {
