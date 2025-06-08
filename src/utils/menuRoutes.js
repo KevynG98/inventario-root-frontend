@@ -42,8 +42,8 @@ const staticRoutes = [
             { title: 'Actualizacion de precio', url: '/dashboard/inventario/precios', icon: <FiEdit3 />, roles: [1, 2] },
             { title: 'Examenes', url: '/dashboard/futuro/', icon: <FiHeart />, roles: [1, 2] },
             { title: 'Historico de Movimientos', url: '/dashboard/inventario/movimientos', icon: <FiArchive />, roles: [1, 2] },
-            { title: 'Consignacion', url: '/dashboard/futuro/', icon: <FiPackage />, roles: [1, 2] },
-            { title: 'Controlados', url: '/dashboard/futuro/', icon: <FiShield />, roles: [1, 2] }
+            { title: 'Consignacion', url: '/dashboard/inventario/consignacion', icon: <FiPackage />, roles: [1, 2] },
+            { title: 'Controlados', url: '/dashboard/inventario/controlados', icon: <FiShield />, roles: [1, 2] }
         ]
     },
     {
