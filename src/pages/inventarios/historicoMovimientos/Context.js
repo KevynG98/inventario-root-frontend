@@ -2,6 +2,7 @@ import React, { createContext, useState, useContext, useEffect } from 'react';
 import { getData, postData, putData, deleteData } from '../../../apiService';
 import { NotificationManager } from "react-notifications";
 import Swal from 'sweetalert2';
+import { set } from 'react-hook-form';
 
 const MyContext = createContext();
 
@@ -19,7 +20,8 @@ export const ContextProvider = ({ children }) => {
     return `${yyyy}-${mm}-${dd}`; // formato YYYY-MM-DD
   });
 
-
+  const [skuFiltro, setSkuFiltro] = useState('');
+  const [skuList, setSkuList] = useState([]);
   //paginacion
   const [page, setPage] = useState(1);
   const [nullNextPage, setNullNextPage] = useState(null)
@@ -36,7 +38,7 @@ export const ContextProvider = ({ children }) => {
 
   const cargarDatos = async () => {
     const loading = Swal.fire({
-      title: 'Cargando datos...',
+      title: 'Cargando movimientos...',
       text: 'Por favor espera',
       allowOutsideClick: false,
       didOpen: () => {
@@ -45,26 +47,40 @@ export const ContextProvider = ({ children }) => {
     });
 
     try {
-      let url = `auditoria/historial-api/?modulo=inventario&tipo=movimiento&page=${page}&page_size=${pageSize}`;
+      let url = `auditoria/inventario-movimientos/?page=${page}&page_size=${pageSize}`;
 
+      if (skuFiltro) {
+        url += `&sku=${skuFiltro}`;
+      }
       if (fechaInicio) {
-        url += `&fecha_inicio=${fechaInicio}`;
+        url += `&inicio=${fechaInicio}`;
       }
       if (fechaFin) {
-        url += `&fecha_fin=${fechaFin}`;
+        url += `&fin=${fechaFin}`;
       }
 
       const response = await getData(url);
       setData(response.data.results);
       setNullNextPage(response.data.next);
       setPrevNextPage(response.data.previous);
+      console.log("MOVIMIENTOS", response.data.results)
     } catch (error) {
-      console.error('Error al cargar historial:', error);
+      console.error('Error al cargar movimientos:', error);
       Swal.fire('Error', 'No se pudieron cargar los datos', 'error');
     } finally {
       Swal.close();
     }
   };
+
+  const cargarSku = async () => {
+    try {
+      const response = await getData(`inventario/sku-listar/`);
+      setSkuList(response.data.results);
+      console.log("SKU", response.data.results)
+    } catch (error) {
+      console.error('Error al cargar SKU:', error);
+    }
+  }
 
 
   const enviarDatos = async (data) => {
@@ -151,7 +167,11 @@ export const ContextProvider = ({ children }) => {
 
   useEffect(() => {
     cargarDatos()
-  }, [page, fechaInicio, fechaFin]);
+  }, [page, fechaInicio, fechaFin, skuFiltro]);
+
+  useEffect(() => {
+    cargarSku();
+  }, []);
 
   const values = {
     data,
@@ -176,7 +196,10 @@ export const ContextProvider = ({ children }) => {
     cargarDatos,
     fechaFin,
     fechaInicio,
-    setPage
+    setPage,
+    skuFiltro,
+    setSkuFiltro,
+    skuList,
   };
 
   return <MyContext.Provider value={values}>{children}</MyContext.Provider>;
