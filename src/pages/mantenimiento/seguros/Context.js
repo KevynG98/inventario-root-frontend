@@ -25,16 +25,43 @@ export const ContextProvider = ({ children }) => {
   }
 
   const cargarDatos = async () => {
+    Swal.fire({
+      title: 'Cargando seguros...',
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+
     try {
       const response = await getData(`inventario/seguros/?page=${page}`);
-      //console.log(response.data)
-      setData(response.data.results);
-      setNullNextPage(response.data.next)
-      setPrevNextPage(response.data.previous)
+      const resultados = response.data.results;
+
+      setData(resultados);
+      setNullNextPage(response.data.next);
+      setPrevNextPage(response.data.previous);
+
+      Swal.close();
+
+      if (resultados.length === 0) {
+        Swal.fire({
+          icon: 'info',
+          title: 'Sin resultados',
+          text: 'No se encontraron seguros.',
+        });
+      }
     } catch (error) {
-      console.error('Error al cargar admisiones:', error);
+      Swal.close();
+
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Error al cargar seguros',
+      });
+
+      console.error('Error al cargar seguros:', error);
     }
-  }
+  };
 
   const enviarDatos = async (data) => {
     console.log("DATOS", data)

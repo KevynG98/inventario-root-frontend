@@ -25,16 +25,43 @@ export const ContextProvider = ({ children }) => {
   }
 
   const cargarDatos = async () => {
+    Swal.fire({
+      title: 'Cargando directorio...',
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+
     try {
       const response = await getData(`directorio-extensiones/?page=${page}`);
-      //console.log(response.data)
-      setData(response.data.results);
-      setNullNextPage(response.data.next)
-      setPrevNextPage(response.data.previous)
+      const resultados = response.data.results;
+
+      setData(resultados);
+      setNullNextPage(response.data.next);
+      setPrevNextPage(response.data.previous);
+
+      Swal.close();
+
+      if (resultados.length === 0) {
+        Swal.fire({
+          icon: 'info',
+          title: 'Sin resultados',
+          text: 'No se encontraron extensiones en el directorio.',
+        });
+      }
     } catch (error) {
+      Swal.close();
+
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Error al cargar el directorio de extensiones',
+      });
+
       console.error('Error al cargar admisiones:', error);
     }
-  }
+  };
 
   const enviarDatos = async (data) => {
     console.log("DATOS", data)

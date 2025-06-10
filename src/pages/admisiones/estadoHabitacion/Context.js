@@ -1,6 +1,7 @@
 import React, { createContext, useEffect, useState } from 'react';
 import { getData } from '../../../apiService';
 import { useForm } from 'react-hook-form';
+import Swal from 'sweetalert2';
 
 export const AppContext = createContext();
 
@@ -20,15 +21,44 @@ export const AppProvider = ({ children }) => {
     const [nullPrevPage, setPrevNextPage] = useState(null)
 
     const getHabitacion = async () => {
+        Swal.fire({
+            title: 'Cargando habitaciones...',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
         try {
             const response = await getData(`habitaciones/habitaciones-listar/?page=${page}`);
-            setHabitacionData(response.data.results);
-            setNullNextPage(response.data.next)
-            setPrevNextPage(response.data.previous)
+            const resultados = response.data.results;
+
+            setHabitacionData(resultados);
+            setNullNextPage(response.data.next);
+            setPrevNextPage(response.data.previous);
+
+            Swal.close();
+
+            if (resultados.length === 0) {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Sin resultados',
+                    text: 'No se encontraron habitaciones.',
+                });
+            }
         } catch (error) {
+            Swal.close();
+
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Error al cargar habitaciones',
+            });
+
             console.error('Error al cargar admisiones:', error);
         }
     };
+
 
     const nextPage = () => {
         setPage(prev => prev + 1);

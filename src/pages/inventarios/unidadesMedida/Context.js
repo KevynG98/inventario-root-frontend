@@ -25,16 +25,43 @@ export const ContextProvider = ({ children }) => {
   }
 
   const cargarDatos = async () => {
+    Swal.fire({
+      title: 'Cargando...',
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+
     try {
       const response = await getData(`inventario/medidas/?page=${page}`);
-      //console.log(response.data)
-      setData(response.data.results);
-      setNullNextPage(response.data.next)
-      setPrevNextPage(response.data.previous)
+      const resultados = response.data.results;
+
+      setData(resultados);
+      setNullNextPage(response.data.next);
+      setPrevNextPage(response.data.previous);
+
+      Swal.close();
+
+      if (resultados.length === 0) {
+        Swal.fire({
+          icon: 'info',
+          title: 'Sin resultados',
+          text: 'No se encontraron datos para los filtros aplicados.',
+        });
+      }
     } catch (error) {
+      Swal.close();
+
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Error al cargar admisiones',
+      });
+
       console.error('Error al cargar admisiones:', error);
     }
-  }
+  };
 
   const enviarDatos = async (data) => {
     console.log("DATOS", data)

@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { getData, postData, putData, deleteData } from '../../../apiService';
+import Swal from 'sweetalert2';
 
 const PreciosContext = createContext();
 
@@ -13,13 +14,41 @@ export const PreciosProvider = ({ children }) => {
   const [descripcionSku, setDescripcionSku] = useState('');
 
   const cargarSkus = async () => {
+    Swal.fire({
+      title: 'Cargando SKUs...',
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+  
     try {
       const res = await getData('inventario/skus/?page_size=1000');
-      setSkus(res.data.results || []);
+      const resultados = res.data.results || [];
+  
+      setSkus(resultados);
+  
+      Swal.close();
+  
+      if (resultados.length === 0) {
+        Swal.fire({
+          icon: 'info',
+          title: 'Sin resultados',
+          text: 'No se encontraron SKUs.',
+        });
+      }
     } catch (error) {
+      Swal.close();
+  
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Error al cargar SKUs',
+      });
+  
       console.error('Error al cargar SKUs:', error);
     }
-  };
+  };  
 
   const cargarSeguros = async () => {
     try {

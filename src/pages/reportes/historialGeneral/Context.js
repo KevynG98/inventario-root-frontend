@@ -1,5 +1,6 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { getData, API_URL } from '../../../apiService';
+import Swal from 'sweetalert2';
 
 const MyContext = createContext();
 
@@ -23,16 +24,45 @@ export const ContextProvider = ({ children }) => {
   const prevPage = () => setPage(prev => prev - 1);
 
   const cargarDatos = async () => {
+    // Mostrar alerta de carga
+    Swal.fire({
+      title: 'Cargando...',
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+
     try {
       let url = `auditoria/historial-api/?page=${page}&page_size=${pageSize}`;
       if (fechaInicio) url += `&fecha_inicio=${fechaInicio}`;
       if (fechaFin) url += `&fecha_fin=${fechaFin}`;
 
       const response = await getData(url);
-      setData(response.data.results);
+      const resultados = response.data.results;
+
+      setData(resultados);
       setNullNextPage(response.data.next);
       setPrevNextPage(response.data.previous);
+
+      Swal.close();
+
+      if (resultados.length === 0) {
+        Swal.fire({
+          icon: 'info',
+          title: 'Sin resultados',
+          text: 'No se encontraron datos para los filtros aplicados.',
+        });
+      }
     } catch (error) {
+      Swal.close();
+
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Error al cargar historial',
+      });
+
       console.error('Error al cargar historial:', error);
     }
   };

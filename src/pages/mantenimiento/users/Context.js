@@ -1,6 +1,7 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { getData, postData, deleteData, putData } from '../../../apiService';
 import { NotificationManager } from "react-notifications";
+import Swal from 'sweetalert2';
 
 const MyContext = createContext();
 
@@ -48,6 +49,15 @@ export const ContextProvider = ({ children }) => {
   };
 
   const fetchData = async () => {
+    // Mostrar alerta de carga
+    Swal.fire({
+      title: 'Cargando...',
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+
     try {
       const responseUser = await getData('user/');
       const responseRol = await getData('rol/');
@@ -60,7 +70,19 @@ export const ContextProvider = ({ children }) => {
         next: responseUser.data.next,
         previous: responseUser.data.previous,
       });
+
+      // Cerrar la alerta
+      Swal.close();
     } catch (error) {
+      Swal.close(); // Cerrar la alerta de carga si hay error
+
+      // Mostrar error
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Error al obtener los datos',
+      });
+
       console.error('Error al obtener los datos:', error);
     }
   };

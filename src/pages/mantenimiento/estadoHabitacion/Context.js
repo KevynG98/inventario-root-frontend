@@ -34,12 +34,40 @@ export const AppProvider = ({ children }) => {
 
 
     const getHabitacion = async () => {
+        Swal.fire({
+            title: 'Cargando habitaciones...',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
         try {
             const response = await getData(`habitaciones/habitaciones-listar/?page=${page}`);
-            setHabitacionData(response.data.results);
+            const resultados = response.data.results;
+
+            setHabitacionData(resultados);
             setNullNextPage(response.data.next);
             setPrevNextPage(response.data.previous);
+
+            Swal.close();
+
+            if (resultados.length === 0) {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Sin resultados',
+                    text: 'No se encontraron habitaciones.',
+                });
+            }
         } catch (error) {
+            Swal.close();
+
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Error al cargar habitaciones',
+            });
+
             console.error('Error al cargar habitaciones:', error);
         }
     };
@@ -81,7 +109,7 @@ export const AppProvider = ({ children }) => {
         } catch (error) {
             console.error('❌ Error al actualizar habitación:', error.response?.data || error);
         }
-    };    
+    };
 
     const cargarHabitacion = async (id) => {
         try {
@@ -113,7 +141,7 @@ export const AppProvider = ({ children }) => {
                     observacion: data.observacion || ''
                 });
                 NotificationManager.success("Habitación actualizada con éxito", "Éxito", 3000);
-    
+
             } else if (modoFormulario === 'crear') {
                 await postData('habitaciones/habitaciones-crear/', {
                     codigo: data.codigo,
@@ -126,14 +154,14 @@ export const AppProvider = ({ children }) => {
                 });
                 NotificationManager.success("Habitación creada con éxito", "Éxito", 3000);
             }
-    
+
             setMostrarModal(false);
             getHabitacion();
         } catch (error) {
             console.error('Error al guardar habitación:', error.response?.data || error);
             NotificationManager.error("Hubo un error al guardar", "Error", 3000);
         }
-    };    
+    };
 
     useEffect(() => {
         getHabitacion();

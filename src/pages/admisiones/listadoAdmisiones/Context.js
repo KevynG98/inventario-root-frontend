@@ -1,6 +1,7 @@
 import React, { createContext, useEffect, useState } from 'react';
 import { getData, putData } from '../../../apiService';
 import { useForm } from 'react-hook-form';
+import Swal from 'sweetalert2';
 
 export const AppContext = createContext();
 
@@ -19,12 +20,40 @@ export const AppProvider = ({ children }) => {
     const [nullPrevPage, setPrevNextPage] = useState(null)
 
     const getAdmisionesResumen = async () => {
+        Swal.fire({
+            title: 'Cargando admisiones...',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
         try {
             const response = await getData(`admisiones/admisiones-resumen/?page=${page}`);
-            setAdmisionesData(response.data.results);
-            setNullNextPage(response.data.next)
-            setPrevNextPage(response.data.previous)
+            const resultados = response.data.results;
+
+            setAdmisionesData(resultados);
+            setNullNextPage(response.data.next);
+            setPrevNextPage(response.data.previous);
+
+            Swal.close();
+
+            if (resultados.length === 0) {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Sin resultados',
+                    text: 'No se encontraron admisiones.',
+                });
+            }
         } catch (error) {
+            Swal.close();
+
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Error al cargar admisiones',
+            });
+
             console.error('Error al cargar admisiones:', error);
         }
     };

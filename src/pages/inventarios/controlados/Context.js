@@ -37,17 +37,44 @@ export const ContextProvider = ({ children }) => {
 
 
   const cargarDatos = async () => {
+    Swal.fire({
+      title: 'Cargando SKUs controlados...',
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+
     try {
       const url = `inventario/skus-filtrados/?page=${page}&clasificacion=controlado`;
       const response = await getData(url);
-  
-      setData(response.data.results);
+      const resultados = response.data.results;
+
+      setData(resultados);
       setNullNextPage(response.data.next);
       setPrevNextPage(response.data.previous);
+
+      Swal.close();
+
+      if (resultados.length === 0) {
+        Swal.fire({
+          icon: 'info',
+          title: 'Sin resultados',
+          text: 'No se encontraron SKUs controlados.',
+        });
+      }
     } catch (error) {
-      console.error('Error al cargar SKUs de consignación:', error);
+      Swal.close();
+
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Error al cargar SKUs controlados',
+      });
+
+      console.error('Error al cargar SKUs controlados:', error);
     }
-  };  
+  };
 
   const cargarCategorias = async () => {
     try {
