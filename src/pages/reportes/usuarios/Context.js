@@ -33,7 +33,7 @@ export const ContextProvider = ({ children }) => {
     });
 
     try {
-      let url = `user/?page=${page}&page_size=${pageSize}`;
+      let url = `user/filter-users/?page=${page}&page_size=${pageSize}`;
       if (fechaInicio) url += `&fecha_inicio=${fechaInicio}`;
       if (fechaFin) url += `&fecha_fin=${fechaFin}`;
 

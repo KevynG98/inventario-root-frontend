@@ -38,7 +38,7 @@ const Usuarios = () => {
             <tr key={idx}>
               <td className="text-center">{user.id}</td>
               <td className="text-center">{user.username}</td>
-              <td>{user.first_name} {user.last_name}</td>
+              <td>{user.perfil.primer_nombre} {user.perfil.primer_apellido}</td>
               <td>{user.email}</td>
               <td className="text-center">
                 <span className={`badge ${user.is_active ? 'badge-success' : 'badge-danger'}`}>
