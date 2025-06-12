@@ -36,8 +36,8 @@ const Users = () => {
       const baseUrl = pagination.next
         ? pagination.next.split('?')[0]
         : pagination.previous
-        ? pagination.previous.split('?')[0]
-        : 'user/';
+          ? pagination.previous.split('?')[0]
+          : 'user/';
       fetchPage(`${baseUrl}?page=${pageNumber}`);
       setCurrentPage(pageNumber);
     }
@@ -125,7 +125,7 @@ const Users = () => {
           </InputGroup.Text>
         </InputGroup>
 
-        <Dropdown>
+        {/* <Dropdown>
           <Dropdown.Toggle variant="outline-secondary" id="dropdown-basic">
             <FiSettings style={{ marginRight: '6px' }} />
             <span>Exportar</span>
@@ -140,7 +140,7 @@ const Users = () => {
             <Dropdown.Item disabled>RTF</Dropdown.Item>
             <Dropdown.Item disabled>Imprimir</Dropdown.Item>
           </Dropdown.Menu>
-        </Dropdown>
+        </Dropdown> */}
       </div>
 
       {/* Tabla */}
@@ -168,7 +168,7 @@ const Users = () => {
                   </Button>
                 </td>
                 <td>{item.username}</td>
-                <td>{item.first_name} {item.last_name}</td>
+                <td>{item.perfil?.primer_nombre || ''} {item.perfil?.primer_apellido || ''}</td>
                 <td>{item.email || ''}</td>
                 <td>{item.is_active ? 'Sí' : 'No'}</td>
               </tr>

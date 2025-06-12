@@ -63,10 +63,16 @@ const SignUp1 = () => {
             </div>
 
             <div className="text-end mb-3">
+              <NavLink to="/auth/signin-1" className="text-primary small">
+                Inicia Sesión en el Sistema
+              </NavLink>
+            </div>
+
+            {/* <div className="text-end mb-3">
               <NavLink to="/auth/reset-password-1" className="text-primary small">
                 ¿Has olvidado tu contraseña?
               </NavLink>
-            </div>
+            </div> */}
 
             <button type="submit" className="btn btn-primary w-100">Continue</button>
           </form>

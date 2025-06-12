@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Modal } from 'react-bootstrap';
+import { Modal, Tab, Tabs, Row, Col, Form } from 'react-bootstrap';
 import { useForm } from 'react-hook-form';
 import { useMyContext } from './Context';
-import ModalResetPassword from './ModalResetPassword';
 
 const ModalUserForm = () => {
   const {
@@ -24,14 +23,17 @@ const ModalUserForm = () => {
     data,
     formKey,
     openResetPasswordModal,
-    updateUser
+    updateUser,
+    userDetail,
+    unassignRol
   } = useMyContext();
 
-  const userData = username ? data.find((u) => u.username === username) : null;
+  const userData = userDetail;
 
   const [active, setActive] = useState(true);
   const [availableGroups, setAvailableGroups] = useState([]);
   const [assignedGroups, setAssignedGroups] = useState([]);
+  const [isMedico, setIsMedico] = useState(false);
 
   useEffect(() => {
     if (getRol.length > 0) {
@@ -49,50 +51,80 @@ const ModalUserForm = () => {
   }, [getRol, userData, isCreatingUser]);
 
   useEffect(() => {
+    const dateToInput = (d) => (d ? d.split('T')[0] : '');
+
     if (isCreatingUser) {
-      reset({ username: '', email: '', first_name: '', last_name: '' });
+      reset({});
+      setIsMedico(false);
     } else if (userData) {
       reset({
         username: userData.username,
         email: userData.email,
         first_name: userData.first_name,
         last_name: userData.last_name,
+        ...userData.perfil,
+        fecha_nacimiento: dateToInput(userData.perfil?.fecha_nacimiento),
+        vencimiento_colegiado: dateToInput(userData.perfil?.vencimiento_colegiado),
       });
+      setIsMedico(userData.perfil?.es_medico || false);
     }
   }, [isCreatingUser, isViewingUser, userData, reset]);
 
-  const handleAssign = () => {
-    const selected = [...document.getElementById('groupLeft').selectedOptions].map(opt => opt.value);
-    setAssignedGroups(prev => [...prev, ...selected]);
-    setAvailableGroups(prev => prev.filter(g => !selected.includes(g)));
-  };
-
-  const handleRemove = () => {
-    const selected = [...document.getElementById('groupRight').selectedOptions].map(opt => opt.value);
-    setAvailableGroups(prev => [...prev, ...selected]);
-    setAssignedGroups(prev => prev.filter(g => !selected.includes(g)));
-  };
-
-  const handleAssignAll = () => {
-    setAssignedGroups(prev => [...prev, ...availableGroups]);
-    setAvailableGroups([]);
-  };
-
-  const handleRemoveAll = () => {
-    setAvailableGroups(prev => [...prev, ...assignedGroups]);
-    setAssignedGroups([]);
-  };
 
   const onSubmit = async (formData) => {
-    formData.is_active = active;
-    delete formData.active;
+    // Asegurar campos booleanos
+    const isActive = active;
+
+    // Asegurar edad numérica
+    const parseOrNull = (val) => {
+      if (val === "" || val === null || val === undefined) return null;
+      const num = parseInt(val, 10);
+      return isNaN(num) ? null : num;
+    };
+
+    // Armar payload
+    const payload = {
+      username: formData.username,
+      email: formData.email,
+      password: isCreatingUser ? formData.password : undefined, // solo si estás creando
+      first_name: formData.first_name || "",
+      last_name: formData.last_name || "",
+      is_active: isActive,
+      perfil: {
+        primer_nombre: formData.primer_nombre || "",
+        segundo_nombre: formData.segundo_nombre || "",
+        primer_apellido: formData.primer_apellido || "",
+        segundo_apellido: formData.segundo_apellido || "",
+        direccion: formData.direccion || "",
+        telefono: formData.telefono || "",
+        correo: formData.email || "",
+        estado_civil: formData.estado_civil || "",
+        fecha_nacimiento: formData.fecha_nacimiento || null,
+        edad: parseOrNull(formData.edad),
+        genero: formData.genero || "",
+        dpi: formData.dpi || "",
+        nit: formData.nit || "",
+        departamento_laboral: formData.departamento_laboral || "",
+        puesto: formData.puesto || "",
+        perfil_acceso: formData.perfil_acceso || "",
+        es_medico: isMedico,
+        colegiado: formData.colegiado || "",
+        vencimiento_colegiado: formData.vencimiento_colegiado || null,
+        especialidad: formData.especialidad || "",
+        banco: formData.banco || "",
+        tipo_cuenta: formData.tipo_cuenta || "",
+        numero_cuenta: formData.numero_cuenta || "",
+        forma_pago: formData.forma_pago || "",
+        regimen_sat: formData.regimen_sat || "",
+      },
+    };
 
     try {
       if (isCreatingUser) {
-        await sendData(formData);
+        await sendData(payload);
       } else {
-        formData.id = userData.id;
-        await updateUser(formData);
+        payload.id = userData.id;
+        await updateUser(payload);
       }
 
       for (const roleName of assignedGroups) {
@@ -106,147 +138,159 @@ const ModalUserForm = () => {
     }
   };
 
+
   return (
-    <Modal show={show} onHide={showModal} size="lg" centered>
+    <Modal show={show} onHide={showModal} size="xl" centered>
       <Modal.Header closeButton>
         <Modal.Title>
           {isCreatingUser ? 'Registrar nuevo usuario' : isViewingUser ? 'Detalles del usuario' : 'Editar usuario'}
         </Modal.Title>
       </Modal.Header>
 
-      <Modal.Body className="px-5 py-4">
-        <form key={formKey} onSubmit={handleSubmit(onSubmit)}>
-          {/* Username */}
-          <div className="mb-3">
-            <label className="fw-semibold">Usuario *</label>
-            <input
-              type="text"
-              className="form-control"
-              placeholder="Nombre de usuario"
-              {...register("username", { required: "Campo obligatorio" })}
-              disabled={!isCreatingUser}
-            />
-            {errors.username && <p className="text-danger">{errors.username.message}</p>}
-          </div>
+      <Modal.Body className="px-4 py-3">
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <Tabs defaultActiveKey="personales" id="tabs-usuario" className="mb-3">
+            {/* Datos personales */}
+            <Tab eventKey="personales" title="Datos personales">
+              <Row className="mb-3">
+                <Col md={3}><Form.Label>Primer nombre</Form.Label><Form.Control {...register("primer_nombre")} /></Col>
+                <Col md={3}><Form.Label>Segundo nombre</Form.Label><Form.Control {...register("segundo_nombre")} /></Col>
+                <Col md={3}><Form.Label>Primer apellido</Form.Label><Form.Control {...register("primer_apellido")} /></Col>
+                <Col md={3}><Form.Label>Segundo apellido</Form.Label><Form.Control {...register("segundo_apellido")} /></Col>
+              </Row>
+              <Row className="mb-3">
+                <Col md={2}><Form.Label>DPI</Form.Label><Form.Control {...register("dpi")} /></Col>
+                <Col md={2}><Form.Label>NIT</Form.Label><Form.Control {...register("nit")} /></Col>
+                <Col md={3}><Form.Label>Teléfono</Form.Label><Form.Control {...register("telefono")} /></Col>
+                <Col md={5}><Form.Label>Correo</Form.Label><Form.Control type="email" {...register("email")} /></Col>
+              </Row>
+              <Row className="mb-3">
+                <Col md={3}><Form.Label>Estado civil</Form.Label><Form.Control {...register("estado_civil")} /></Col>
+                <Col md={3}><Form.Label>Género</Form.Label><Form.Control {...register("genero")} /></Col>
+                <Col md={3}><Form.Label>Fecha de nacimiento</Form.Label><Form.Control type="date" {...register("fecha_nacimiento")} /></Col>
+                <Col md={3}><Form.Label>Edad</Form.Label><Form.Control type="number" {...register("edad")} /></Col>
+              </Row>
+              <Form.Label>Dirección</Form.Label>
+              <Form.Control as="textarea" rows={2} {...register("direccion")} />
+            </Tab>
 
-          {/* Nombre */}
-          <div className="mb-3">
-            <label className="fw-semibold">Nombre</label>
-            <input
-              type="text"
-              className="form-control"
-              {...register("first_name")}
-            />
-          </div>
+            {/* Datos laborales */}
+            <Tab eventKey="laborales" title="Datos laborales">
+              <Row className="mb-3">
+                <Col md={6}><Form.Label>Departamento</Form.Label><Form.Control {...register("departamento_laboral")} /></Col>
+                <Col md={6}><Form.Label>Puesto</Form.Label><Form.Control {...register("puesto")} /></Col>
+              </Row>
+              <Form.Label>Perfil de acceso</Form.Label>
+              <Form.Control {...register("perfil_acceso")} />
+            </Tab>
 
-          {/* Email */}
-          <div className="mb-3">
-            <label className="fw-semibold">E-mail</label>
-            <div className="row">
-              <div className="col-12">
-                <input
-                  type="email"
-                  className="form-control"
-                  {...register("email")}
-                />
-              </div>
-            </div>
-          </div>
+            {/* Datos médicos */}
+            <Tab eventKey="medico" title="Médico">
+              <Form.Check
+                type="checkbox"
+                label="¿Es médico?"
+                checked={isMedico}
+                onChange={() => setIsMedico(!isMedico)}
+                className="mb-3"
+              />
+              {isMedico && (
+                <>
+                  <Row className="mb-3">
+                    <Col md={6}><Form.Label>Colegiado</Form.Label><Form.Control {...register("colegiado")} /></Col>
+                    <Col md={6}><Form.Label>Vencimiento colegiado</Form.Label><Form.Control type="date" {...register("vencimiento_colegiado")} /></Col>
+                  </Row>
+                  <Form.Label>Especialidad</Form.Label>
+                  <Form.Control {...register("especialidad")} />
+                </>
+              )}
+            </Tab>
+
+            {/* Datos bancarios */}
+            <Tab eventKey="bancarios" title="Datos bancarios">
+              <Row className="mb-3">
+                <Col md={6}><Form.Label>Banco</Form.Label><Form.Control {...register("banco")} /></Col>
+                <Col md={6}><Form.Label>Tipo de cuenta</Form.Label><Form.Control {...register("tipo_cuenta")} /></Col>
+              </Row>
+              <Row className="mb-3">
+                <Col md={6}><Form.Label>Número de cuenta</Form.Label><Form.Control {...register("numero_cuenta")} /></Col>
+                <Col md={6}><Form.Label>Forma de pago</Form.Label><Form.Control {...register("forma_pago")} /></Col>
+              </Row>
+              <Form.Label>Régimen SAT</Form.Label>
+              <Form.Control {...register("regimen_sat")} />
+            </Tab>
+          </Tabs>
 
           {/* Activo */}
-          <div className="mb-3 d-flex align-items-center">
-            <label className="fw-semibold mb-0">Activo</label>
-            <div
-              onClick={() => setActive(!active)}
-              style={{
-                marginLeft: '12px',
-                width: '32px',
-                height: '18px',
-                backgroundColor: active ? '#0d6efd' : '#ccc',
-                borderRadius: '20px',
-                position: 'relative',
-                cursor: 'pointer',
-                transition: 'background-color 0.2s'
-              }}
-            >
-              <div
-                style={{
-                  position: 'absolute',
-                  top: '2px',
-                  left: active ? '16px' : '2px',
-                  width: '14px',
-                  height: '14px',
-                  backgroundColor: '#fff',
-                  borderRadius: '50%',
-                  transition: 'left 0.2s'
-                }}
-              />
-            </div>
-          </div>
+          <Form.Group className="mb-3">
+            <Row className="mb-3">
+              <Col md={2}>
+                <Form.Label>Activo</Form.Label>
+                <Form.Check
+                  type="switch"
+                  id="estado-switch"
+                  label={active ? "Sí" : "No"}
+                  checked={active}
+                  onChange={() => setActive(!active)}
+                />
+              </Col>
+              <Col md={10}>
+                {/* Username (solo al crear) */}
+                <Form.Group className="mb-3">
+                  <Form.Label>Usuario *</Form.Label>
+                  <Form.Control
+                    type="text"
+                    {...register("username", { required: "Campo obligatorio" })}
+                    disabled={!isCreatingUser}
+                  />
+                  {errors.username && <p className="text-danger">{errors.username.message}</p>}
+                </Form.Group>
+              </Col>
+            </Row>
+          </Form.Group>
 
           {/* Grupos */}
-          <div className="mb-3">
-            <label className="fw-semibold">Grupos</label>
-            <div className="d-flex gap-3 flex-column flex-md-row">
-              <select
-                id="groupLeft"
-                multiple
-                className="form-control"
-                size={6}
-                onDoubleClick={handleAssign}
-              >
-                {availableGroups.length > 0 ? (
-                  availableGroups.map((g) => (
-                    <option key={g} value={g}>{g}</option>
-                  ))
-                ) : (
-                  <option disabled>No hay grupos</option>
-                )}
-              </select>
+          <Form.Group className="mb-4">
+            <Form.Label>Grupos</Form.Label>
+            <Row>
+              <Col md={5}>
+                <select id="groupLeft" multiple size={5} className="form-control" onDoubleClick={() => {
+                  const selected = [...document.getElementById('groupLeft').selectedOptions].map(opt => opt.value);
+                  setAssignedGroups(prev => [...prev, ...selected]);
+                  setAvailableGroups(prev => prev.filter(r => !selected.includes(r)));
+                }}>
+                  {availableGroups.map(role => <option key={role} value={role}>{role}</option>)}
+                </select>
+              </Col>
+              <Col md={2} className="d-flex flex-column justify-content-center align-items-center">
+                <button type="button" onClick={() => {
+                  const selected = [...document.getElementById('groupLeft').selectedOptions].map(opt => opt.value);
+                  setAssignedGroups(prev => [...prev, ...selected]);
+                  setAvailableGroups(prev => prev.filter(r => !selected.includes(r)));
+                }} className="btn btn-outline-secondary mb-2">&gt;</button>
+                <button type="button" onClick={async () => {
+                  const selected = [...document.getElementById('groupRight').selectedOptions].map(opt => opt.value);
 
-              <div className="d-flex flex-md-column justify-content-center gap-2">
-                <button type="button" onClick={handleAssign} className="btn btn-outline-secondary">&gt;</button>
-                <button type="button" onClick={handleRemove} className="btn btn-outline-secondary">&lt;</button>
-                <button type="button" onClick={handleAssignAll} className="btn btn-outline-secondary">&gt;&gt;</button>
-                <button type="button" onClick={handleRemoveAll} className="btn btn-outline-secondary">&lt;&lt;</button>
-              </div>
+                  setAvailableGroups(prev => [...prev, ...selected]);
+                  setAssignedGroups(prev => prev.filter(r => !selected.includes(r)));
 
-              <select
-                id="groupRight"
-                multiple
-                className="form-control"
-                size={6}
-                onDoubleClick={handleRemove}
-              >
-                {assignedGroups.length > 0 ? (
-                  assignedGroups.map((g) => (
-                    <option key={g} value={g}>{g}</option>
-                  ))
-                ) : (
-                  <option disabled>No hay asignados</option>
-                )}
-              </select>
-            </div>
-          </div>
+                  // 👇 Desasignar roles en el backend
+                  for (const role of selected) {
+                    await unassignRol({ username: userData.username, role });
+                  }
+                }} className="btn btn-outline-secondary">&lt;</button>
+              </Col>
+              <Col md={5}>
+                <select id="groupRight" multiple size={5} className="form-control">
+                  {assignedGroups.map(role => <option key={role} value={role}>{role}</option>)}
+                </select>
+              </Col>
+            </Row>
+          </Form.Group>
 
-          {/* Botones Finales */}
-          <div className="d-flex justify-content-end gap-2 mt-4">
-            {isCreatingUser && (
-              <button
-                type="button"
-                onClick={() => {
-                  reset({ username: '', email: '', first_name: '', last_name: '' });
-                  setAssignedGroups([]);
-                  setAvailableGroups(getRol.map(r => r.name));
-                  setActive(true);
-                }}
-                className="btn btn-secondary"
-              >
-                Nuevo
-              </button>
-            )}
+          {/* Botones */}
+          <div className="d-flex justify-content-end gap-2">
             <button type="submit" className="btn btn-primary">
-              {isCreatingUser ? 'Registrar' : 'Guardar'}
+              {isCreatingUser ? "Registrar" : "Guardar"}
             </button>
             {!isCreatingUser && (
               <button type="button" className="btn btn-warning" onClick={openResetPasswordModal}>

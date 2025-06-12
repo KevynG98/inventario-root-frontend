@@ -19,6 +19,7 @@ export const ContextProvider = ({ children }) => {
   const [isViewingUser, setIsViewingUser] = useState(false);
   const [formKey, setFormKey] = useState(Date.now());
   const [showResetPassword, setShowResetPassword] = useState(false);
+  const [userDetail, setUserDetail] = useState(null);
 
   const showModal = () => setShow(!show);
   const openResetPasswordModal = () => setShowResetPassword(true);
@@ -32,7 +33,12 @@ export const ContextProvider = ({ children }) => {
     setShow(true);
   };
 
-  const openAssignRolModal = (username) => {
+  const openAssignRolModal = async (username) => {
+    const u = data.find(u => u.username === username);
+    if (u) {
+      const detail = await getData(`user/${u.id}/`);   // 👈 nuevo fetch
+      setUserDetail(detail.data);                      // guarda todo
+    }
     setUsername(username);
     setIsViewingUser(false);
     setIsCreatingUser(false);
@@ -40,7 +46,12 @@ export const ContextProvider = ({ children }) => {
     setShow(true);
   };
 
-  const openViewUserModal = (username) => {
+  const openViewUserModal = async (username) => {
+    const u = data.find(u => u.username === username);
+    if (u) {
+      const detail = await getData(`user/${u.id}/`);
+      setUserDetail(detail.data);
+    }
     setUsername(username);
     setIsCreatingUser(false);
     setIsViewingUser(true);
@@ -59,7 +70,7 @@ export const ContextProvider = ({ children }) => {
     });
 
     try {
-      const responseUser = await getData('user/');
+      const responseUser = await getData('user/filter-users/');
       const responseRol = await getData('rol/');
 
       setData(responseUser.data.results);
@@ -106,6 +117,7 @@ export const ContextProvider = ({ children }) => {
 
   const sendData = async (data) => {
     try {
+      console.log('Enviando datos:', data);
       const response = await postData("user/register/", data);
       if (response?.status === 201 && response.data) {
         NotificationManager.success("Usuario creado", "Éxito", 3000);
@@ -120,6 +132,7 @@ export const ContextProvider = ({ children }) => {
   };
 
   const updateUser = async (data) => {
+    console.log('Actualizando usuario:', data);
     try {
       const response = await putData(`user/update/${data.id}/`, data);
       if (response?.status === 200 && response.data) {
@@ -191,6 +204,21 @@ export const ContextProvider = ({ children }) => {
     }
   };
 
+  const unassignRol = async (data) => {
+    try {
+      const response = await postData("rol/unassign/", data);
+      if (response?.status === 200) {
+        console.log(`Rol ${data.role} desasignado de ${data.username}`);
+      } else {
+        NotificationManager.error("Error al desasignar rol", "Error", 5000);
+      }
+    } catch (err) {
+      console.error('Error al desasignar rol:', err);
+      NotificationManager.error("Error al desasignar rol", "Error", 5000);
+    }
+  };
+  
+
   useEffect(() => {
     fetchData();
   }, []);
@@ -221,6 +249,8 @@ export const ContextProvider = ({ children }) => {
     fetchPage,
     searchUsers,
     resetUserPassword,
+    userDetail,
+    unassignRol
   };
 
   return (
