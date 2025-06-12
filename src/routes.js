@@ -38,6 +38,7 @@ const InventarioControlados = React.lazy(() => import('./pages/inventarios/contr
 /* Mantenimiento */
 const MantenimientoHabitacion = React.lazy(() => import('./pages/mantenimiento/estadoHabitacion/Index'))
 const Users = React.lazy(() => import('./pages/mantenimiento/users/Index'));
+const UsersDoctores = React.lazy(() => import('./pages/mantenimiento/doctor/Index'));
 const InventarioSeguros = React.lazy(() => import('./pages/mantenimiento/seguros/Index'));
 const DirectorioExtensiones = React.lazy(() => import('./pages/mantenimiento/directorioExtensiones/Index'));
 
@@ -106,6 +107,7 @@ const routes = [
     { path: '/dashboard/mantenimiento/habitaciones', exact: true, name: 'Inventario Marcas', component: MantenimientoHabitacion },
     { path: '/dashboard/mantenimiento/seguros', exact: true, name: 'Seguros', component: InventarioSeguros },
     { path: '/dashboard/mantenimiento/users', exact: true, name: 'Users', component: userPermissions.some(item => [0, 1].includes(item)) ? Users : Error404 },
+    { path: '/dashboard/mantenimiento/medicos', exact: true, name: 'Seguros', component: UsersDoctores },
     { path: '/dashboard/mantenimiento/extensiones', exact: true, name: 'Seguros', component: DirectorioExtensiones },
     /*Reportes*/
     { path: '/dashboard/reportes/historial-general', exact: true, name: 'Inventario Marcas', component: HIstorialGeneral },
