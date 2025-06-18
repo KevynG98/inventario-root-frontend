@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useEffect, useState, useContext, useMemo, } from 'react';
 import {
   Container,
   Row,
@@ -18,7 +18,9 @@ import { AppContext } from './Context';
 
 const FormularioAdmision = () => {
 
-  const { guardarAdmision, loading, listarHabitaciones } = useContext(AppContext);
+  const { guardarAdmision, loading, listarHabitaciones, seguros, areaHabitacion, setAreaSeleccionada, areaSeleccionada,
+    doctor
+  } = useContext(AppContext);
 
   const { register, handleSubmit, watch, setValue, getValues } = useForm();
   const [acompanantesVisibles, setAcompanantesVisibles] = useState([]);
@@ -70,16 +72,39 @@ const FormularioAdmision = () => {
     }
   }, [listaFamiliares, setValue]);
 
+  const habitacionesFiltradas = useMemo(() => {
+    return listarHabitaciones.filter(
+      (hab) => hab.area === areaSeleccionada
+    );
+  }, [listarHabitaciones, areaSeleccionada]);
+
   const calcularEdad = (fecha) => {
     const nacimiento = new Date(fecha);
     const hoy = new Date();
+
+    const diffTiempo = hoy.getTime() - nacimiento.getTime();
+    const diffDias = Math.floor(diffTiempo / (1000 * 60 * 60 * 24));
+
+    if (diffDias < 30) {
+      return `${diffDias} día(s)`;
+    }
+
+    const diffMeses = (hoy.getFullYear() - nacimiento.getFullYear()) * 12 + hoy.getMonth() - nacimiento.getMonth();
+    if (diffMeses < 12) {
+      return `${diffMeses} mes(es)`;
+    }
+
     let edad = hoy.getFullYear() - nacimiento.getFullYear();
     const mes = hoy.getMonth() - nacimiento.getMonth();
-    if (mes < 0 || (mes === 0 && hoy.getDate() < nacimiento.getDate())) {
+    const dia = hoy.getDate() - nacimiento.getDate();
+
+    if (mes < 0 || (mes === 0 && dia < 0)) {
       edad--;
     }
-    return edad;
+
+    return `${edad} año(s)`;
   };
+
 
   const agregarFamiliar = (nuevoFamiliar) => {
     const actualizada = [...listaFamiliares, nuevoFamiliar];
@@ -221,12 +246,12 @@ const FormularioAdmision = () => {
         <h4 className="fw-bold text-dark m-0">Ficha del Paciente</h4>
 
         <div className="d-flex flex-column flex-md-row align-items-start align-items-md-center gap-2">
-        <span className="fw-bold mr-3">Fecha: {todayDate}</span>
+          <span className="fw-bold mr-3">Fecha: {todayDate}</span>
 
           <div className="d-flex gap-2">
-            <Button variant="primary">
+            {/* <Button variant="primary">
               <FiAlignJustify /> <span>Listado</span>
-            </Button>
+            </Button> */}
             <Button
               variant="primary"
               disabled={loading}
@@ -327,6 +352,7 @@ const FormularioAdmision = () => {
                   <option>Seleccione</option>
                   <option>DPI</option>
                   <option>PASAPORTE</option>
+                  <option>CERTIFICADO DE NACIMIENTO</option>
                 </Form.Control>
               </Form.Group>
             </Col>
@@ -453,23 +479,32 @@ const FormularioAdmision = () => {
           <Row className="mb-3">
             <Col md={4}>
               <Form.Group>
-                <Form.Label>Área de Admisión</Form.Label>
-                <Form.Control as="select" {...register('area_admision')}>
-                  <option>Seleccione</option>
-                  <option>EMERGENCIA</option>
-                  <option>ENCAMAMIENTO / HOSPITAL</option>
-                  <option>INTENSIVO</option>
-                  <option>NEONATO</option>
-                  <option>QUIROFANO / CIRUJIA</option>
+                <Form.Label>Área</Form.Label>
+                <Form.Control
+                  as="select"
+                  {...register('area')}
+                  onChange={(e) => {
+                    setAreaSeleccionada(e.target.value);
+                    setValue('area', e.target.value); // opcional, si querés sincronizarlo con react-hook-form
+                  }}
+                >
+                  <option value="">Seleccione</option>
+                  {Array.isArray(areaHabitacion) &&
+                    areaHabitacion.map((item, idx) => (
+                      <option key={idx} value={item.area}>
+                        {item.area}
+                      </option>
+                    ))}
                 </Form.Control>
               </Form.Group>
+
             </Col>
             <Col md={4}>
               <Form.Group>
                 <Form.Label>Habitación</Form.Label>
                 <Form.Control as="select" {...register('habitacion')}>
                   <option>Seleccione</option>
-                  {listarHabitaciones.map((data, index) => (
+                  {habitacionesFiltradas.map((data, index) => (
                     <option key={index} value={data.id}>
                       {`${data.codigo} - nivel: ${data.nivel}`}
                     </option>
@@ -481,10 +516,12 @@ const FormularioAdmision = () => {
               <Form.Group>
                 <Form.Label>Médico Tratante</Form.Label>
                 <Form.Control as="select" {...register('medicoTratante')}>
-                  <option>Seleccione</option>
-                  <option>MEDICO 1</option>
-                  <option>MEDICO 2</option>
-                  <option>MEDICO 3</option>
+                  <option value="">Seleccione</option>
+                  {doctor.map((medico) => (
+                    <option key={medico.id} value={medico.id}>
+                      {medico.perfil.primer_nombre} {medico.perfil.primer_apellido}
+                    </option>
+                  ))}
                 </Form.Control>
               </Form.Group>
             </Col>
@@ -643,7 +680,16 @@ const FormularioAdmision = () => {
             <Col md={4}>
               <Form.Group>
                 <Form.Label>Aseguradora</Form.Label>
-                <Form.Control type="text" {...register('aseguradora')} />
+                <Form.Control as="select" {...register('aseguradora')}>
+                  <option value="">Seleccione</option>
+                  {Array.isArray(seguros) &&
+                    seguros.map((seguro) => (
+                      <option key={seguro.id} value={seguro.id}>
+                        {seguro.nombre}
+                      </option>
+                    ))
+                  }
+                </Form.Control>
               </Form.Group>
             </Col>
             <Col md={4}>

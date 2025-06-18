@@ -1,5 +1,6 @@
 import React, { createContext, useEffect, useState } from 'react';
 import { postData, getData } from '../../../apiService'
+import { get } from 'jquery';
 
 export const AppContext = createContext();
 
@@ -7,15 +8,51 @@ export const AppProvider = ({ children }) => {
     const [state, setState] = useState(null);
     const [loading, setLoading] = useState(false);
     const [listarHabitaciones, setListarHabitaciones] = useState([])
+    const [seguros, setSeguros] = useState([])
+    const [areaHabitacion, setAreaHabitacion] = useState([]);
+    const [areaSeleccionada, setAreaSeleccionada] = useState('');
+    const [doctor, setDoctor] = useState([]);
+
+    const getDoctores = async () => {
+        setLoading(true);
+        try {
+            const response = await getData('user/doctor-users/?page_size=50');
+            console.log('DOCTORES: ', response.data.results);
+            setDoctor(response.data.results);
+        } catch (error) {
+            console.error('Fallo al obtener doctores:', error);
+            throw error;
+        } finally {
+            setLoading(false);
+        }
+    }
 
     const getHabitaciones = async () => {
         setLoading(true);
         try {
-            const response = await getData('habitaciones/');
-            console.log('HABITACIONES: ', response.data);
-            setListarHabitaciones(response.data)
+            const response = await getData('habitaciones/habitaciones-listar/?page_size=50');
+            const areasUnicas = [
+                ...new Set(response.data.results.map(habitacion => habitacion.area))
+            ];
+            setAreaHabitacion(areasUnicas.map(area => ({ area })));
+            setListarHabitaciones(response.data.results);
+            console.log('HABITACIONES: ', response.data.results);
         } catch (error) {
             console.error('Fallo al obtener habitaciones:', error);
+            throw error;
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    const getSeguros = async () => {
+        setLoading(true);
+        try {
+            const response = await getData('inventario/seguros/?page_size=50');
+            console.log('SEGUROS: ', response.data);
+            setSeguros(response.data.results)
+        } catch (error) {
+            console.error('Fallo al obtener seguros:', error);
             throw error;
         } finally {
             setLoading(false);
@@ -58,10 +95,10 @@ export const AppProvider = ({ children }) => {
                     (typeof valor === 'number' && isNaN(valor)) ||
                     (Array.isArray(valor) && valor.length === 0) ||
                     (typeof valor === 'object' && Object.keys(valor).length === 0)
-                  ) {
+                ) {
                     continue;
-                  }
-                                    
+                }
+
                 limpio[clave] = valor;
             }
             return Object.keys(limpio).length > 0 ? limpio : undefined;
@@ -72,6 +109,8 @@ export const AppProvider = ({ children }) => {
 
     useEffect(() => {
         getHabitaciones()
+        getSeguros()
+        getDoctores()
     }, [])
 
     const values = {
@@ -80,6 +119,12 @@ export const AppProvider = ({ children }) => {
         setState,
         guardarAdmision,
         loading,
+        seguros,
+        areaHabitacion,
+        areaSeleccionada, 
+        setAreaSeleccionada,
+        doctor, 
+        setDoctor
     };
 
     return (

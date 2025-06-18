@@ -6,7 +6,7 @@ import Swal from 'sweetalert2';
 export const AppContext = createContext();
 
 export const AppProvider = ({ children }) => {
-    const { register, handleSubmit, setValue, getValues, watch } = useForm();
+    const { register, handleSubmit, setValue, getValues, watch, reset } = useForm();
 
     const [admisionesData, setAdmisionesData] = useState([]);
     const [mostrarModal, setMostrarModal] = useState(false);
@@ -14,10 +14,61 @@ export const AppProvider = ({ children }) => {
     const [loading, setLoading] = useState(false);
     const [seccionActiva, setSeccionActiva] = useState('datos-seguro');
     const [todayDate, setTodayDate] = useState('');
+    const [seguros, setSeguros] = useState([])
+    const [areaHabitacion, setAreaHabitacion] = useState([]);
+    const [areaSeleccionada, setAreaSeleccionada] = useState('');
+    const [doctor, setDoctor] = useState([]);
+    const [listarHabitaciones, setListarHabitaciones] = useState([])
     //paginacion
     const [page, setPage] = useState(1);
     const [nullNextPage, setNullNextPage] = useState(null)
     const [nullPrevPage, setPrevNextPage] = useState(null)
+
+    const getDoctores = async () => {
+        setLoading(true);
+        try {
+            const response = await getData('user/doctor-users/?page_size=50');
+            console.log('DOCTORES: ', response.data.results);
+            setDoctor(response.data.results);
+        } catch (error) {
+            console.error('Fallo al obtener doctores:', error);
+            throw error;
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    const getHabitaciones = async () => {
+        setLoading(true);
+        try {
+            const response = await getData('habitaciones/habitaciones-listar/?page_size=50');
+            const areasUnicas = [
+                ...new Set(response.data.results.map(habitacion => habitacion.area))
+            ];
+            setAreaHabitacion(areasUnicas.map(area => ({ area })));
+            setListarHabitaciones(response.data.results);
+            console.log('HABITACIONES: ', response.data.results);
+        } catch (error) {
+            console.error('Fallo al obtener habitaciones:', error);
+            throw error;
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    const getSeguros = async () => {
+        setLoading(true);
+        try {
+            const response = await getData('inventario/seguros/?page_size=50');
+            console.log('SEGUROS: ', response.data);
+            setSeguros(response.data.results)
+        } catch (error) {
+            console.error('Fallo al obtener seguros:', error);
+            throw error;
+        } finally {
+            setLoading(false);
+        }
+    }
 
     const getAdmisionesResumen = async () => {
         Swal.fire({
@@ -69,130 +120,139 @@ export const AppProvider = ({ children }) => {
     const cargarAdmision = async (id) => {
         try {
             const { data } = await getData(`admisiones/${id}/`);
-            console.log("DATOS CRUDOS", data)
+            console.log("DATOS CRUDOS", data);
+
             setTodayDate(data.fecha);
 
-            // ID
-            setValue('idFicha', data.id);
+            const acompanantesTransformados = (data.acompanantes || []).map(a => ({
+                nombre: a.nombre,
+                tipoIdentificacion: a.tipo_identificacion,
+                numeroIdentificacion: a.numero_identificacion,
+                fechaNacimiento: a.fecha_nacimiento,
+                edad: a.edad,
+                genero: a.genero,
+                correo: a.correo,
+                nit: a.nit,
+                tipo: a.tipo,
+                responsableCuenta: a.responsable_cuenta,
+                direccionLaboral: a.direccion_laboral,
+                telefonoEmpresa: a.telefono_empresa,
+                contacto: a.contacto,
+                correoContacto: a.correo_contacto,
+                telefonoContacto: a.telefono_contacto,
+              }));              
 
-            // PACIENTE
-            setValue('nombre', data.paciente.primer_nombre);
-            setValue('primerNombre', data.paciente.primer_nombre);
-            setValue('segundoNombre', data.paciente.segundo_nombre);
-            setValue('primerApellido', data.paciente.primer_apellido);
-            setValue('segundoApellido', data.paciente.segundo_apellido);
-            setValue('apellidoCasada', data.paciente.apellido_casada);
-            setValue('genero', data.paciente.genero);
-            setValue('estadoCivil', data.paciente.estado_civil);
-            setValue('tipoSangre', data.paciente.tipo_sangre || ''); // No está en el JSON, dejar vacío si no hay
-            setValue('fechaNacimiento', data.paciente.fecha_nacimiento);
-            setValue('edad', data.paciente.edad);
-            setValue('tipoIdentificacion', data.paciente.tipo_identificacion);
-            setValue('numeroIdentificacion', data.paciente.numero_identificacion);
-            setValue('direccion', data.paciente.direccion);
-            setValue('telefono1', data.paciente.telefono1);
-            setValue('telefono2', data.paciente.telefono2);
-            setValue('correo', data.paciente.correo);
-            setValue('nit', data.paciente.nit);
-            setValue('observacion', data.paciente.observacion);
-            setValue('religion', data.paciente.religion);
+            reset({
+                idFicha: data.id,
+                primerNombre: data.paciente.primer_nombre,
+                segundoNombre: data.paciente.segundo_nombre,
+                primerApellido: data.paciente.primer_apellido,
+                segundoApellido: data.paciente.segundo_apellido,
+                apellidoCasada: data.paciente.apellido_casada,
+                genero: data.paciente.genero,
+                estadoCivil: data.paciente.estado_civil,
+                tipo_sangre: data.paciente.tipo_sangre || '',
+                fechaNacimiento: data.paciente.fecha_nacimiento,
+                tipoIdentificacion: data.paciente.tipo_identificacion,
+                numeroIdentificacion: data.paciente.numero_identificacion,
+                direccion: data.paciente.direccion,
+                telefono1: data.paciente.telefono1,
+                telefono2: data.paciente.telefono2,
+                correo: data.paciente.correo,
+                nit: data.paciente.nit,
+                observacion: data.paciente.observacion,
+                religion: data.paciente.religion,
+                responsableCuenta: false,
 
-            // Checkbox responsable de cuenta (si tienes lógica, usa data.responsableCuenta o similar)
-            setValue('responsableCuenta', false);
+                empresa: data.datos_laborales?.empresa,
+                direccionEmpresa: data.datos_laborales?.direccion,
+                telefonoEmpresa1: data.datos_laborales?.telefono1,
+                telefonoEmpresa2: data.datos_laborales?.telefono2,
+                ocupacion: data.datos_laborales?.ocupacion,
 
-            // ACOMPANANTE
-            setValue('acompananteNombre', data.acompanante?.nombre);
-            setValue('acompananteTelefono', data.acompanante?.telefono);
+                area: data.area_admision || '',
+                habitacion: data.habitacion || '',
+                medicoTratante: data.medico_tratante || '',
 
-            // ADMISION
-            setValue('area_admision', data.area_admision);
-            setValue('habitacion', data.habitacion);
-            setValue('medicoTratante', data.medico_tratante);
+                aseguradora: data.datos_seguro?.aseguradora,
+                listaPrecios: data.datos_seguro?.lista_precios,
+                carnet: data.datos_seguro?.carnet,
+                certificado: data.datos_seguro?.certificado,
+                nombreTitular: data.datos_seguro?.nombre_titular,
+                coaseguro: data.datos_seguro?.coaseguro,
+                valorCopago: data.datos_seguro?.valor_copago,
+                valorDeducible: data.datos_seguro?.valor_deducible,
+                numero_poliza: data.datos_seguro?.numero_poliza, // ✅ agregado aquí
 
-            // DATOS SEGURO
-            setValue('aseguradora', data.datos_seguro?.aseguradora);
-            setValue('listaPrecios', data.datos_seguro?.lista_precios);
-            setValue('carnet', data.datos_seguro?.carnet);
-            setValue('certificado', data.datos_seguro?.certificado);
-            setValue('nombreTitular', data.datos_seguro?.nombre_titular);
-            setValue('coaseguro', data.datos_seguro?.coaseguro);
-            setValue('valorCopago', data.datos_seguro?.valor_copago);
-            setValue('valorDeducible', data.datos_seguro?.valor_deducible);
+                garantiaPago: data.garantia_pago?.tipo,
+                tcCheque: data.garantia_pago?.numero_tc_cheque,
+                nombreFactura: data.garantia_pago?.nombre_factura,
+                direccionFactura: data.garantia_pago?.direccion_factura,
+                correoFactura: data.garantia_pago?.correo_factura,
 
-            // GARANTÍA
-            setValue('garantiaPago', data.garantia_pago?.tipo);
-            setValue('tcCheque', data.garantia_pago?.numero_tc_cheque);
-            setValue('nit', data.garantia_pago?.nit);
-            setValue('nombreFactura', data.garantia_pago?.nombre_factura);
-            setValue('direccionFactura', data.garantia_pago?.direccion_factura);
-            setValue('correoFactura', data.garantia_pago?.correo_factura);
+                resp_primerNombre: data.responsable?.primer_nombre,
+                resp_segundoNombre: data.responsable?.segundo_nombre,
+                resp_primerApellido: data.responsable?.primer_apellido,
+                resp_segundoApellido: data.responsable?.segundo_apellido,
+                resp_tipoIdentificacion: data.responsable?.tipo_identificacion,
+                resp_numeroIdentificacion: data.responsable?.numero_identificacion,
+                resp_fechaNacimiento: data.responsable?.fecha_nacimiento,
+                resp_genero: data.responsable?.genero,
+                resp_relacionPaciente: data.responsable?.relacion_paciente,
+                resp_ocupacion: data.responsable?.ocupacion,
+                resp_domicilio: data.responsable?.domicilio,
+                resp_empresa: data.responsable?.empresa,
+                resp_direccion: data.responsable?.direccion,
+                resp_telefono1: data.responsable?.telefono1,
+                resp_telefono2: data.responsable?.telefono2,
+                resp_contacto: data.responsable?.contacto,
+                resp_email: data.responsable?.email,
 
-            // DATOS LABORALES
-            setValue('empresa', data.datos_laborales?.empresa);
-            setValue('direccionEmpresa', data.datos_laborales?.direccion);
-            setValue('telefonoEmpresa1', data.datos_laborales?.telefono1);
-            setValue('telefonoEmpresa2', data.datos_laborales?.telefono2);
-            setValue('ocupacion', data.datos_laborales?.ocupacion);
+                esposo_nombre: data.esposo?.nombre,
+                esposo_genero: data.esposo?.genero,
+                esposo_tipoIdentificacion: data.esposo?.tipo_identificacion,
+                esposo_numeroIdentificacion: data.esposo?.numero_identificacion,
+                esposo_fechaNacimiento: data.esposo?.fecha_nacimiento,
+                esposo_telefono1: data.esposo?.telefono1,
+                esposo_telefono2: data.esposo?.telefono2,
+                esposo_domicilio: data.esposo?.domicilio,
+                esposo_ocupacion: data.esposo?.ocupacion,
+                esposo_empresa: data.esposo?.empresa,
+                esposo_direccion: data.esposo?.direccion,
+                esposo_email: data.esposo?.email,
 
-            // RESPONSABLE
-            setValue('resp_primerNombre', data.responsable?.primer_nombre);
-            setValue('resp_segundoNombre', data.responsable?.segundo_nombre);
-            setValue('resp_primerApellido', data.responsable?.primer_apellido);
-            setValue('resp_segundoApellido', data.responsable?.segundo_apellido);
-            setValue('resp_tipoIdentificacion', data.responsable?.tipo_identificacion);
-            setValue('resp_numeroIdentificacion', data.responsable?.numero_identificacion);
-            setValue('resp_fechaNacimiento', data.responsable?.fecha_nacimiento);
-            setValue('resp_edad', data.responsable?.edad);
-            setValue('resp_genero', data.responsable?.genero);
-            setValue('resp_relacionPaciente', data.responsable?.relacion_paciente);
-            setValue('resp_ocupacion', data.responsable?.ocupacion);
-            setValue('resp_domicilio', data.responsable?.domicilio);
-            setValue('resp_empresa', data.responsable?.empresa);
-            setValue('resp_direccion', data.responsable?.direccion);
-            setValue('resp_telefono1', data.responsable?.telefono1);
-            setValue('resp_telefono2', data.responsable?.telefono2);
-            setValue('resp_contacto', data.responsable?.contacto);
-            setValue('resp_email', data.responsable?.email);
-
-            // ESPOSO
-            setValue('esposo_nombre', data.esposo?.nombre);
-            setValue('esposo_genero', data.esposo?.genero);
-            setValue('esposo_tipoIdentificacion', data.esposo?.tipo_identificacion);
-            setValue('esposo_numeroIdentificacion', data.esposo?.numero_identificacion);
-            setValue('esposo_fechaNacimiento', data.esposo?.fecha_nacimiento);
-            setValue('esposo_edad', data.esposo?.edad);
-            setValue('esposo_telefono1', data.esposo?.telefono1);
-            setValue('esposo_telefono2', data.esposo?.telefono2);
-            setValue('esposo_domicilio', data.esposo?.domicilio);
-            setValue('esposo_ocupacion', data.esposo?.ocupacion);
-            setValue('esposo_empresa', data.esposo?.empresa);
-            setValue('esposo_direccion', data.esposo?.direccion);
-            setValue('esposo_email', data.esposo?.email);
-
+                acompanantes: acompanantesTransformados,
+            });
         } catch (error) {
             console.error('Error al cargar admisión:', error);
         }
     };
 
     const onSubmit = async (data) => {
-        console.log("DATOS", data)
+        // Filtrar campos vacíos ("" o null)
+        console.log("DATOS DEL FORMULARIO", data);
+
         try {
             const { status, data: response } = await putData(`admisiones/editar/${data.idFicha}/`, data);
 
             if (status === 200) {
                 console.log('Actualizado correctamente:', response);
-                setMostrarModal(!mostrarModal)
-                // cerrar modal, recargar tabla, etc.
+                setMostrarModal(false);
             } else {
                 console.error('Error al actualizar:', response);
             }
         } catch (error) {
             console.error('Error de red o servidor:', error);
         }
-        getAdmisionesResumen()
+
+        getAdmisionesResumen();
     };
 
+
     useEffect(() => {
+        getHabitaciones()
+        getSeguros()
+        getDoctores()
         getAdmisionesResumen();
     }, [page]);
 
@@ -216,7 +276,14 @@ export const AppProvider = ({ children }) => {
         nullNextPage,
         nullPrevPage,
         nextPage,
-        prevPage
+        prevPage,
+        areaSeleccionada,
+        setAreaSeleccionada,
+        listarHabitaciones,
+        setListarHabitaciones,
+        seguros,
+        areaHabitacion,
+        doctor,
     }
 
     return (
