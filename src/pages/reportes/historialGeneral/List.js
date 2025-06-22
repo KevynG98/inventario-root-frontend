@@ -78,7 +78,7 @@ const Marcas = () => {
               <tr key={idx}>
                 <td className="text-center">{item.id}</td>
                 <td>{new Date(item.fecha).toLocaleString()}</td>
-                <td>{item.usuario || 'Anónimo'}</td>
+                <td>{item.usuario__username || 'Anónimo'}</td>
                 <td className="text-center">
                   <span className={`badge ${metodoColor}`}>
                     {{

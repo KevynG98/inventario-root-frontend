@@ -38,12 +38,20 @@ export const ContextProvider = ({ children }) => {
       if (fechaInicio) url += `&fecha_inicio=${fechaInicio}`;
       if (fechaFin) url += `&fecha_fin=${fechaFin}`;
 
+      console.time("⏱️ API - Fetch historial"); // Inicia medición de tiempo
       const response = await getData(url);
-      const resultados = response.data.results;
+      console.timeEnd("⏱️ API - Fetch historial"); // Termina medición del fetch
 
+      const resultados = response.data.results;
+      console.log('Resultados obtenidos:', resultados);
+
+      console.time("⏱️ UI - Render historial"); // Inicia medición del render
       setData(resultados);
       setNullNextPage(response.data.next);
       setPrevNextPage(response.data.previous);
+      setTimeout(() => {
+        console.timeEnd("⏱️ UI - Render historial"); // Termina después del render
+      }, 0);
 
       Swal.close();
 
@@ -54,6 +62,7 @@ export const ContextProvider = ({ children }) => {
           text: 'No se encontraron datos para los filtros aplicados.',
         });
       }
+
     } catch (error) {
       Swal.close();
 
