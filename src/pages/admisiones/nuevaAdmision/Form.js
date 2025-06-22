@@ -327,7 +327,19 @@ const FormularioAdmision = () => {
             <Col md={3}>
               <Form.Group>
                 <Form.Label>Tipo de Sangre</Form.Label>
-                <Form.Control type="text" {...register('tipoSangre')} />
+                {/* <Form.Control type="text" {...register('tipoSangre')} /> */}
+                <Form.Control as="select" {...register('tipoSangre')}>
+                  <option>Seleccione</option>
+                  <option>O+</option>
+                  <option>O-</option>
+                  <option>A+</option>
+                  <option>A-</option>
+                  <option>B+</option>
+                  <option>B-</option>
+                  <option>AB+</option>
+                  <option>AB-</option>
+                  <option>Pendiente</option>
+                </Form.Control>
               </Form.Group>
             </Col>
           </Row>
@@ -482,10 +494,10 @@ const FormularioAdmision = () => {
                 <Form.Label>Área</Form.Label>
                 <Form.Control
                   as="select"
-                  {...register('area')}
+                  {...register('area_admision')}
                   onChange={(e) => {
                     setAreaSeleccionada(e.target.value);
-                    setValue('area', e.target.value); // opcional, si querés sincronizarlo con react-hook-form
+                    setValue('area_admision', e.target.value); // opcional, si querés sincronizarlo con react-hook-form
                   }}
                 >
                   <option value="">Seleccione</option>

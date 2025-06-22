@@ -109,7 +109,18 @@ const ModalAdmision = () => {
                                 <Col md={3}>
                                     <Form.Group>
                                         <Form.Label>Tipo de Sangre</Form.Label>
-                                        <Form.Control type="text" readOnly={readOnly} {...register('tipo_sangre')} />
+                                        <Form.Control as="select" {...register('tipoSangre')}>
+                                            <option>Seleccione</option>
+                                            <option>O+</option>
+                                            <option>O-</option>
+                                            <option>A+</option>
+                                            <option>A-</option>
+                                            <option>B+</option>
+                                            <option>B-</option>
+                                            <option>AB+</option>
+                                            <option>AB-</option>
+                                            <option>Pendiente</option>
+                                        </Form.Control>
                                     </Form.Group>
                                 </Col>
                             </Row>
@@ -265,10 +276,10 @@ const ModalAdmision = () => {
                                         <Form.Control
                                             as="select"
                                             disabled={readOnly}
-                                            {...register('area')}
+                                            {...register('area_admision')}
                                             onChange={(e) => {
                                                 setAreaSeleccionada(e.target.value);
-                                                setValue('area', e.target.value); // opcional, si querés sincronizarlo con react-hook-form
+                                                setValue('area_admision', e.target.value); // opcional, si querés sincronizarlo con react-hook-form
                                             }}
                                         >
                                             <option value="">Seleccione</option>
