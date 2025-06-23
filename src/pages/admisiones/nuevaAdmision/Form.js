@@ -10,7 +10,6 @@ import {
   Tabs,
   Tab,
 } from 'react-bootstrap';
-import { useForm } from 'react-hook-form';
 import { BiSearch } from 'react-icons/bi';
 import { convert_fecha_ddmmaa } from '../../../utils/formatUtils';
 import { FiAlignJustify } from "react-icons/fi";
@@ -19,10 +18,10 @@ import { AppContext } from './Context';
 const FormularioAdmision = () => {
 
   const { guardarAdmision, loading, listarHabitaciones, seguros, areaHabitacion, setAreaSeleccionada, areaSeleccionada,
-    doctor
+    doctor, register, handleSubmit, watch, setValue, getValues
   } = useContext(AppContext);
 
-  const { register, handleSubmit, watch, setValue, getValues } = useForm();
+  //const { register, handleSubmit, watch, setValue, getValues } = useForm();
   const [acompanantesVisibles, setAcompanantesVisibles] = useState([]);
   const [todayDate, setTodayDate] = useState('');
   const [mostrarModalFamiliar, setMostrarModalFamiliar] = useState(false);
@@ -227,7 +226,7 @@ const FormularioAdmision = () => {
     try {
       const datosTransformados = transformarCampos(data);
       const resultado = await guardarAdmision(datosTransformados);
-      alert('Guardado con éxito');
+      //alert('Guardado con éxito');
     } catch (err) {
       alert('Error al guardar');
     }
@@ -412,13 +411,14 @@ const FormularioAdmision = () => {
                 <Form.Label>Religión</Form.Label>
                 <Form.Control as="select" {...register('religion')}>
                   <option>Seleccione</option>
-                  <option>CATOLICA</option>
-                  <option>EVANGELICA</option>
-                  <option>JUDIA</option>
-                  <option>MORMONA</option>
-                  <option>MUSULMANA</option>
-                  <option>NO DEFINIDO</option>
-                  <option>TESTIGO DE JEHOVA</option>
+                  <option>No Difinido</option>
+                  <option>Católico/a</option>
+                  <option>Evangélico/a</option>
+                  <option>Judío/a</option>
+                  <option>Mormón/a</option>
+                  <option>Musulmán/a</option>
+                  <option>Testigo de Jehová</option>
+                  <option>Otro</option>
                 </Form.Control>
               </Form.Group>
             </Col>
@@ -529,6 +529,7 @@ const FormularioAdmision = () => {
                 <Form.Label>Médico Tratante</Form.Label>
                 <Form.Control as="select" {...register('medicoTratante')}>
                   <option value="">Seleccione</option>
+                  <option value="Sin referencia medica">Sin referencia medica</option>
                   {doctor.map((medico) => (
                     <option key={medico.id} value={medico.id}>
                       {medico.perfil.primer_nombre} {medico.perfil.primer_apellido}

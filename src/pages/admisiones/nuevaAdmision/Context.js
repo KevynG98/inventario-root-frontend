@@ -1,6 +1,6 @@
 import React, { createContext, useEffect, useState } from 'react';
 import { postData, getData } from '../../../apiService'
-import { get } from 'jquery';
+import { useForm } from 'react-hook-form';
 
 export const AppContext = createContext();
 
@@ -12,6 +12,7 @@ export const AppProvider = ({ children }) => {
     const [areaHabitacion, setAreaHabitacion] = useState([]);
     const [areaSeleccionada, setAreaSeleccionada] = useState('');
     const [doctor, setDoctor] = useState([]);
+    const { register, handleSubmit, watch, setValue, getValues, reset } = useForm();
 
     const getDoctores = async () => {
         setLoading(true);
@@ -72,6 +73,7 @@ export const AppProvider = ({ children }) => {
             throw error;
         } finally {
             setLoading(false);
+            reset(); // Limpiar el formulario después de guardar
         }
     };
 
@@ -121,10 +123,11 @@ export const AppProvider = ({ children }) => {
         loading,
         seguros,
         areaHabitacion,
-        areaSeleccionada, 
+        areaSeleccionada,
         setAreaSeleccionada,
-        doctor, 
-        setDoctor
+        doctor,
+        setDoctor,
+        register, handleSubmit, watch, setValue, getValues
     };
 
     return (

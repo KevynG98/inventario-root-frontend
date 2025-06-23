@@ -135,7 +135,7 @@ const ModalAdmision = () => {
                                 <Col md={2}>
                                     <Form.Group>
                                         <Form.Label>Edad</Form.Label>
-                                        <Form.Control type="text" readOnly={readOnly} {...register('edad')} disabled />
+                                        <Form.Control type="text" readOnly={readOnly} {...register('edadPaciente')} disabled />
                                     </Form.Group>
                                 </Col>
                                 <Col md={3}>
@@ -193,13 +193,14 @@ const ModalAdmision = () => {
                                         <Form.Label>Religión</Form.Label>
                                         <Form.Control as="select" disabled={readOnly} {...register('religion')}>
                                             <option>Seleccione</option>
-                                            <option>CATOLICA</option>
-                                            <option>EVANGELICA</option>
-                                            <option>JUDIA</option>
-                                            <option>MORMONA</option>
-                                            <option>MUSULMANA</option>
-                                            <option>NO DEFINIDO</option>
-                                            <option>TESTIGO DE JEHOVA</option>
+                                            <option>No Definido</option>
+                                            <option>Católico/a</option>
+                                            <option>Evangélico/a</option>
+                                            <option>Judío/a</option>
+                                            <option>Mormón/a</option>
+                                            <option>Musulmán/a</option>
+                                            <option>Testigo de Jehová</option>
+                                            <option>Otro</option>
                                         </Form.Control>
                                     </Form.Group>
                                 </Col>
@@ -311,6 +312,7 @@ const ModalAdmision = () => {
                                         <Form.Label>Médico Tratante</Form.Label>
                                         <Form.Control as="select" disabled={readOnly} {...register('medicoTratante')}>
                                             <option value="">Seleccione</option>
+                                            <option value="Sin referencia medica">Sin referencia medica</option>
                                             {Array.isArray(doctor) &&
                                                 doctor.map((medico) => (
                                                     <option key={medico.id} value={medico.id}>
@@ -407,6 +409,7 @@ const ModalAdmision = () => {
                                                             <option value="abuelo">Abuelo/a</option>
                                                             <option value="tio">Tío/a</option>
                                                             <option value="amigo">Amigo/a</option>
+                                                            <option value="esposo">Esposa/o</option>
                                                             <option value="otro">Otro</option>
                                                         </Form.Control>
                                                     </Form.Group>

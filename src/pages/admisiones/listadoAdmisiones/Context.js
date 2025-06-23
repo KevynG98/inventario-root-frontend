@@ -24,6 +24,33 @@ export const AppProvider = ({ children }) => {
     const [nullNextPage, setNullNextPage] = useState(null)
     const [nullPrevPage, setPrevNextPage] = useState(null)
 
+    const calcularEdad = (fecha) => {
+        const nacimiento = new Date(fecha);
+        const hoy = new Date();
+
+        const diffTiempo = hoy.getTime() - nacimiento.getTime();
+        const diffDias = Math.floor(diffTiempo / (1000 * 60 * 60 * 24));
+
+        if (diffDias < 30) {
+            return `${diffDias} día(s)`;
+        }
+
+        const diffMeses = (hoy.getFullYear() - nacimiento.getFullYear()) * 12 + hoy.getMonth() - nacimiento.getMonth();
+        if (diffMeses < 12) {
+            return `${diffMeses} mes(es)`;
+        }
+
+        let edad = hoy.getFullYear() - nacimiento.getFullYear();
+        const mes = hoy.getMonth() - nacimiento.getMonth();
+        const dia = hoy.getDate() - nacimiento.getDate();
+
+        if (mes < 0 || (mes === 0 && dia < 0)) {
+            edad--;
+        }
+
+        return `${edad} año(s)`;
+    };
+
     const getDoctores = async () => {
         setLoading(true);
         try {
@@ -82,7 +109,7 @@ export const AppProvider = ({ children }) => {
         try {
             const response = await getData(`admisiones/admisiones-resumen/?page=${page}`);
             const resultados = response.data.results;
-
+            console.log('ADMISIÓN RESUMEN: ', resultados);
             setAdmisionesData(resultados);
             setNullNextPage(response.data.next);
             setPrevNextPage(response.data.previous);
@@ -129,7 +156,7 @@ export const AppProvider = ({ children }) => {
                 tipoIdentificacion: a.tipo_identificacion,
                 numeroIdentificacion: a.numero_identificacion,
                 fechaNacimiento: a.fecha_nacimiento,
-                edad: a.edad,
+                edad: calcularEdad(a.fecha_nacimiento),
                 genero: a.genero,
                 correo: a.correo,
                 nit: a.nit,
@@ -140,7 +167,7 @@ export const AppProvider = ({ children }) => {
                 contacto: a.contacto,
                 correoContacto: a.correo_contacto,
                 telefonoContacto: a.telefono_contacto,
-              }));              
+            }));
 
             reset({
                 idFicha: data.id,
@@ -153,6 +180,7 @@ export const AppProvider = ({ children }) => {
                 estadoCivil: data.paciente.estado_civil,
                 tipo_sangre: data.paciente.tipo_sangre || '',
                 fechaNacimiento: data.paciente.fecha_nacimiento,
+                edadPaciente: calcularEdad(data.paciente.fecha_nacimiento),
                 tipoIdentificacion: data.paciente.tipo_identificacion,
                 numeroIdentificacion: data.paciente.numero_identificacion,
                 direccion: data.paciente.direccion,
@@ -170,8 +198,8 @@ export const AppProvider = ({ children }) => {
                 telefonoEmpresa2: data.datos_laborales?.telefono2,
                 ocupacion: data.datos_laborales?.ocupacion,
 
-                area: data.area_admision || '',
-                habitacion: data.habitacion || '',
+                area_admision: data.area_admision || '',
+                habitacion: data.habitacion_fk?.id || '',
                 medicoTratante: data.medico_tratante || '',
 
                 aseguradora: data.datos_seguro?.aseguradora,
@@ -223,6 +251,7 @@ export const AppProvider = ({ children }) => {
 
                 acompanantes: acompanantesTransformados,
             });
+            setAreaSeleccionada(data.habitacion_fk?.area || '');
         } catch (error) {
             console.error('Error al cargar admisión:', error);
         }
