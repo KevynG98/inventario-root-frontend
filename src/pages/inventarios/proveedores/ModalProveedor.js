@@ -19,7 +19,6 @@ const ModalProveedor = () => {
 
   const [cuentas, setCuentas] = useState([
     { banco: '', tipo: '', numero: '' },
-    { banco: '', tipo: '', numero: '' },
   ]);
 
   const agregarCuenta = () => {
@@ -42,7 +41,7 @@ const ModalProveedor = () => {
   useEffect(() => {
     if (modoFormulario === 'crear') {
       reset();
-      setCuentas([{ banco: '', tipo: '', numero: '' }, { banco: '', tipo: '', numero: '' }]);
+      setCuentas([{ banco: '', tipo: '', numero: '' }]);
     }
 
     if ((modoFormulario === 'editar' || modoFormulario === 'ver') && proveedorSeleccionado) {
@@ -196,7 +195,7 @@ const ModalProveedor = () => {
 
             <Tab eventKey="cuentas" title="Cuentas Bancarias">
               {cuentas.map((cuenta, index) => (
-                <div key={index} className="row mb-3 align-items-end">
+                <div key={index} className="row mb-3 align-items-center">
                   <Form.Group className="col-md-4">
                     <Form.Label>Banco</Form.Label>
                     <Form.Control

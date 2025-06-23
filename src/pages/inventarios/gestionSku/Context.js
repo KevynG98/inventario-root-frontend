@@ -77,7 +77,7 @@ export const ContextProvider = ({ children }) => {
 
   const cargarCategorias = async () => {
     try {
-      const response = await getData(`inventario/categorias/?page_size=100}`);
+      const response = await getData(`inventario/categorias/?page_size=100`);
       //console.log(responseCategorias.data)
       setCategorias(response.data.results);
     } catch (error) {
@@ -87,7 +87,7 @@ export const ContextProvider = ({ children }) => {
 
   const cargarMarcas = async () => {
     try {
-      const response = await getData(`inventario/marcas/?page_size=100}`);
+      const response = await getData(`inventario/marcas/?page_size=100`);
       //console.log(response.data)
       setMarcas(response.data.results);
     } catch (error) {

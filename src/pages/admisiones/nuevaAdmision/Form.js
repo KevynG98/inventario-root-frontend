@@ -625,6 +625,7 @@ const FormularioAdmision = () => {
                           <option value="abuelo">Abuelo/a</option>
                           <option value="tio">Tío/a</option>
                           <option value="amigo">Amigo/a</option>
+                          <option value="esposo">Esposa/o</option>
                           <option value="otro">Otro</option>
                         </Form.Control>
                       </Form.Group>

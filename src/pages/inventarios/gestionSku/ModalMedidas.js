@@ -172,6 +172,7 @@ const ModalMedidas = () => {
                   <option value="">Seleccionar</option>
                   <option value="consignacion">Consignación</option>
                   <option value="controlado">Controlado</option>
+                  <option value="normal">Inventario Normal</option>
                 </Form.Control>
               </Form.Group>
             </Col>
@@ -204,7 +205,13 @@ const ModalMedidas = () => {
             <Col md={4}>
               <Form.Group>
                 <Form.Label>Unidad de Compra *</Form.Label>
-                <Form.Control {...register('unidad_compra', { required: true })} readOnly={readOnly} />
+                {/* <Form.Control {...register('unidad_compra', { required: true })} readOnly={readOnly} /> */}
+                <Form.Control as="select" {...register('unidad_compra', { required: true })} readOnly={readOnly}>
+                  <option value="">Seleccionar</option>
+                  {unidadMedida?.map((data, i) => (
+                    <option key={i} value={data.nombre}>{data.nombre}</option>
+                  ))}
+                </Form.Control>
               </Form.Group>
             </Col>
             <Col md={4}>
