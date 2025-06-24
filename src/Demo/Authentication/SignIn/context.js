@@ -27,12 +27,13 @@ function ComponentProvider({ children, history }) {
                 setData1(response.data);
                 setIsLoading(false);
                 history.push("/dashboard/default");
-                
+
             } else {
                 setError(`Error ${response?.status || "desconocido"}`);
             }
         } catch (err) {
-            setError(err.message || "Ocurrió un error inesperado");
+            const backendError = err?.response?.data?.error;
+            setError(backendError || "Ocurrió un error inesperado");
         } finally {
             setIsLoading(false);
         }

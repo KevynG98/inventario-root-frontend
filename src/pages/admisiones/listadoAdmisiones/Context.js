@@ -107,7 +107,7 @@ export const AppProvider = ({ children }) => {
         });
 
         try {
-            const response = await getData(`admisiones/admisiones-resumen/?page=${page}`);
+            const response = await getData(`admisiones/admisiones-resumen/?page=${page}&page_size=25`);
             const resultados = response.data.results;
             console.log('ADMISIÓN RESUMEN: ', resultados);
             setAdmisionesData(resultados);

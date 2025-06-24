@@ -68,7 +68,7 @@ const ListadoAdmisiones = () => {
 
             {estaAbierta && (
               <div className="table-responsive mt-2">
-                <table className="table table-bordered table-sm">
+                <table className="table table-bordered table-sm align-middle small">
                   <thead className="table-primary text-dark fw-semibold">
                     <tr>
                       <th>Admisión</th>

@@ -3,7 +3,6 @@ import { NavLink } from 'react-router-dom';
 import '../../../assets/scss/style.scss';
 import { useForm } from 'react-hook-form';
 import { useComponentContext } from './context';
-import ModalCarga from './Modal';
 import logo from '../../../assets/images/hospistal/el-naranjo.png';
 import Swal from 'sweetalert2';
 
@@ -24,8 +23,25 @@ const SignUp1 = () => {
       });
     } else {
       Swal.close();
+
+      if (error) {
+        let mensaje = 'Ha ocurrido un error inesperado.';
+      
+        if (error.includes("User not found")) {
+          mensaje = 'El usuario ingresado no existe.';
+        } else if (error.includes("Incorrect password")) {
+          mensaje = 'La contraseña ingresada es incorrecta.';
+        }
+      
+        Swal.fire({
+          icon: 'error',
+          title: 'No se pudo iniciar sesión',
+          text: mensaje
+        });
+      }
+      
     }
-  }, [isLoading]);
+  }, [isLoading, error]);
 
   const onSubmit = (data) => {
     sendData(data);
