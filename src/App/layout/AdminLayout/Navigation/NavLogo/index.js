@@ -2,6 +2,7 @@ import React from 'react';
 import { FiArchive } from 'react-icons/fi'; // Feather Archive icon
 import DEMO from './../../../../../store/constant';
 import Aux from "../../../../../hoc/_Aux";
+import colors from '../../../../../utils/colors';
 
 const navLogo = (props) => {
     let toggleClass = ['mobile-menu'];
@@ -11,7 +12,7 @@ const navLogo = (props) => {
 
     return (
         <Aux>
-            <div className="navbar-brand header-logo" style={{ backgroundColor: '#2f3e5a' }}>
+            <div className="navbar-brand header-logo" style={{ backgroundColor: colors.black }}>
                 <a className="b-brand">
                     <div className="b-bg">
                         <FiArchive size={24} color="white" />

@@ -6,6 +6,7 @@ import windowSize from 'react-window-size';
 
 import Aux from "../../../../../hoc/_Aux";
 import * as actionTypes from "../../../../../store/actions";
+import colors from '../../../../../utils/colors';
 
 class NavContent extends Component {
   constructor(props) {
@@ -57,20 +58,50 @@ class NavContent extends Component {
 
       if (hasChildren) {
         return (
-          <li key={index} className={`nav-item pcoded-hasmenu ${isOpen ? 'pcoded-trigger' : ''}`}>
-            <a href="#!" className="nav-link" onClick={() => this.toggleSubmenu(currentIndex)}>
-              <span className="pcoded-micon">{item.icon}</span>
-              <span className="pcoded-mtext">{item.title}</span>
+          <li
+            key={index}
+            style={{
+              listStyleType: 'none',
+              backgroundColor: isOpen ? colors.black : 'transparent',
+              color: colors.white,
+              borderRadius: '8px',
+              marginBottom: '8px',
+              transition: 'background-color 0.3s ease',
+            }}
+          >
+            <a
+              href="#!"
+              onClick={() => this.toggleSubmenu(currentIndex)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                textDecoration: 'none',
+                color: colors.white,
+                padding: '10px 16px',
+                borderRadius: '8px',
+                backgroundColor: isOpen ? colors.primary : 'transparent',
+                transition: 'background-color 0.3s ease',
+              }}
+            >
+              <span style={{ marginRight: '12px' }}>{item.icon}</span>
+              <span>{item.title}</span>
             </a>
+
             <ul
-              className="pcoded-submenu"
               ref={el => this.submenuRefs[currentIndex] = el}
               style={{
+                listStyleType: 'none',
+                paddingLeft: '20px',
                 maxHeight: isOpen
-                  ? this.submenuRefs[currentIndex]?.scrollHeight + "px"
-                  : "0px",
+                  ? this.submenuRefs[currentIndex]?.scrollHeight + 'px'
+                  : '0px',
                 overflow: 'hidden',
-                transition: 'max-height 0.75s cubic-bezier(0.25, 1, 0.5, 1)'
+                transition: 'max-height 0.75s cubic-bezier(0.25, 1, 0.5, 1)',
+                backgroundColor: colors.black,
+                color: colors.white,
+                borderLeft: `2px solid ${colors.primary}`,
+                marginTop: '4px',
+                borderRadius: '6px',
               }}
             >
               {this.renderNavItems(item.children, `${currentIndex}-`)}

@@ -9,6 +9,7 @@ import OutsideClick from './OutsideClick';
 import Aux from './../../../../hoc/_Aux';
 import * as actionTypes from './../../../../store/actions';
 import staticRoutes from '../../../../utils/menuRoutes';
+import colors from '../../../../utils/colors';
 class Navigation extends Component {
   resize = () => {
     const contentWidth = document.getElementById('root').clientWidth;
@@ -50,7 +51,7 @@ class Navigation extends Component {
           display: 'flex',
           flexDirection: 'column',
           minHeight: '100vh',
-          backgroundColor: '#2f3e5a',
+          backgroundColor: colors.black,
         }}
       >
         <div
@@ -74,7 +75,7 @@ class Navigation extends Component {
             textAlign: 'center',
             fontSize: '12px',
             color: 'rgba(255,255,255,0.5)',
-            backgroundColor: '#2f3e5a',
+            backgroundColor: colors.black,
             borderTop: '1px solid rgba(255,255,255,0.1)',
           }}
         >
@@ -92,7 +93,7 @@ class Navigation extends Component {
             overflowY: 'auto',
             scrollbarWidth: 'none',
             msOverflowStyle: 'none',
-            backgroundColor: '#2f3e5a',
+            backgroundColor: colors.black,
           }}
         >
           {this.props.windowWidth < 992 ? (
