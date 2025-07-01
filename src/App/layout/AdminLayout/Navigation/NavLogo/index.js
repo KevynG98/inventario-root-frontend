@@ -1,5 +1,6 @@
 import React from 'react';
-import DEMO  from './../../../../../store/constant';
+import { FiArchive } from 'react-icons/fi'; // Feather Archive icon
+import DEMO from './../../../../../store/constant';
 import Aux from "../../../../../hoc/_Aux";
 
 const navLogo = (props) => {
@@ -13,13 +14,11 @@ const navLogo = (props) => {
             <div className="navbar-brand header-logo" style={{ backgroundColor: '#2f3e5a' }}>
                 <a className="b-brand">
                     <div className="b-bg">
-                        <i className="feather icon-trending-up" />
+                        <FiArchive size={24} color="white" />
                     </div>
-                    <span className="b-title">Hospital Naranjo</span>
+
+                    <span className="b-title">Sistema de inventarios</span>
                 </a>
-                {/* <a href={DEMO.BLANK_LINK} className={toggleClass.join(' ')} id="mobile-collapse" onClick={props.onToggleNavigation}>
-                    <span />
-                </a> */}
             </div>
         </Aux>
     );

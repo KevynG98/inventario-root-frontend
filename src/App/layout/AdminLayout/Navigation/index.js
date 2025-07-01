@@ -64,7 +64,7 @@ class Navigation extends Component {
             windowWidth={this.props.windowWidth}
             onToggleNavigation={this.props.onToggleNavigation}
           />
-          <NavContent navigation={filteredRoutes} />
+          <NavContent navigation={staticRoutes} />
         </div>
 
         <div

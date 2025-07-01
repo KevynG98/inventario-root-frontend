@@ -38,7 +38,8 @@ const ModalMedidas = () => {
         unidad_compra: '',
         unidad_despacho: '',
         unidades_por_paquete: 1,
-        descripcion_estado_cuenta: ''
+        descripcion_estado_cuenta: '',
+        barcode: '',
       });
     }
 
@@ -229,6 +230,15 @@ const ModalMedidas = () => {
               <Form.Group>
                 <Form.Label>Unidades x paquete *</Form.Label>
                 <Form.Control type="number" min={1} {...register('unidades_por_paquete', { required: true })} readOnly={readOnly} />
+              </Form.Group>
+            </Col>
+          </Row>
+
+          <Row className="mt-2">
+            <Col md={4}>
+              <Form.Group>
+                <Form.Label>Barcode</Form.Label>
+                <Form.Control {...register('barcode')} readOnly={readOnly} />
               </Form.Group>
             </Col>
           </Row>

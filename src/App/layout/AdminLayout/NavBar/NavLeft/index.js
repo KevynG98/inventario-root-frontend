@@ -16,20 +16,22 @@ class NavLeft extends Component {
         this.props.history.push(url);
     };
 
-    hasAccess = (roles) => {
-        const user = JSON.parse(localStorage.getItem("user") || "{}");
-        const userRoles = user?.roles?.map(r => r.id) || [];
-        return !roles || roles.some(role => userRoles.includes(role));
-    };
+    // Función original para validar roles (comentada por ahora)
+    // hasAccess = (roles) => {
+    //     const user = JSON.parse(localStorage.getItem("user") || "{}");
+    //     const userRoles = user?.roles?.map(r => r.id) || [];
+    //     return !roles || roles.some(role => userRoles.includes(role));
+    // };
 
     renderMenuItems = () => {
-        const user = JSON.parse(localStorage.getItem("user") || "{}");
-        const userRoles = user?.roles?.map(r => r.id) || [];
+        // const user = JSON.parse(localStorage.getItem("user") || "{}");
+        // const userRoles = user?.roles?.map(r => r.id) || [];
 
-        const hasAccess = (roles) => !roles || roles.some(role => userRoles.includes(role));
+        // const hasAccess = (roles) => !roles || roles.some(role => userRoles.includes(role));
 
-        const dashboardItem = staticRoutes.find(r => r.title === 'Dashboard' && !r.children && hasAccess(r.roles));
-        const sections = staticRoutes.filter(r => r.children && hasAccess(r.roles));
+        // Sin filtro de roles (todos los menús visibles)
+        const dashboardItem = staticRoutes.find(r => r.title === 'Dashboard' && !r.children);
+        const sections = staticRoutes.filter(r => r.children);
 
         return (
             <>
@@ -64,7 +66,7 @@ class NavLeft extends Component {
                             {section.title}
                         </div>
                         {section.children.map((item, i) => {
-                            if (!hasAccess(item.roles)) return null;
+                            // if (!hasAccess(item.roles)) return null; // ← Filtrado por roles comentado
                             return (
                                 <div
                                     key={i}
@@ -90,7 +92,6 @@ class NavLeft extends Component {
         );
     };
 
-
     render() {
         const isMobile = this.props.windowWidth < 992;
 
@@ -98,7 +99,6 @@ class NavLeft extends Component {
             <>
                 {isMobile && (
                     <>
-                        {/* Botón hamburguesa */}
                         <div style={{
                             position: 'fixed',
                             top: 15,
@@ -113,7 +113,6 @@ class NavLeft extends Component {
                             <FiMenu size={24} />
                         </div>
 
-                        {/* Sidebar flotante */}
                         {this.state.mobileOpen && (
                             <div
                                 style={{

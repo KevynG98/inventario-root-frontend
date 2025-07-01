@@ -5,18 +5,18 @@
     align-items: center;
 
     .b-bg {
-        background: $theme-color;
+        background: #007b8f;
         border-radius: 10px;
         width: 35px;
         height: 35px;
         display: inline-flex;
         align-items: center;
         justify-content: center;
-
+    
         i {
             color: #fff;
         }
-    }
+    }    
 
     .b-title {
         margin-left: 10px;
