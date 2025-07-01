@@ -44,9 +44,9 @@ const ModalCategoria = () => {
     <Modal show={show} onHide={showModal} size="sm" centered scrollable>
       <Modal.Header closeButton>
         <Modal.Title>
-          {modoFormulario === 'crear' && 'Nuevo proveedor'}
-          {modoFormulario === 'editar' && 'Editar proveedor'}
-          {modoFormulario === 'ver' && 'Ver proveedor'}
+          {modoFormulario === 'crear' && 'Nueva categoría'}
+          {modoFormulario === 'editar' && 'Editar categoría'}
+          {modoFormulario === 'ver' && 'Ver categoría'}
         </Modal.Title>
       </Modal.Header>
       <Modal.Body>

@@ -1,17 +1,19 @@
 import React, { createContext, useEffect, useState } from 'react';
-import { postData, getData } from '../../../apiService'
+import { postData, getData } from '../../../apiService';
 import { useForm } from 'react-hook-form';
+import Swal from 'sweetalert2';
 
 export const AppContext = createContext();
 
 export const AppProvider = ({ children }) => {
     const [state, setState] = useState(null);
     const [loading, setLoading] = useState(false);
-    const [listarHabitaciones, setListarHabitaciones] = useState([])
-    const [seguros, setSeguros] = useState([])
+    const [listarHabitaciones, setListarHabitaciones] = useState([]);
+    const [seguros, setSeguros] = useState([]);
     const [areaHabitacion, setAreaHabitacion] = useState([]);
     const [areaSeleccionada, setAreaSeleccionada] = useState('');
     const [doctor, setDoctor] = useState([]);
+
     const { register, handleSubmit, watch, setValue, getValues, reset } = useForm();
 
     const getDoctores = async () => {
@@ -22,11 +24,10 @@ export const AppProvider = ({ children }) => {
             setDoctor(response.data.results);
         } catch (error) {
             console.error('Fallo al obtener doctores:', error);
-            throw error;
         } finally {
             setLoading(false);
         }
-    }
+    };
 
     const getHabitaciones = async () => {
         setLoading(true);
@@ -40,36 +41,50 @@ export const AppProvider = ({ children }) => {
             console.log('HABITACIONES: ', response.data.results);
         } catch (error) {
             console.error('Fallo al obtener habitaciones:', error);
-            throw error;
         } finally {
             setLoading(false);
         }
-    }
+    };
 
     const getSeguros = async () => {
         setLoading(true);
         try {
             const response = await getData('inventario/seguros/?page_size=50');
             console.log('SEGUROS: ', response.data);
-            setSeguros(response.data.results)
+            setSeguros(response.data.results);
         } catch (error) {
             console.error('Fallo al obtener seguros:', error);
-            throw error;
         } finally {
             setLoading(false);
         }
-    }
+    };
 
     const guardarAdmision = async (formulario) => {
         setLoading(true);
         try {
             const datosLimpios = limpiarDatosVacios(formulario);
-            console.log(datosLimpios)
+            console.log(datosLimpios);
             const response = await postData('admisiones/', datosLimpios);
             console.log('Admisión guardada con éxito:', response.data);
+
+            Swal.fire({
+                icon: 'success',
+                title: '¡Éxito!',
+                text: 'Admisión guardada con éxito',
+                confirmButtonColor: '#007b8f'
+            });
+
             return response.data;
         } catch (error) {
             console.error('Error al guardar admisión:', error);
+
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'No se pudo guardar la admisión',
+                confirmButtonColor: '#d33'
+            });
+
             throw error;
         } finally {
             setLoading(false);
@@ -110,10 +125,10 @@ export const AppProvider = ({ children }) => {
     };
 
     useEffect(() => {
-        getHabitaciones()
-        getSeguros()
-        getDoctores()
-    }, [])
+        getHabitaciones();
+        getSeguros();
+        getDoctores();
+    }, []);
 
     const values = {
         state,
@@ -127,7 +142,11 @@ export const AppProvider = ({ children }) => {
         setAreaSeleccionada,
         doctor,
         setDoctor,
-        register, handleSubmit, watch, setValue, getValues
+        register,
+        handleSubmit,
+        watch,
+        setValue,
+        getValues
     };
 
     return (

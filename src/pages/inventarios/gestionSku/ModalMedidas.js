@@ -118,8 +118,8 @@ const ModalMedidas = () => {
               <Form.Group>
                 <Form.Label>Estado *</Form.Label>
                 <Form.Control as="select" {...register('estado', { required: true })} readOnly={readOnly}>
-                  <option value="alta">Alta</option>
-                  <option value="baja">Baja</option>
+                  <option value="alta">Disponible</option>
+                  <option value="baja">No Disponible</option>
                 </Form.Control>
               </Form.Group>
             </Col>
@@ -187,18 +187,18 @@ const ModalMedidas = () => {
                 {errors.codigo_sku && <small className="text-danger">Código SKU es obligatorio</small>}
               </Form.Group>
             </Col>
-            <Col md={4}>
+            <Col md={8}>
               <Form.Group>
                 <Form.Label>Nombre *</Form.Label>
                 <Form.Control {...register('nombre', { required: true })} readOnly={readOnly} />
               </Form.Group>
             </Col>
-            <Col md={4}>
+            {/* <Col md={4}>
               <Form.Group>
                 <Form.Label>Cantidad (stock inicial)</Form.Label>
                 <Form.Control type="number" {...register('cantidad')} readOnly={readOnly} />
               </Form.Group>
-            </Col>
+            </Col> */}
           </Row>
 
           <Row className="mt-2">
@@ -234,13 +234,22 @@ const ModalMedidas = () => {
           </Row>
 
           <Row className="mt-2">
+            <Col md={4}>
+              <Form.Group>
+                <Form.Label>Codigo de Barras</Form.Label>
+                <Form.Control {...register('barcode', { required: true })} readOnly={readOnly} />
+              </Form.Group>
+            </Col>
+          </Row>
+
+          {/* <Row className="mt-2">
             <Col>
               <Form.Group>
                 <Form.Label>Descripción en el Estado de Cuenta *</Form.Label>
                 <Form.Control as="textarea" rows={2} {...register('descripcion_estado_cuenta')} readOnly={readOnly} />
               </Form.Group>
             </Col>
-          </Row>
+          </Row> */}
 
           <div className="d-flex justify-content-end mt-4">
             <Button variant="secondary" onClick={showModal} className="me-2">

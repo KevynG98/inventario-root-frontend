@@ -13,7 +13,7 @@ const ModalProveedor = () => {
     proveedorSeleccionado, modoFormulario, actualizarProveedor
   } = useMyContext();
 
-  const { register, handleSubmit, setValue, reset } = useForm();
+  const { register, handleSubmit, setValue, reset, formState: { errors } } = useForm();
   const [key, setKey] = useState('contables');
   const readOnly = modoFormulario === 'ver';
 
@@ -111,7 +111,24 @@ const ModalProveedor = () => {
 
             <Form.Group className="col-md-3">
               <Form.Label>Página Web</Form.Label>
-              <Form.Control {...register("pagina_web")} disabled={readOnly} />
+              <Form.Control
+                type="text"
+                {...register("pagina_web", {
+                  setValueAs: value => {
+                    if (!value) return '';
+                    if (/^https?:\/\//.test(value)) return value; // ya tiene http o https
+                    return 'https://' + value;
+                  },
+                  pattern: {
+                    value: /^(https?:\/\/)(www\.)?[a-zA-Z0-9.-]+\.[a-z]{2,}$/,
+                    message: 'Formato de URL inválido. Ej: www.ejemplo.com',
+                  }
+                })}
+                disabled={readOnly}
+              />
+              {errors.pagina_web && (
+                <Form.Text className="text-danger">{errors.pagina_web.message}</Form.Text>
+              )}
             </Form.Group>
 
             <Form.Group className="col-md-2">
@@ -146,8 +163,15 @@ const ModalProveedor = () => {
                 </Form.Group>
 
                 <Form.Group className="col-md-2 mb-3">
-                  <Form.Label>Días Crédito *</Form.Label>
-                  <Form.Control type="number" {...register("dias_credito")} disabled={readOnly} />
+                  <Form.Label>Días Crédito</Form.Label>
+                  <Form.Control
+                    type="number"
+                    {...register("dias_credito", {
+                      setValueAs: v => v === '' ? null : parseInt(v)
+                    })}
+                    disabled={readOnly}
+                  />
+                  <Form.Text muted>Podés dejarlo vacío si no aplica</Form.Text>
                 </Form.Group>
 
                 <Form.Group className="col-md-2 mb-3">

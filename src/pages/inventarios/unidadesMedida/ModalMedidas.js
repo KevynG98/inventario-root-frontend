@@ -44,9 +44,9 @@ const ModalMedidas = () => {
     <Modal show={show} onHide={showModal} size="sm" centered scrollable>
       <Modal.Header closeButton>
         <Modal.Title>
-          {modoFormulario === 'crear' && 'Nuevo proveedor'}
-          {modoFormulario === 'editar' && 'Editar proveedor'}
-          {modoFormulario === 'ver' && 'Ver proveedor'}
+          {modoFormulario === 'crear' && 'Nueva Medida'}
+          {modoFormulario === 'editar' && 'Editar Medida'}
+          {modoFormulario === 'ver' && 'Ver Medida'}
         </Modal.Title>
       </Modal.Header>
       <Modal.Body>
