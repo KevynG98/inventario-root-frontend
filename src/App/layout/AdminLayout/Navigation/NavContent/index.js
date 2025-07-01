@@ -111,17 +111,34 @@ class NavContent extends Component {
       }
 
       return (
-        <li key={index} className="nav-item">
+        <li key={index} className="nav-item" style={{ listStyle: 'none', marginBottom: '8px' }}>
           <Link
             to={item.url}
             className="nav-link"
             onClick={() => {
               if (!isChild) this.setState({ activeMenu: null });
             }}
-            style={{ paddingLeft: isChild ? '1.5rem' : undefined }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              textDecoration: 'none',
+              color:
+                this.props.location.pathname === item.url
+                  ? colors.white
+                  : 'rgba(255, 255, 255, 0.85)',
+              backgroundColor:
+                this.props.location.pathname === item.url
+                  ? colors.primary
+                  : 'transparent',
+              padding: '10px 16px',
+              borderRadius: '8px',
+              transition: 'all 0.3s ease',
+              fontWeight:
+                this.props.location.pathname === item.url ? 'bold' : 'normal',
+            }}
           >
-            <span className="pcoded-micon">{item.icon}</span>
-            <span className="pcoded-mtext">{item.title}</span>
+            <span style={{ marginRight: '12px' }}>{item.icon}</span>
+            <span>{item.title}</span>
           </Link>
         </li>
       );
