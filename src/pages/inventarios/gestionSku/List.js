@@ -78,7 +78,7 @@ const Medidas = () => {
                       <FiEdit />
                     </Button>
                   </OverlayTrigger>
-                  <OverlayTrigger overlay={<Tooltip>Eliminar</Tooltip>}>
+                  {/* <OverlayTrigger overlay={<Tooltip>Eliminar</Tooltip>}>
                     <Button className="btn btn-outline-secondary btn-sm me-1" onClick={() => eliminarProveedor(sku.id)}>
                       <FiTrash2 />
                     </Button>
@@ -87,7 +87,7 @@ const Medidas = () => {
                     <Button className="btn btn-outline-secondary btn-sm" onClick={() => abrirModalMovimiento(sku)}>
                       <FiTruck />
                     </Button>
-                  </OverlayTrigger>
+                  </OverlayTrigger> */}
                 </td>
               </tr>
             ))}
