@@ -32,56 +32,73 @@ class NavContent extends Component {
       const isOpen = !!this.state.activeMenus[currentKey];
 
       const containerStyle = {
-        opacity: isOpen ? 1 : 0.9,
-        transform: isOpen ? 'translateY(0)' : 'translateY(-2px)',
-        transition: 'all 0.4s ease'
+        padding: 0,
+        margin: 0,
+        backgroundColor: isOpen ? '#384865' : 'transparent',
+        borderLeft: isOpen ? '3px solid #00BFFF' : '3px solid transparent',
+        transition: 'all 0.3s ease',
+        listStyle: 'none' // Importante para quitar puntos o márgenes heredados
       };
+
+      const linkStyles = {
+        padding: '8px 16px',  // compactamos el padding
+        display: 'flex',
+        alignItems: 'center',
+        minHeight: '40px',    // más compacto, pero legible
+        color: '#fff',
+        textDecoration: 'none',
+        justifyContent: 'space-between'
+      };
+
+      const iconAndText = (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <span style={{
+            fontSize: '18px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '24px',
+            height: '24px'
+          }}>
+            {item.icon}
+          </span>
+          <span style={{
+            fontSize: '14px',
+            whiteSpace: 'nowrap'
+          }}>
+            {item.title}
+          </span>
+        </div>
+      );
 
       if (hasChildren) {
         return (
-          <li key={currentKey} className={`nav-item pcoded-hasmenu ${isOpen ? 'pcoded-trigger' : ''}`} style={containerStyle}>
+          <li key={currentKey} style={containerStyle}>
             <a
               href="#!"
-              className="nav-link"
               onClick={() => this.toggleSubmenu(currentKey)}
-              style={{
-                padding: '10px 16px',
-                display: 'flex',
-                alignItems: 'center',
-                minHeight: '44px',
-                color: '#fff',
-                textDecoration: 'none',
-                gap: '10px'
-              }}
+              style={linkStyles}
             >
+              {iconAndText}
+
               <span style={{
-                fontSize: '18px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                width: '24px',
-                height: '24px'
+                fontSize: '12px',
+                transition: 'transform 0.3s',
+                transform: isOpen ? 'rotate(90deg)' : 'rotate(0deg)'
               }}>
-                {item.icon}
-              </span>
-              <span style={{
-                fontSize: '14px',
-                whiteSpace: 'nowrap'
-              }}>
-                {item.title}
+                ▶
               </span>
             </a>
             <ul
-              className="pcoded-submenu"
               ref={el => this.submenuRefs[currentKey] = el}
               style={{
-                maxHeight: isOpen ? (this.submenuRefs[currentKey]?.scrollHeight || 500) + "px" : "0px",
+                paddingLeft: '20px',
+                margin: 0,
+                maxHeight: isOpen ? ((this.submenuRefs[currentKey] ? this.submenuRefs[currentKey].scrollHeight : 500) + "px") : "0px",
                 opacity: isOpen ? 1 : 0,
                 transform: isOpen ? 'translateY(0px)' : 'translateY(-5px)',
                 overflow: 'hidden',
-                transition: 'all 0.5s cubic-bezier(0.25, 1, 0.5, 1)',
-                paddingLeft: '20px',
-                marginTop: '5px'
+                transition: 'all 0.5s cubic-bezier(0.25, 1, 0.5, 1)'
               }}
             >
               {this.renderNavItems(item.children, `${currentKey}-`)}
@@ -91,42 +108,19 @@ class NavContent extends Component {
       }
 
       return (
-        <li key={currentKey} className="nav-item" style={{
-          opacity: 1,
-          transition: 'opacity 0.3s ease'
+        <li key={currentKey} style={{
+          padding: 0,
+          margin: 0,
+          listStyle: 'none'
         }}>
           <Link
             to={item.url}
-            className="nav-link"
+            style={linkStyles}
             onClick={() => {
               if (!parentKey) this.setState({ activeMenus: {} });
             }}
-            style={{
-              padding: '10px 16px',
-              display: 'flex',
-              alignItems: 'center',
-              minHeight: '44px',
-              color: '#fff',
-              textDecoration: 'none',
-              gap: '10px'
-            }}
           >
-            <span style={{
-              fontSize: '18px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: '24px',
-              height: '24px'
-            }}>
-              {item.icon}
-            </span>
-            <span style={{
-              fontSize: '14px',
-              whiteSpace: 'nowrap'
-            }}>
-              {item.title}
-            </span>
+            {iconAndText}
           </Link>
         </li>
       );
