@@ -17,7 +17,7 @@ const staticRoutes = [
         icon: <FiUserPlus />,
         roles: [1],
         children: [
-            { title: 'Nueva Admision', url: '/dashboard/admisiones/nueva/', icon: <FiUserPlus />},
+            { title: 'Nueva Admision', url: '/dashboard/admisiones/nueva/', icon: <FiUserPlus /> },
             { title: 'Listado de Admisiones', url: '/dashboard/admisiones/listar-admision', icon: <FiList />, roles: [1] },
             { title: 'Estado de cuenta', url: '/dashboard/admisiones/listar-admision-estados/', icon: <FiFileText />, roles: [1] },
             { title: 'Egreso de Pacientes', url: '/dashboard/construccion/', icon: <FiLogOut />, roles: [1] },
@@ -51,9 +51,17 @@ const staticRoutes = [
         icon: <FiPackage />,
         roles: [1, 2],
         children: [
-            { title: 'Solicitud de Medicamentos', url: '/dashboard/futuro/', icon: <FiFileText />, roles: [1, 2] },
+            {
+                title: 'Solicitud de Medicamentos',
+                icon: <FiFileText />,
+                roles: [1, 2],
+                children: [
+                    { title: 'Medicamento A', url: '/dashboard/futuro/', icon: <FiFileText />, roles: [1, 2] },
+                    { title: 'Medicamento B', url: '/dashboard/futuro/', icon: <FiFileText />, roles: [1, 2] },
+                ]
+            },
             { title: 'Devoluciones de Medicamentos', url: '/dashboard/futuro/', icon: <FiLogOut />, roles: [1, 2] },
-            { title: 'Solicitud  de Compra', url: '/dashboard/futuro/', icon: <FiFilePlus />, roles: [1, 2] },
+            { title: 'Solicitud de Compra', url: '/dashboard/futuro/', icon: <FiFilePlus />, roles: [1, 2] },
             { title: 'Traslados', url: '/dashboard/futuro/', icon: <FiTruck />, roles: [1, 2] }
         ]
     },

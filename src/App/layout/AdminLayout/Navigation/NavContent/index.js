@@ -11,86 +11,122 @@ class NavContent extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      scrollWidth: 0,
-      prevDisable: true,
-      nextDisable: false,
-      activeMenu: null
+      activeMenus: {}
     };
     this.submenuRefs = {};
   }
 
-  scrollPrevHandler = () => {
-    const wrapperWidth = document.getElementById('sidenav-wrapper').clientWidth;
-    let scrollWidth = this.state.scrollWidth - wrapperWidth;
-    this.setState({
-      scrollWidth: scrollWidth < 0 ? 0 : scrollWidth,
-      prevDisable: scrollWidth <= 0,
-      nextDisable: false
-    });
-  };
-
-  scrollNextHandler = () => {
-    const wrapperWidth = document.getElementById('sidenav-wrapper').clientWidth;
-    const contentWidth = document.getElementById('sidenav-horizontal').clientWidth;
-    let scrollWidth = this.state.scrollWidth + (wrapperWidth - 80);
-    const maxScroll = contentWidth - wrapperWidth + 80;
-
-    this.setState({
-      scrollWidth: scrollWidth > maxScroll ? maxScroll : scrollWidth,
-      prevDisable: false,
-      nextDisable: scrollWidth >= maxScroll
-    });
-  };
-
-  toggleSubmenu = (index) => {
+  toggleSubmenu = (key) => {
     this.setState(prevState => ({
-      activeMenu: prevState.activeMenu === index ? null : index
+      activeMenus: {
+        ...prevState.activeMenus,
+        [key]: !prevState.activeMenus[key]
+      }
     }));
   };
 
-  renderNavItems = (items, parentIndex = '') => {
+  renderNavItems = (items, parentKey = '') => {
     return items.map((item, index) => {
-      const currentIndex = `${parentIndex}${index}`;
+      const currentKey = `${parentKey}${index}`;
       const hasChildren = item.children && item.children.length > 0;
-      const isOpen = this.state.activeMenu === currentIndex;
-      const isChild = parentIndex !== '';
+      const isOpen = !!this.state.activeMenus[currentKey];
+
+      const containerStyle = {
+        opacity: isOpen ? 1 : 0.9,
+        transform: isOpen ? 'translateY(0)' : 'translateY(-2px)',
+        transition: 'all 0.4s ease'
+      };
 
       if (hasChildren) {
         return (
-          <li key={index} className={`nav-item pcoded-hasmenu ${isOpen ? 'pcoded-trigger' : ''}`}>
-            <a href="#!" className="nav-link" onClick={() => this.toggleSubmenu(currentIndex)}>
-              <span className="pcoded-micon">{item.icon}</span>
-              <span className="pcoded-mtext">{item.title}</span>
+          <li key={currentKey} className={`nav-item pcoded-hasmenu ${isOpen ? 'pcoded-trigger' : ''}`} style={containerStyle}>
+            <a
+              href="#!"
+              className="nav-link"
+              onClick={() => this.toggleSubmenu(currentKey)}
+              style={{
+                padding: '10px 16px',
+                display: 'flex',
+                alignItems: 'center',
+                minHeight: '44px',
+                color: '#fff',
+                textDecoration: 'none',
+                gap: '10px'
+              }}
+            >
+              <span style={{
+                fontSize: '18px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '24px',
+                height: '24px'
+              }}>
+                {item.icon}
+              </span>
+              <span style={{
+                fontSize: '14px',
+                whiteSpace: 'nowrap'
+              }}>
+                {item.title}
+              </span>
             </a>
             <ul
               className="pcoded-submenu"
-              ref={el => this.submenuRefs[currentIndex] = el}
+              ref={el => this.submenuRefs[currentKey] = el}
               style={{
-                maxHeight: isOpen
-                  ? this.submenuRefs[currentIndex]?.scrollHeight + "px"
-                  : "0px",
+                maxHeight: isOpen ? (this.submenuRefs[currentKey]?.scrollHeight || 500) + "px" : "0px",
+                opacity: isOpen ? 1 : 0,
+                transform: isOpen ? 'translateY(0px)' : 'translateY(-5px)',
                 overflow: 'hidden',
-                transition: 'max-height 0.75s cubic-bezier(0.25, 1, 0.5, 1)'
+                transition: 'all 0.5s cubic-bezier(0.25, 1, 0.5, 1)',
+                paddingLeft: '20px',
+                marginTop: '5px'
               }}
             >
-              {this.renderNavItems(item.children, `${currentIndex}-`)}
+              {this.renderNavItems(item.children, `${currentKey}-`)}
             </ul>
           </li>
         );
       }
 
       return (
-        <li key={index} className="nav-item">
+        <li key={currentKey} className="nav-item" style={{
+          opacity: 1,
+          transition: 'opacity 0.3s ease'
+        }}>
           <Link
             to={item.url}
             className="nav-link"
             onClick={() => {
-              if (!isChild) this.setState({ activeMenu: null });
+              if (!parentKey) this.setState({ activeMenus: {} });
             }}
-            style={{ paddingLeft: isChild ? '1.5rem' : undefined }}
+            style={{
+              padding: '10px 16px',
+              display: 'flex',
+              alignItems: 'center',
+              minHeight: '44px',
+              color: '#fff',
+              textDecoration: 'none',
+              gap: '10px'
+            }}
           >
-            <span className="pcoded-micon">{item.icon}</span>
-            <span className="pcoded-mtext">{item.title}</span>
+            <span style={{
+              fontSize: '18px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: '24px',
+              height: '24px'
+            }}>
+              {item.icon}
+            </span>
+            <span style={{
+              fontSize: '14px',
+              whiteSpace: 'nowrap'
+            }}>
+              {item.title}
+            </span>
           </Link>
         </li>
       );
@@ -106,7 +142,13 @@ class NavContent extends Component {
         className={`nav pcoded-inner-navbar ${horizontal ? 'sidenav-inner' : ''}`}
         id={horizontal ? 'sidenav-horizontal' : ''}
         onMouseLeave={this.props.onNavContentLeave}
-        style={horizontal ? { marginLeft: `-${this.state.scrollWidth}px` } : {}}
+        style={{
+          listStyle: 'none',
+          padding: 0,
+          margin: 0,
+          backgroundColor: '#2e3b55',
+          color: '#fff'
+        }}
       >
         {navItems}
       </ul>
@@ -116,24 +158,10 @@ class NavContent extends Component {
       <Aux>
         {horizontal ? (
           <div className="navbar-content sidenav-horizontal" id="layout-sidenav">
-            <a
-              href="#!"
-              className={`sidenav-horizontal-prev ${this.state.prevDisable ? 'disabled' : ''}`}
-              onClick={this.scrollPrevHandler}
-            >
-              <span />
-            </a>
             <div id="sidenav-wrapper" className="sidenav-horizontal-wrapper">{navList}</div>
-            <a
-              href="#!"
-              className={`sidenav-horizontal-next ${this.state.nextDisable ? 'disabled' : ''}`}
-              onClick={this.scrollNextHandler}
-            >
-              <span />
-            </a>
           </div>
         ) : (
-          <div className="navbar-content datta-scroll">
+          <div className="navbar-content datta-scroll" style={{ height: '100vh', backgroundColor: '#2e3b55' }}>
             <PerfectScrollbar>{navList}</PerfectScrollbar>
           </div>
         )}
