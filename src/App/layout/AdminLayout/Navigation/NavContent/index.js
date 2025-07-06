@@ -4,6 +4,8 @@ import { connect } from 'react-redux';
 import PerfectScrollbar from 'react-perfect-scrollbar';
 import windowSize from 'react-window-size';
 
+import { FiChevronRight } from 'react-icons/fi';
+
 import Aux from "../../../../../hoc/_Aux";
 import * as actionTypes from "../../../../../store/actions";
 
@@ -37,67 +39,77 @@ class NavContent extends Component {
         backgroundColor: isOpen ? '#384865' : 'transparent',
         borderLeft: isOpen ? '3px solid #00BFFF' : '3px solid transparent',
         transition: 'all 0.3s ease',
-        listStyle: 'none' // Importante para quitar puntos o márgenes heredados
+        listStyle: 'none',
+        // Aseguramos que el borde izquierdo no genere overflow
+        boxSizing: 'border-box'
       };
 
-      const linkStyles = {
-        padding: '8px 16px',  // compactamos el padding
+      const linkStyle = {
         display: 'flex',
         alignItems: 'center',
-        minHeight: '40px',    // más compacto, pero legible
+        justifyContent: 'flex-start',     // alineamos todo al inicio
+        padding: '8px 16px',
+        minHeight: '40px',
         color: '#fff',
-        textDecoration: 'none',
-        justifyContent: 'space-between'
+        textDecoration: 'none'
       };
 
-      const iconAndText = (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <span style={{
-            fontSize: '18px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            width: '24px',
-            height: '24px'
-          }}>
-            {item.icon}
-          </span>
-          <span style={{
-            fontSize: '14px',
-            whiteSpace: 'nowrap'
-          }}>
-            {item.title}
-          </span>
-        </div>
+      // Elementos del ítem: icono + texto + (opcional) flecha
+      const iconSpan = (
+        <span style={{
+          fontSize: '18px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          width: '24px',
+          height: '24px'
+        }}>
+          {item.icon}
+        </span>
       );
 
+      const textSpan = (
+        <span style={{
+          fontSize: '14px',
+          // whiteSpace eliminado para permitir wrapping si es necesario
+          // whiteSpace: 'nowrap'
+        }}>
+          {item.title}
+        </span>
+      );
+
+      // Si el ítem tiene hijos, renderizar un <a> con flecha desplegable
       if (hasChildren) {
         return (
           <li key={currentKey} style={containerStyle}>
             <a
               href="#!"
               onClick={() => this.toggleSubmenu(currentKey)}
-              style={linkStyles}
+              style={linkStyle}
             >
-              {iconAndText}
-
-              <span style={{
-                fontSize: '12px',
+              {/* Icono + Texto del ítem */}
+              {iconSpan}
+              {textSpan}
+              {/* Flecha desplegable */}
+              <FiChevronRight style={{
+                fontSize: '16px',
+                marginLeft: '10px',               // separa la flecha del texto
                 transition: 'transform 0.3s',
                 transform: isOpen ? 'rotate(90deg)' : 'rotate(0deg)'
-              }}>
-                ▶
-              </span>
+              }} />
             </a>
+            {/* Submenú desplegable */}
             <ul
-              ref={el => this.submenuRefs[currentKey] = el}
+              ref={el => (this.submenuRefs[currentKey] = el)}
               style={{
                 paddingLeft: '20px',
                 margin: 0,
-                maxHeight: isOpen ? ((this.submenuRefs[currentKey] ? this.submenuRefs[currentKey].scrollHeight : 500) + "px") : "0px",
+                maxHeight: isOpen
+                  ? `${this.submenuRefs[currentKey]?.scrollHeight || 0}px`
+                  : '0px',
                 opacity: isOpen ? 1 : 0,
-                transform: isOpen ? 'translateY(0px)' : 'translateY(-5px)',
                 overflow: 'hidden',
+                transform: isOpen ? 'translateY(0)' : 'translateY(-5px)',
                 transition: 'all 0.5s cubic-bezier(0.25, 1, 0.5, 1)'
               }}
             >
@@ -107,20 +119,21 @@ class NavContent extends Component {
         );
       }
 
+      // Ítems sin hijos (enlaces simples)
       return (
-        <li key={currentKey} style={{
-          padding: 0,
-          margin: 0,
-          listStyle: 'none'
-        }}>
+        <li key={currentKey} style={{ padding: 0, margin: 0, listStyle: 'none' }}>
           <Link
             to={item.url}
-            style={linkStyles}
+            style={linkStyle}
             onClick={() => {
-              if (!parentKey) this.setState({ activeMenus: {} });
+              if (!parentKey) {
+                // Colapsar todos los menús abiertos al navegar a una página
+                this.setState({ activeMenus: {} });
+              }
             }}
           >
-            {iconAndText}
+            {iconSpan}
+            {textSpan}
           </Link>
         </li>
       );

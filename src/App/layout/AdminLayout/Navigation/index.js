@@ -30,7 +30,7 @@ class Navigation extends Component {
     const user = localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user")) : null;
     const userRoles = user?.roles.map(role => role.id) || [];
 
-    
+
 
     const filterByRoles = (items) => {
       return items
@@ -89,7 +89,9 @@ class Navigation extends Component {
           className="pcoded-navbar no-scrollbar"
           style={{
             height: '100vh',
+            width: '260px',  // << AÑADE ESTO
             overflowY: 'auto',
+            overflowX: 'hidden',  // Opcional, oculta el scroll horizontal
             scrollbarWidth: 'none',
             msOverflowStyle: 'none',
             backgroundColor: '#2f3e5a',
