@@ -108,8 +108,8 @@ const SignUp1 = () => {
             </div>
 
             <div className="text-end mb-3">
-              <NavLink to="/auth/signin-1" className="text-primary small">
-                Inicia Sesión en el Sistema
+              <NavLink to="/caja" className="text-primary small">
+                Inicia Sesión en el Sistema como <b>cajero</b>
               </NavLink>
             </div>
 

@@ -106,7 +106,7 @@ const routes = [
     /*Mantenimiento*/
     { path: '/dashboard/mantenimiento/habitaciones', exact: true, name: 'Inventario Marcas', component: MantenimientoHabitacion },
     { path: '/dashboard/mantenimiento/seguros', exact: true, name: 'Seguros', component: InventarioSeguros },
-    { path: '/dashboard/mantenimiento/users', exact: true, name: 'Users', component: userPermissions.some(item => [0, 1].includes(item)) ? Users : Error404 },
+    { path: '/dashboard/mantenimiento/users', exact: true, name: 'Users', component: Users }, //userPermissions.some(item => [0, 1].includes(item)) ? Users : Error404
     { path: '/dashboard/mantenimiento/medicos', exact: true, name: 'Seguros', component: UsersDoctores },
     { path: '/dashboard/mantenimiento/extensiones', exact: true, name: 'Seguros', component: DirectorioExtensiones },
     /*Reportes*/

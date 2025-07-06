@@ -87,7 +87,7 @@ const staticRoutes = [
             // { title: 'Admisiones', url: '/dashboard/futuro/', icon: <FiUserPlus />, roles: [1, 2] },
             // { title: 'Facturacion', url: '/dashboard/futuro/', icon: <FiDollarSign />, roles: [1, 2] },
             // { title: 'Habitaciones', url: '/dashboard/mantenimiento/habitaciones', icon: <FiGrid />, roles: [1, 2] },
-            // { title: 'Usuarios', url: '/dashboard/mantenimiento/users/', icon: <FiUsers />, roles: [1, 2] },
+            { title: 'Usuarios', url: '/dashboard/mantenimiento/users/', icon: <FiUsers />, roles: [1, 2] },
             // { title: 'Medicos', url: '/dashboard/mantenimiento/medicos/', icon: <FiUser />, roles: [1, 2] },
             // { title: 'Directorio Extensiones', url: '/dashboard/mantenimiento/extensiones', icon: <FiBookOpen />, roles: [1, 2] },
             //{ title: 'Costos Emergencias', url: '/dashboard/futuro/', icon: <FiDollarSign />, roles: [1, 2] },
