@@ -47,22 +47,23 @@ const staticRoutes = [
         ]
     },
     {
-        title: 'Farmacia',
+        title: 'Bodegas',
         icon: <FiPackage />,
         roles: [1, 2],
         children: [
             {
-                title: 'Solicitud de Medicamentos',
+                title: 'Compras',
                 icon: <FiFileText />,
                 roles: [1, 2],
                 children: [
-                    { title: 'Medicamento A', url: '/dashboard/futuro/', icon: <FiFileText />, roles: [1, 2] },
-                    { title: 'Medicamento B', url: '/dashboard/futuro/', icon: <FiFileText />, roles: [1, 2] },
+                    { title: 'Generar Requsicion', url: '/dashboard/bodegas/compras/generar/', icon: <FiFileText />, roles: [1, 2] },
+                    { title: 'Visualizar Requisiciones', url: '/dashboard/bodegas/compras/visualizar/', icon: <FiFileText />, roles: [1, 2] },
+                    { title: 'Orden de Compra', url: '/dashboard/bodegas/compras/orden/', icon: <FiFileText />, roles: [1, 2] },
                 ]
             },
-            { title: 'Devoluciones de Medicamentos', url: '/dashboard/futuro/', icon: <FiLogOut />, roles: [1, 2] },
-            { title: 'Solicitud de Compra', url: '/dashboard/futuro/', icon: <FiFilePlus />, roles: [1, 2] },
-            { title: 'Traslados', url: '/dashboard/futuro/', icon: <FiTruck />, roles: [1, 2] }
+            { title: 'Entradas', url: '/dashboard/bodegas/entradas/', icon: <FiLogOut />, roles: [1, 2] },
+            { title: 'Salidas', url: '/dashboard/bodegas/salidas/', icon: <FiFilePlus />, roles: [1, 2] },
+            { title: 'Traslados', url: '/dashboard/bodegas/traslados/', icon: <FiTruck />, roles: [1, 2] }
         ]
     },
     {

@@ -35,6 +35,13 @@ const InventarioStock = React.lazy(() => import('./pages/inventarios/stock/Index
 const InventarioPrecios = React.lazy(() => import('./pages/inventarios/actualizarPrecio/Index'))
 const InventarioConsignacion = React.lazy(() => import('./pages/inventarios/consignacion/Index'));
 const InventarioControlados = React.lazy(() => import('./pages/inventarios/controlados/Index'));
+/* Bodegas */
+const InventarioComprasGenerar = React.lazy(() => import('./pages/bodegas/compras/generar/Index'));
+const InventarioComprasVisualizar = React.lazy(() => import('./pages/bodegas/compras/visualizar/Index'));
+const InventarioComprasOrden = React.lazy(() => import('./pages/bodegas/compras/orden/Index'));
+const InventarioEntradas = React.lazy(() => import('./pages/bodegas/entradas/Index'));
+const InventarioSalidas = React.lazy(() => import('./pages/bodegas/salidas/Index'));
+const InventarioTraslados = React.lazy(() => import('./pages/bodegas/traslados/Index'));
 /* Mantenimiento */
 const MantenimientoHabitacion = React.lazy(() => import('./pages/mantenimiento/estadoHabitacion/Index'))
 const Users = React.lazy(() => import('./pages/mantenimiento/users/Index'));
@@ -103,6 +110,13 @@ const routes = [
     { path: '/dashboard/inventario/precios', exact: true, name: 'Precios', component: InventarioPrecios },
     { path: '/dashboard/inventario/consignacion', exact: true, name: 'Precios', component: InventarioConsignacion },
     { path: '/dashboard/inventario/controlados', exact: true, name: 'Precios', component: InventarioControlados },
+    /*Bodegas*/
+    { path: '/dashboard/bodegas/compras/generar', exact: true, name: 'Precios', component: InventarioComprasGenerar },
+    { path: '/dashboard/bodegas/compras/visualizar', exact: true, name: 'Precios', component: InventarioComprasVisualizar },
+    { path: '/dashboard/bodegas/compras/orden', exact: true, name: 'Precios', component: InventarioComprasOrden },
+    { path: '/dashboard/bodegas/entradas', exact: true, name: 'Precios', component: InventarioEntradas },
+    { path: '/dashboard/bodegas/salidas', exact: true, name: 'Precios', component: InventarioSalidas },
+    { path: '/dashboard/bodegas/traslados', exact: true, name: 'Precios', component: InventarioTraslados },
     /*Mantenimiento*/
     { path: '/dashboard/mantenimiento/habitaciones', exact: true, name: 'Inventario Marcas', component: MantenimientoHabitacion },
     { path: '/dashboard/mantenimiento/seguros', exact: true, name: 'Seguros', component: InventarioSeguros },
