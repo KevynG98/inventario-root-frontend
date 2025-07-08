@@ -23,7 +23,7 @@ class NavRight extends Component {
 
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    window.location.href = '/auth/signin-1';
+    window.location.href = '/#/auth/signin-1';
   };
 
   render() {

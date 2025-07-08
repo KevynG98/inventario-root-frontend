@@ -1,5 +1,5 @@
 import React, { Component, Suspense } from 'react';
-import { Switch, Route } from 'react-router-dom';
+import { Switch, Route, Redirect } from 'react-router-dom';
 import Loadable from 'react-loadable';
 import { NotificationContainer } from 'react-notifications'; // Importa NotificationContainer
 
@@ -22,16 +22,16 @@ class App extends Component {
         const userPermissions = user?.roles?.map(role => role.id) || [];
 
         const menu = routes.map((route, index) => {
-          return (route.component) ? (
-              <Route
-                  key={index}
-                  path={route.path}
-                  exact={route.exact}
-                  name={route.name}
-                  render={props => (
-                      <route.component {...props} />
-                  )} />
-          ) : (null);
+            return (route.component) ? (
+                <Route
+                    key={index}
+                    path={route.path}
+                    exact={route.exact}
+                    name={route.name}
+                    render={props => (
+                        <route.component {...props} />
+                    )} />
+            ) : (null);
         });
 
         return (
@@ -42,8 +42,19 @@ class App extends Component {
                     <Suspense fallback={<Loader />}>
                         <Switch>
                             {menu}
-                            <Route path="/" component={AdminLayout} />
+
+                            {/* Redirige desde raíz */}
+                            <Route exact path="/">
+                                <Redirect to="/auth/signin-1" />
+                            </Route>
+
+                            {/* Solo rutas dashboard */}
+                            <Route path="/dashboard" component={AdminLayout} />
+
+                            {/* Opcional: si quieres manejar otras rutas */}
+                            <Route path="*" render={() => <Redirect to="/auth/signin-1" />} />
                         </Switch>
+
                     </Suspense>
                 </ScrollToTop>
             </Aux>

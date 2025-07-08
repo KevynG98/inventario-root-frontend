@@ -40,21 +40,19 @@ class NavContent extends Component {
         borderLeft: isOpen ? '3px solid #00BFFF' : '3px solid transparent',
         transition: 'all 0.3s ease',
         listStyle: 'none',
-        // Aseguramos que el borde izquierdo no genere overflow
         boxSizing: 'border-box'
       };
 
       const linkStyle = {
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'flex-start',     // alineamos todo al inicio
+        justifyContent: 'flex-start',
         padding: '8px 16px',
         minHeight: '40px',
         color: '#fff',
         textDecoration: 'none'
       };
 
-      // Elementos del ítem: icono + texto + (opcional) flecha
       const iconSpan = (
         <span style={{
           fontSize: '18px',
@@ -70,35 +68,30 @@ class NavContent extends Component {
 
       const textSpan = (
         <span style={{
-          fontSize: '14px',
-          // whiteSpace eliminado para permitir wrapping si es necesario
-          // whiteSpace: 'nowrap'
+          fontSize: '14px'
         }}>
           {item.title}
         </span>
       );
 
-      // Si el ítem tiene hijos, renderizar un <a> con flecha desplegable
+      // Si el ítem tiene hijos, renderiza el botón para desplegar
       if (hasChildren) {
         return (
           <li key={currentKey} style={containerStyle}>
             <a
-              href="#!"
+              href="javascript:void(0)"
               onClick={() => this.toggleSubmenu(currentKey)}
               style={linkStyle}
             >
-              {/* Icono + Texto del ítem */}
               {iconSpan}
               {textSpan}
-              {/* Flecha desplegable */}
               <FiChevronRight style={{
                 fontSize: '16px',
-                marginLeft: '10px',               // separa la flecha del texto
+                marginLeft: '10px',
                 transition: 'transform 0.3s',
                 transform: isOpen ? 'rotate(90deg)' : 'rotate(0deg)'
               }} />
             </a>
-            {/* Submenú desplegable */}
             <ul
               ref={el => (this.submenuRefs[currentKey] = el)}
               style={{
@@ -119,7 +112,18 @@ class NavContent extends Component {
         );
       }
 
-      // Ítems sin hijos (enlaces simples)
+      // Ítems sin hijos
+      if (!item.url) {
+        return (
+          <li key={currentKey} style={{ padding: 0, margin: 0, listStyle: 'none' }}>
+            <span style={linkStyle}>
+              {iconSpan}
+              {textSpan}
+            </span>
+          </li>
+        );
+      }
+
       return (
         <li key={currentKey} style={{ padding: 0, margin: 0, listStyle: 'none' }}>
           <Link
@@ -127,7 +131,6 @@ class NavContent extends Component {
             style={linkStyle}
             onClick={() => {
               if (!parentKey) {
-                // Colapsar todos los menús abiertos al navegar a una página
                 this.setState({ activeMenus: {} });
               }
             }}
