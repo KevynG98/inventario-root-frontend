@@ -29,7 +29,7 @@ class NavContent extends Component {
 
   renderNavItems = (items, parentKey = '') => {
     return items.map((item, index) => {
-      const currentKey = `${parentKey}${index}`;
+      const currentKey = parentKey ? `${parentKey}.${index}` : `${index}`;
       const hasChildren = item.children && item.children.length > 0;
       const isOpen = !!this.state.activeMenus[currentKey];
 
