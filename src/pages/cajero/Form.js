@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { Form, Button, Table, Row, Col, Card, Container } from 'react-bootstrap';
 import { CajeroContext } from './Context';
@@ -6,7 +6,8 @@ import { FaPlus, FaBroom, FaCashRegister, FaSignOutAlt } from 'react-icons/fa';
 
 const CajeroForm = () => {
     const { register, handleSubmit, reset } = useForm();
-    const { items, addItem, clearItems } = useContext(CajeroContext);
+    const { items, productos, bodegas, bodegaActual, changeBodega, addItem, clearItems } = useContext(CajeroContext);
+    const [recordar, setRecordar] = useState(!!localStorage.getItem('bodegaPredeterminada'));
 
     // 🔄 Recargar automáticamente al entrar (solo cuando no quieres tocar el router)
     useEffect(() => {
@@ -20,6 +21,11 @@ const CajeroForm = () => {
 
 
     const onSubmit = (data) => {
+        const existe = productos.find(p => p.nombre === data.producto);
+        if (!existe) {
+            alert('El producto no pertenece a esta bodega');
+            return;
+        }
         addItem(data);
         reset();
     };
@@ -32,6 +38,37 @@ const CajeroForm = () => {
                 </Card.Header>
                 <Card.Body>
                     <Form onSubmit={handleSubmit(onSubmit)}>
+                        <Row className="mb-3">
+                            <Col md={6}>
+                                <Form.Label>Tienda</Form.Label>
+                                <Form.Control
+                                    as="select"
+                                    value={bodegaActual}
+                                    onChange={e => changeBodega(e.target.value, recordar)}
+                                >
+                                    <option value="">Seleccione una tienda</option>
+                                    {bodegas.map(b => (
+                                        <option key={b.id} value={b.nombre}>{b.nombre}</option>
+                                    ))}
+                                </Form.Control>
+                            </Col>
+                            <Col md={6} className="mt-4">
+                                <Form.Check
+                                    type="checkbox"
+                                    label="Recordar como predeterminada"
+                                    checked={recordar}
+                                    onChange={e => {
+                                        const val = e.target.checked;
+                                        setRecordar(val);
+                                        if (!val) {
+                                            localStorage.removeItem('bodegaPredeterminada');
+                                        } else if (bodegaActual) {
+                                            localStorage.setItem('bodegaPredeterminada', bodegaActual);
+                                        }
+                                    }}
+                                />
+                            </Col>
+                        </Row>
                         <Row className="mb-4 align-items-end">
                             <Col md={5}>
                                 <Form.Label>Producto</Form.Label>
@@ -39,8 +76,14 @@ const CajeroForm = () => {
                                     size="md"
                                     type="text"
                                     placeholder="Nombre del producto"
+                                    list="lista-productos"
                                     {...register('producto', { required: true })}
                                 />
+                                <datalist id="lista-productos">
+                                    {productos.map(p => (
+                                        <option key={p.id} value={p.nombre} />
+                                    ))}
+                                </datalist>
                             </Col>
 
                             <Col md={3}>
