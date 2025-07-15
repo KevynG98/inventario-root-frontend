@@ -20,7 +20,8 @@ const CajeroForm = () => {
 
 
     const onSubmit = (data) => {
-        const existe = productos.find(p => p.nombre === data.producto);
+        const normalized = data.producto.trim().toLowerCase();
+        const existe = productos.some(p => p.nombre.toLowerCase() === normalized);
         if (!existe) {
             alert('El producto no pertenece a esta bodega');
             return;
