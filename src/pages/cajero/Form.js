@@ -6,7 +6,7 @@ import { FaPlus, FaBroom, FaCashRegister, FaSignOutAlt } from 'react-icons/fa';
 
 const CajeroForm = () => {
     const { register, handleSubmit, reset } = useForm();
-    const { items, addItem, clearItems } = useContext(CajeroContext);
+    const { items, productos, addItem, clearItems } = useContext(CajeroContext);
 
     // 🔄 Recargar automáticamente al entrar (solo cuando no quieres tocar el router)
     useEffect(() => {
@@ -20,6 +20,11 @@ const CajeroForm = () => {
 
 
     const onSubmit = (data) => {
+        const existe = productos.find(p => p.nombre === data.producto);
+        if (!existe) {
+            alert('El producto no pertenece a esta bodega');
+            return;
+        }
         addItem(data);
         reset();
     };
@@ -39,8 +44,14 @@ const CajeroForm = () => {
                                     size="md"
                                     type="text"
                                     placeholder="Nombre del producto"
+                                    list="lista-productos"
                                     {...register('producto', { required: true })}
                                 />
+                                <datalist id="lista-productos">
+                                    {productos.map(p => (
+                                        <option key={p.id} value={p.nombre} />
+                                    ))}
+                                </datalist>
                             </Col>
 
                             <Col md={3}>
