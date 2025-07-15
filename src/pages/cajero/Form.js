@@ -21,12 +21,12 @@ const CajeroForm = () => {
 
 
     const onSubmit = (data) => {
-        const existe = productos.find(p => p.nombre === data.producto);
+        const existe = productos.find(p => p.nombre.toLowerCase() === data.producto.toLowerCase());
         if (!existe) {
             alert('El producto no pertenece a esta bodega');
             return;
         }
-        addItem(data);
+        addItem({ ...data, producto: existe.nombre });
         reset();
     };
 
@@ -80,9 +80,12 @@ const CajeroForm = () => {
                                     {...register('producto', { required: true })}
                                 />
                                 <datalist id="lista-productos">
-                                    {productos.map(p => (
-                                        <option key={p.id} value={p.nombre} />
-                                    ))}
+                                    {productos
+                                        .slice()
+                                        .sort((a, b) => a.nombre.localeCompare(b.nombre))
+                                        .map(p => (
+                                            <option key={p.id} value={p.nombre} />
+                                        ))}
                                 </datalist>
                             </Col>
 

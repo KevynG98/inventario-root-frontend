@@ -53,8 +53,10 @@ export const CajeroProvider = ({ children }) => {
 
   const changeBodega = (nombre, recordar) => {
     setBodegaActual(nombre);
-    if (recordar) {
+    if (recordar && nombre) {
       localStorage.setItem('bodegaPredeterminada', nombre);
+    } else if (!recordar || !nombre) {
+      localStorage.removeItem('bodegaPredeterminada');
     }
   };
 
