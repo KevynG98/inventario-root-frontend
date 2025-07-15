@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Row,
   Col,
@@ -10,8 +10,30 @@ import { useForm } from 'react-hook-form';
 import { FiEye, FiEyeOff } from 'react-icons/fi';
 
 const FormularioAdmision = () => {
-  const { register, handleSubmit } = useForm();
+  const defaultCaja = localStorage.getItem('defaultCaja') || '';
+  const { register, handleSubmit, setValue, watch } = useForm({
+    defaultValues: { caja: defaultCaja }
+  });
   const [showPassword, setShowPassword] = useState(false);
+  const [filtroCaja, setFiltroCaja] = useState('');
+
+  const cajas = [
+    { value: 'admisiones', label: 'Caja Admisiones' },
+    { value: 'farmacia', label: 'Caja Farmacia' },
+    { value: 'consulta', label: 'Caja Consulta Externa' }
+  ];
+
+  const cajasFiltradas = cajas.filter(caja =>
+    caja.label.toLowerCase().includes(filtroCaja.toLowerCase())
+  );
+
+  const selectedCaja = watch('caja');
+
+  useEffect(() => {
+    if (selectedCaja) {
+      localStorage.setItem('defaultCaja', selectedCaja);
+    }
+  }, [selectedCaja]);
 
   const onSubmit = (data) => {
     console.log('Ingresando a la caja:', data);
@@ -30,9 +52,24 @@ const FormularioAdmision = () => {
             <Col md={6}>
               <Form.Group>
                 <Form.Label># Caja *</Form.Label>
-                <Form.Control as="select" {...register('caja')}>
+                <Form.Control
+                  type="text"
+                  placeholder="Filtrar cajas"
+                  value={filtroCaja}
+                  onChange={(e) => setFiltroCaja(e.target.value)}
+                  className="mb-2"
+                />
+                <Form.Control
+                  as="select"
+                  {...register('caja')}
+                  defaultValue={defaultCaja}
+                >
                   <option value="">Seleccione</option>
-                  <option value="admisiones">Caja Admisiones</option>
+                  {cajasFiltradas.map((caja) => (
+                    <option key={caja.value} value={caja.value}>
+                      {caja.label}
+                    </option>
+                  ))}
                 </Form.Control>
               </Form.Group>
             </Col>
