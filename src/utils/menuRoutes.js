@@ -92,6 +92,7 @@ const staticRoutes = [
             // { title: 'Directorio Extensiones', url: '/dashboard/mantenimiento/extensiones', icon: <FiBookOpen />, roles: [1, 2] },
             //{ title: 'Costos Emergencias', url: '/dashboard/futuro/', icon: <FiDollarSign />, roles: [1, 2] },
             { title: 'Seguros', url: '/dashboard/mantenimiento/seguros', icon: <FiList />, roles: [1, 2] },
+            { title: 'Cajeros', url: '/dashboard/mantenimiento/cajeros', icon: <FiCreditCard />, roles: [1, 2] },
         ]
     },
     // {

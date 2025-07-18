@@ -41,6 +41,7 @@ const Users = React.lazy(() => import('./pages/mantenimiento/users/Index'));
 const UsersDoctores = React.lazy(() => import('./pages/mantenimiento/doctor/Index'));
 const InventarioSeguros = React.lazy(() => import('./pages/mantenimiento/seguros/Index'));
 const DirectorioExtensiones = React.lazy(() => import('./pages/mantenimiento/directorioExtensiones/Index'));
+const Cajeros = React.lazy(() => import('./pages/mantenimiento/cajero/IndexCajeros'));
 
 /* Reportes */
 const HIstorialGeneral = React.lazy(() => import('./pages/reportes/historialGeneral/Index'))
@@ -109,6 +110,7 @@ const routes = [
     { path: '/dashboard/mantenimiento/users', exact: true, name: 'Users', component: Users }, //userPermissions.some(item => [0, 1].includes(item)) ? Users : Error404
     { path: '/dashboard/mantenimiento/medicos', exact: true, name: 'Seguros', component: UsersDoctores },
     { path: '/dashboard/mantenimiento/extensiones', exact: true, name: 'Seguros', component: DirectorioExtensiones },
+    { path: '/dashboard/mantenimiento/cajeros', exact: true, name: 'Seguros', component: Cajeros },
     /*Reportes*/
     { path: '/dashboard/reportes/historial-general', exact: true, name: 'Inventario Marcas', component: HIstorialGeneral },
     { path: '/dashboard/reportes/users', exact: true, name: 'Inventario Marcas', component: UsersReporte },
