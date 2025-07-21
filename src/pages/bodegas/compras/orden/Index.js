@@ -1,11 +1,11 @@
 import React from 'react';
 import { ContextProvider } from './Context';
-import Form from './Form';
+import FormularioOrdenCompra from './Form';
 
 const Index = () => {
   return (
     <ContextProvider>
-      <Form />
+      <FormularioOrdenCompra />
     </ContextProvider>
   );
 };

@@ -1,11 +1,13 @@
 import React from 'react';
 import { ContextProvider } from './Context';
-import Form from './Form';
+import List from './List';
+import ModalRequisicion from './ModalRequisicion';
 
 const Index = () => {
   return (
     <ContextProvider>
-      <Form />
+      <List />
+      <ModalRequisicion />
     </ContextProvider>
   );
 };
