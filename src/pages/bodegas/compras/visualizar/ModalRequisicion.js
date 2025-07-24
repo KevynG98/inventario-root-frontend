@@ -1,6 +1,5 @@
-// ModalRequisicion.js
 import React, { useContext, useEffect, useState } from 'react';
-import { Modal, Button, Form } from 'react-bootstrap';
+import { Modal, Button, Form, Row, Col } from 'react-bootstrap';
 import Swal from 'sweetalert2';
 import { AppContext } from './Context';
 
@@ -15,29 +14,50 @@ const ModalRequisicion = () => {
 
     const [estadoSimulado, setEstadoSimulado] = useState('');
     const [observacion, setObservacion] = useState('');
+    const [formData, setFormData] = useState({
+        proveedor: '',
+        fecha: '',
+    });
 
     useEffect(() => {
         if (requisicionSeleccionada) {
-            setEstadoSimulado(requisicionSeleccionada.estado);
+            setEstadoSimulado(requisicionSeleccionada.estado || '');
             setObservacion('');
+            setFormData({
+                proveedor: requisicionSeleccionada.proveedor || '',
+                fecha: requisicionSeleccionada.fecha || '',
+            });
         }
     }, [requisicionSeleccionada]);
 
     if (!requisicionSeleccionada) return null;
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
 
     const lanzarSweetAlert = (titulo, nuevoEstado) => {
         cerrarModal(); // Oculta el modal primero
         setTimeout(() => {
             Swal.fire({
                 title: titulo,
-                text: `Observación: ${observacion || 'Sin observaciones'}`,
+                html: `
+                    <strong>Proveedor:</strong> ${formData.proveedor}<br/>
+                    <strong>Fecha:</strong> ${formData.fecha}<br/>
+                    <strong>Estado:</strong> ${nuevoEstado}<br/>
+                    <strong>Observación:</strong> ${observacion || 'Sin observaciones'}
+                `,
                 icon: 'question',
                 showCancelButton: true,
                 confirmButtonText: 'Confirmar',
                 cancelButtonText: 'Cancelar',
             }).then((result) => {
                 if (result.isConfirmed) {
-                    actualizarEstado(requisicionSeleccionada.id, nuevoEstado); // Cambia estado
+                    actualizarEstado(requisicionSeleccionada.id, nuevoEstado);
                 } else {
                     setTimeout(() => abrirModal(requisicionSeleccionada), 100); // Reactiva modal
                 }
@@ -57,26 +77,53 @@ const ModalRequisicion = () => {
                 <Modal.Title>Requisición #{requisicionSeleccionada.id}</Modal.Title>
             </Modal.Header>
             <Modal.Body>
-                <div className="mb-3">
-                    <strong>Proveedor:</strong> {requisicionSeleccionada.proveedor}
-                </div>
-                <div className="mb-3">
-                    <strong>Fecha:</strong> {requisicionSeleccionada.fecha}
-                </div>
-                <div className="mb-3">
-                    <strong>Estado actual:</strong> {estadoSimulado}
-                </div>
+                <Form>
+                    <Row className="mb-3">
+                        <Col md={6}>
+                            <Form.Group>
+                                <Form.Label>Proveedor</Form.Label>
+                                <Form.Control
+                                    type="text"
+                                    name="proveedor"
+                                    value={formData.proveedor}
+                                    onChange={handleChange}
+                                />
+                            </Form.Group>
+                        </Col>
+                        <Col md={6}>
+                            <Form.Group>
+                                <Form.Label>Fecha</Form.Label>
+                                <Form.Control
+                                    type="date"
+                                    name="fecha"
+                                    value={formData.fecha}
+                                    onChange={handleChange}
+                                />
+                            </Form.Group>
+                        </Col>
+                    </Row>
 
-                <Form.Group>
-                    <Form.Label>Observaciones</Form.Label>
-                    <Form.Control
-                        as="textarea"
-                        rows={3}
-                        value={observacion}
-                        onChange={(e) => setObservacion(e.target.value)}
-                    />
-                </Form.Group>
+                    <Form.Group className="mb-3">
+                        <Form.Label>Estado actual</Form.Label>
+                        <Form.Control
+                            type="text"
+                            value={estadoSimulado}
+                            onChange={(e) => setEstadoSimulado(e.target.value)}
+                        />
+                    </Form.Group>
+
+                    <Form.Group className="mb-3">
+                        <Form.Label>Observaciones</Form.Label>
+                        <Form.Control
+                            as="textarea"
+                            rows={3}
+                            value={observacion}
+                            onChange={(e) => setObservacion(e.target.value)}
+                        />
+                    </Form.Group>
+                </Form>
             </Modal.Body>
+
             <Modal.Footer className="justify-content-between flex-wrap gap-2">
                 <Button variant="success" className="w-100" onClick={handleGuardar}>Guardar</Button>
                 <Button variant="warning" className="w-100" onClick={handleNoRequiereVB}>No requiere visto bueno</Button>

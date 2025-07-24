@@ -1,17 +1,81 @@
 // Form.js
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { AppContext } from './Context';
 import { Form, Button, Row, Col, Card, Table } from 'react-bootstrap';
 
 const FormularioRequisicion = () => {
-  const { toggleModalProveedor } = useContext(AppContext);
-  const { register, handleSubmit, watch } = useForm();
+  const { crearRequisicion } = useContext(AppContext);
+  const {
+    register,
+    handleSubmit,
+    watch,
+    getValues,
+    reset,
+  } = useForm();
 
-  const tipoRequisicion = watch('tipoRequisicion');
+  const tipoRequisicion = watch('tipo_requisicion');
+
+  const [productos, setProductos] = useState([]);
+  const [servicios, setServicios] = useState([]);
+  const [descripcionServicio, setDescripcionServicio] = useState('');
+  const [cantidadServicio, setCantidadServicio] = useState('');
+  const [precioServicio, setPrecioServicio] = useState('');
+
+  const handleAgregarProducto = () => {
+    const values = getValues();
+
+    const sku = values.SKU;
+    const cantidad = values.cantidadSku;
+    const precio = values.precioSku;
+
+    // Datos temporales si aún no conectas descripción y unidad
+    const descripcion = 'Descripción genérica';
+    const unidad = 'Unidad';
+
+    if (!sku || !cantidad || !precio) {
+      alert('Todos los campos del producto son obligatorios');
+      return;
+    }
+
+    const nuevo = {
+      id: Date.now(),
+      sku,
+      descripcion,
+      unidad,
+      cantidad: parseFloat(cantidad),
+      precio: parseFloat(precio),
+      total: parseFloat(cantidad) * parseFloat(precio),
+    };
+
+    setProductos((prev) => [...prev, nuevo]);
+  };
+
+  const handleAgregarServicio = () => {
+    if (!descripcionServicio || !cantidadServicio || !precioServicio) {
+      alert('Todos los campos del servicio son obligatorios');
+      return;
+    }
+
+    const nuevo = {
+      id: Date.now(),
+      descripcion: descripcionServicio,
+      cantidad: parseFloat(cantidadServicio),
+      precio: parseFloat(precioServicio),
+      total: parseFloat(cantidadServicio) * parseFloat(precioServicio),
+    };
+
+    setServicios([...servicios, nuevo]);
+    setDescripcionServicio('');
+    setCantidadServicio('');
+    setPrecioServicio('');
+  };
 
   const onSubmit = (data) => {
-    console.log('Datos enviados:', data);
+    crearRequisicion(data, productos, servicios);
+    reset();
+    setProductos([]);
+    setServicios([]);
   };
 
   return (
@@ -36,10 +100,10 @@ const FormularioRequisicion = () => {
               <Form.Label>Prioridad</Form.Label>
               <Form.Control as="select" {...register('prioridad')}>
                 <option value="">Seleccione</option>
-                <option value="Urgente">Urgente</option>
-                <option value="Alta">Alta</option>
-                <option value="Normal">Normal</option>
-                <option value="Baja">Baja</option>
+                <option value="urgente">Urgente</option>
+                <option value="alta">Alta</option>
+                <option value="normal">Normal</option>
+                <option value="baja">Baja</option>
               </Form.Control>
             </Form.Group>
           </Col>
@@ -55,87 +119,99 @@ const FormularioRequisicion = () => {
           />
         </Form.Group>
 
-        <Row>
-          <Col md={6}>
-            <Form.Group className="mb-3">
-              <Form.Label>Centro de Costo</Form.Label>
-              <Form.Control as="select" {...register('centroCosto')}>
-                <option value="">Seleccione</option>
-                <option value="Centro 1">Centro 1</option>
-                <option value="Centro 2">Centro 2</option>
-              </Form.Control>
-            </Form.Group>
-          </Col>
-
-          <Col md={6}>
-            <Form.Group className="mb-3">
-              <Form.Label>Área Solicitante</Form.Label>
-              <Form.Control as="select" {...register('areaSolicitante')}>
-                <option value="">Seleccione</option>
-                <option value="Área 1">Área 1</option>
-                <option value="Área 2">Área 2</option>
-              </Form.Control>
-            </Form.Group>
-          </Col>
-        </Row>
-
         <Form.Group className="mb-3">
           <Form.Label>Tipo de Requisición</Form.Label>
-          <Form.Control as="select" {...register('tipoRequisicion')}>
+          <Form.Control as="select" {...register('tipo_requisicion')}>
             <option value="">Seleccione</option>
-            <option value="Bien">Bien</option>
-            <option value="Servicio">Servicio</option>
+            <option value="bien">Bien</option>
+            <option value="servicio">Servicio</option>
           </Form.Control>
         </Form.Group>
 
-        {tipoRequisicion === 'Bien' && (
-          <Card className="p-3 mb-3" style={{ backgroundColor: '#f7f9fc' }}>
-            <Row className="align-items-end">
-              <Col md={4} className="mb-3">
-                <Form.Label><strong>Proveedor</strong></Form.Label>
-                <Button
-                  variant="outline-primary"
-                  size="sm"
-                  onClick={toggleModalProveedor}
-                  block
-                >
-                  Seleccionar Proveedor
-                </Button>
-              </Col>
+        {tipoRequisicion === 'bien' && (
+          <>
+            <Card className="p-3 mb-3" style={{ backgroundColor: '#f7f9fc' }}>
+              <Row className="align-items-end">
+                <Col md={3} className="mb-3">
+                  <Form.Group>
+                    <Form.Label><strong>Proveedor</strong></Form.Label>
+                    <Form.Control as="select" size="sm" {...register('proveedor')}>
+                      <option value="">Selecciona un proveedor</option>
+                      <option value="1">Proveedor A</option>
+                      <option value="2">Proveedor B</option>
+                      <option value="3">Proveedor C</option>
+                    </Form.Control>
+                  </Form.Group>
+                </Col>
 
-              <Col md={4} className="mb-3">
-                <Form.Label><strong>Categoría</strong></Form.Label>
-                <Button
-                  variant="outline-primary"
-                  size="sm"
-                  onClick={() => alert('Abrir modal de Categorías')}
-                  block
-                >
-                  Seleccionar Categoría
-                </Button>
-              </Col>
+                <Col md={3} className="mb-3">
+                  <Form.Group>
+                    <Form.Label><strong>Categoría</strong></Form.Label>
+                    <Form.Control as="select" size="sm" {...register('categoria')}>
+                      <option value="">Selecciona una categoría</option>
+                      <option value="1">Categoría A</option>
+                      <option value="2">Categoría B</option>
+                      <option value="3">Categoría C</option>
+                    </Form.Control>
+                  </Form.Group>
+                </Col>
 
-              <Col md={4} className="mb-3">
-                <Form.Label><strong>Subcategoría</strong></Form.Label>
-                <Button
-                  variant="outline-primary"
-                  size="sm"
-                  onClick={() => alert('Abrir modal de Subcategorías')}
-                  block
-                >
-                  Seleccionar Subcategoría
-                </Button>
-              </Col>
-            </Row>
+                <Col md={3} className="mb-3">
+                  <Form.Group>
+                    <Form.Label><strong>Subcategoría</strong></Form.Label>
+                    <Form.Control as="select" size="sm" {...register('subcategoria')}>
+                      <option value="">Selecciona una subcategoría</option>
+                      <option value="1">Subcategoría A</option>
+                      <option value="2">Subcategoría B</option>
+                      <option value="3">Subcategoría C</option>
+                    </Form.Control>
+                  </Form.Group>
+                </Col>
 
-            <div className="mt-2">
-              <Button
-                variant="info"
-                onClick={() => alert('Abrir modal para seleccionar SKU')}
-              >
-                Seleccionar SKU
-              </Button>
-            </div>
+                <Col md={3} className="mb-3">
+                  <Form.Group>
+                    <Form.Label><strong>Seleccionar SKU</strong></Form.Label>
+                    <Form.Control as="select" size="sm" {...register('SKU')}>
+                      <option value="">Selecciona un SKU</option>
+                      <option value="1">SKU A</option>
+                      <option value="2">SKU B</option>
+                      <option value="3">SKU C</option>
+                    </Form.Control>
+                  </Form.Group>
+                </Col>
+
+                <Col md={3} className="mb-3">
+                  <Form.Group>
+                    <Form.Label><strong>Cantidad</strong></Form.Label>
+                    <Form.Control
+                      type="number"
+                      size="sm"
+                      min="1"
+                      {...register('cantidadSku')}
+                    />
+                  </Form.Group>
+                </Col>
+
+                <Col md={3} className="mb-3">
+                  <Form.Group>
+                    <Form.Label><strong>Precio</strong></Form.Label>
+                    <Form.Control
+                      type="number"
+                      size="sm"
+                      step="0.01"
+                      min="0"
+                      {...register('precioSku')}
+                    />
+                  </Form.Group>
+                </Col>
+
+                <Col md={1} className="mb-3 d-flex align-items-end">
+                  <Button type="button" variant="success" onClick={handleAgregarProducto}>
+                    Agregar
+                  </Button>
+                </Col>
+              </Row>
+            </Card>
 
             <h6 className="mt-4">Productos agregados:</h6>
 
@@ -151,33 +227,84 @@ const FormularioRequisicion = () => {
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td colSpan="6" className="text-center text-muted">
-                    No hay productos agregados
-                  </td>
-                </tr>
+                {productos.length === 0 ? (
+                  <tr>
+                    <td colSpan="6" className="text-center text-muted">
+                      No hay productos agregados
+                    </td>
+                  </tr>
+                ) : (
+                  productos.map((item) => (
+                    <tr key={item.id}>
+                      <td>{item.sku}</td>
+                      <td>{item.descripcion}</td>
+                      <td>{item.unidad}</td>
+                      <td>{item.cantidad}</td>
+                      <td>{item.precio.toFixed(2)}</td>
+                      <td>{item.total.toFixed(2)}</td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </Table>
-          </Card>
+          </>
         )}
 
-        {tipoRequisicion === 'Servicio' && (
+        {tipoRequisicion === 'servicio' && (
           <>
-            <div className="mt-3">
-              <Button
-                variant="info"
-                onClick={() => alert('Abrir modal para ítems de Servicio')}
-              >
-                Agregar ítems de Servicio
-              </Button>
-            </div>
+            <Card className="p-3 mt-3" style={{ backgroundColor: '#f7f9fc' }}>
+              <Row>
+                <Col md={4} className="mb-3">
+                  <Form.Group>
+                    <Form.Label><strong>Descripción</strong></Form.Label>
+                    <Form.Control
+                      type="text"
+                      placeholder="Ej: Reparación de aire"
+                      value={descripcionServicio}
+                      onChange={(e) => setDescripcionServicio(e.target.value)}
+                    />
+                  </Form.Group>
+                </Col>
+
+                <Col md={4} className="mb-3">
+                  <Form.Group>
+                    <Form.Label><strong>Cantidad</strong></Form.Label>
+                    <Form.Control
+                      type="number"
+                      step="1"
+                      min="1"
+                      value={cantidadServicio}
+                      onChange={(e) => setCantidadServicio(e.target.value)}
+                    />
+                  </Form.Group>
+                </Col>
+
+                <Col md={2} className="mb-3">
+                  <Form.Group>
+                    <Form.Label><strong>Precio</strong></Form.Label>
+                    <Form.Control
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={precioServicio}
+                      onChange={(e) => setPrecioServicio(e.target.value)}
+                    />
+                  </Form.Group>
+                </Col>
+
+                <Col md={2} className="mb-3 d-flex align-items-end">
+                  <Button variant="success" onClick={handleAgregarServicio}>
+                    Agregar Servicio
+                  </Button>
+                </Col>
+              </Row>
+            </Card>
 
             <h6 className="mt-4">Servicios agregados:</h6>
 
             <Table bordered size="sm" className="mt-2">
               <thead style={{ backgroundColor: '#d2e8ff' }}>
                 <tr>
-                  <th>Cotización</th>
                   <th>Descripción</th>
                   <th>Cantidad</th>
                   <th>Precio</th>
@@ -185,11 +312,22 @@ const FormularioRequisicion = () => {
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td colSpan="5" className="text-center text-muted">
-                    No hay servicios agregados
-                  </td>
-                </tr>
+                {servicios.length === 0 ? (
+                  <tr>
+                    <td colSpan="4" className="text-center text-muted">
+                      No hay servicios agregados
+                    </td>
+                  </tr>
+                ) : (
+                  servicios.map((item) => (
+                    <tr key={item.id}>
+                      <td>{item.descripcion}</td>
+                      <td>{item.cantidad}</td>
+                      <td>{item.precio.toFixed(2)}</td>
+                      <td>{item.total.toFixed(2)}</td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </Table>
           </>
