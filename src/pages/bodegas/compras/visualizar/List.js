@@ -8,9 +8,15 @@ const List = () => {
   const { abrirModal, requisiciones } = useContext(AppContext);
   const [busqueda, setBusqueda] = useState('');
 
-  const filteredData = requisiciones.filter((r) =>
-    r.proveedor.toLowerCase().includes(busqueda.toLowerCase())
-  );
+  const filteredData = requisiciones.filter((r) => {
+    const texto = busqueda.toLowerCase();
+    return (
+      (r.proveedor || '').toLowerCase().includes(texto) ||
+      (r.tipo_requisicion || '').toLowerCase().includes(texto) ||
+      (r.descripcion || '').toLowerCase().includes(texto) ||
+      (r.estado || '').toLowerCase().includes(texto)
+    );
+  });
 
   return (
     <div className="mb-4">
@@ -21,15 +27,15 @@ const List = () => {
           <div className="col-12 col-md-10">
             <input
               type="text"
-              placeholder="Buscar proveedor..."
+              placeholder="Buscar..."
               className="form-control shadow-sm w-100"
               value={busqueda}
               onChange={(e) => setBusqueda(e.target.value)}
             />
           </div>
           <div className="col-12 col-md-2">
-            <Button className="w-100">
-              Buscar Requisición
+            <Button className="w-100" onClick={() => setBusqueda('')}>
+              Limpiar
             </Button>
           </div>
         </div>

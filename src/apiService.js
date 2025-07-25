@@ -1,3 +1,4 @@
+// apiService.js
 import axios from 'axios';
 
 // Configuración general
@@ -26,11 +27,9 @@ const getAuthToken = () => {
 const getData = async (endpoint) => {
   try {
     const authToken = getAuthToken();
-
     const headers = {
       ...(authToken && { 'Authorization': `Token ${authToken}` }),
     };
-
     const response = await apiClient.get(endpoint, { headers });
     return response;
   } catch (error) {
@@ -43,12 +42,10 @@ const getData = async (endpoint) => {
 const postData = async (endpoint, data) => {
   try {
     const authToken = getAuthToken();
-
     const headers = {
       'Content-Type': 'application/json',
       ...(authToken && { 'Authorization': `Token ${authToken}` }),
     };
-
     const response = await apiClient.post(endpoint, data, { headers });
     return response;
   } catch (error) {
@@ -61,18 +58,15 @@ const postData = async (endpoint, data) => {
 const putData = async (url, data) => {
   try {
     const authToken = getAuthToken();
-
     const headers = {
       'Content-Type': 'application/json',
       ...(authToken && { 'Authorization': `Token ${authToken}` }),
     };
-
     const response = await fetch(`${API_URL}${url}`, {
       method: 'PUT',
       headers: headers,
       body: JSON.stringify(data),
     });
-
     const json = await response.json();
     return { status: response.status, data: json };
   } catch (error) {
@@ -81,15 +75,29 @@ const putData = async (url, data) => {
   }
 };
 
+// PATCH
+const patchData = async (endpoint, data) => {
+  try {
+    const authToken = getAuthToken();
+    const headers = {
+      'Content-Type': 'application/json',
+      ...(authToken && { 'Authorization': `Token ${authToken}` }),
+    };
+    const response = await apiClient.patch(endpoint, data, { headers });
+    return response;
+  } catch (error) {
+    console.error(`Error al hacer PATCH en ${endpoint}:`, error.response ? error.response.data : error);
+    throw error;
+  }
+};
+
 // DELETE
 const deleteData = async (endpoint) => {
   try {
     const authToken = getAuthToken();
-
     const headers = {
       ...(authToken && { 'Authorization': `Token ${authToken}` }),
     };
-
     const response = await apiClient.delete(endpoint, { headers });
     return response;
   } catch (error) {
@@ -106,7 +114,6 @@ const logout = async () => {
       ...(authToken && { 'Authorization': `Token ${authToken}` }),
       'Content-Type': 'application/json',
     };
-
     const response = await apiClient.post('user/logout/', {}, { headers });
     return response;
   } catch (error) {
@@ -117,4 +124,4 @@ const logout = async () => {
 
 // Exportar funciones
 export default apiClient;
-export { getData, postData, putData, deleteData, logout, API_URL };
+export { getData, postData, putData, patchData, deleteData, logout, API_URL };

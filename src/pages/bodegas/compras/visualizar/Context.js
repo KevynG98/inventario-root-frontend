@@ -1,17 +1,42 @@
 // Context.js
-import React, { createContext, useState } from 'react';
+import React, { createContext, useState, useEffect } from 'react';
+import { getData } from '../../../../apiService';
 
 export const AppContext = createContext();
 
-const datosIniciales = [
-  { id: 1, proveedor: 'Proveedor A', fecha: '2025-07-14', estado: 'Nueva' },
-  { id: 2, proveedor: 'Proveedor B', fecha: '2025-07-13', estado: 'Revisión' },
-];
-
 export const ContextProvider = ({ children }) => {
-  const [requisiciones, setRequisiciones] = useState(datosIniciales);
+  const [requisiciones, setRequisiciones] = useState([]);
   const [requisicionSeleccionada, setRequisicionSeleccionada] = useState(null);
   const [showModal, setShowModal] = useState(false);
+
+  const cargarRequisiciones = async () => {
+    try {
+      const data = await getData('requisisiones/');
+      console.log('🧪 Respuesta original del backend:', data);
+
+      if (!Array.isArray(data.data)) {
+        console.error('❌ La respuesta no es un arreglo:', data);
+        return;
+      }
+
+      const mapeadas = data.data.map((r) => ({
+        ...r,
+        proveedor: r.tipo_requisicion === 'bien'
+          ? (r.productos[0]?.sku || 'Producto sin SKU')
+          : (r.servicios[0]?.descripcion || 'Servicio sin nombre'),
+        fecha: new Date(r.created_at).toISOString().split('T')[0],
+      }));
+
+      console.log('📦 Requisiciones cargadas:', mapeadas);
+      setRequisiciones(mapeadas);
+    } catch (error) {
+      console.error('❌ Error cargando requisiciones:', error.response?.data || error.message);
+    }
+  };
+
+  useEffect(() => {
+    cargarRequisiciones();
+  }, []);
 
   const abrirModal = (requisicion) => {
     setRequisicionSeleccionada(requisicion);
@@ -24,20 +49,22 @@ export const ContextProvider = ({ children }) => {
   };
 
   const actualizarEstado = (id, nuevoEstado) => {
-    setRequisiciones(prev =>
-      prev.map(r => r.id === id ? { ...r, estado: nuevoEstado } : r)
+    setRequisiciones((prev) =>
+      prev.map((r) => (r.id === id ? { ...r, estado: nuevoEstado } : r))
     );
   };
 
   return (
-    <AppContext.Provider value={{
-      showModal,
-      abrirModal,
-      cerrarModal,
-      requisicionSeleccionada,
-      requisiciones,
-      actualizarEstado
-    }}>
+    <AppContext.Provider
+      value={{
+        showModal,
+        abrirModal,
+        cerrarModal,
+        requisicionSeleccionada,
+        requisiciones,
+        actualizarEstado,
+      }}
+    >
       {children}
     </AppContext.Provider>
   );

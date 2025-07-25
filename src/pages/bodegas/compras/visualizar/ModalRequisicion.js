@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { Modal, Button, Form, Row, Col } from 'react-bootstrap';
+import { Modal, Button, Form, Row, Col, Table } from 'react-bootstrap';
 import Swal from 'sweetalert2';
 import { AppContext } from './Context';
 
@@ -41,16 +41,16 @@ const ModalRequisicion = () => {
     };
 
     const lanzarSweetAlert = (titulo, nuevoEstado) => {
-        cerrarModal(); // Oculta el modal primero
+        cerrarModal();
         setTimeout(() => {
             Swal.fire({
                 title: titulo,
                 html: `
-                    <strong>Proveedor:</strong> ${formData.proveedor}<br/>
-                    <strong>Fecha:</strong> ${formData.fecha}<br/>
-                    <strong>Estado:</strong> ${nuevoEstado}<br/>
-                    <strong>Observación:</strong> ${observacion || 'Sin observaciones'}
-                `,
+          <strong>Proveedor:</strong> ${formData.proveedor}<br/>
+          <strong>Fecha:</strong> ${formData.fecha}<br/>
+          <strong>Estado:</strong> ${nuevoEstado}<br/>
+          <strong>Observación:</strong> ${observacion || 'Sin observaciones'}
+        `,
                 icon: 'question',
                 showCancelButton: true,
                 confirmButtonText: 'Confirmar',
@@ -59,7 +59,7 @@ const ModalRequisicion = () => {
                 if (result.isConfirmed) {
                     actualizarEstado(requisicionSeleccionada.id, nuevoEstado);
                 } else {
-                    setTimeout(() => abrirModal(requisicionSeleccionada), 100); // Reactiva modal
+                    setTimeout(() => abrirModal(requisicionSeleccionada), 100);
                 }
             });
         }, 200);
@@ -70,6 +70,44 @@ const ModalRequisicion = () => {
     const handlePendienteVB = () => lanzarSweetAlert('Marcada como "Pendiente de visto bueno"', 'Revisión');
     const handleDarVB = () => lanzarSweetAlert('Visto bueno otorgado', 'Orden de Compra');
     const handleAnular = () => lanzarSweetAlert('Requisición anulada', 'Anulada');
+
+    const renderDetalle = () => {
+        const { tipo_requisicion, productos, servicios } = requisicionSeleccionada;
+
+        const data = tipo_requisicion === 'bien' ? productos : servicios;
+
+        if (!data || data.length === 0) {
+            return <p className="text-muted mt-3">Sin {tipo_requisicion === 'bien' ? 'productos' : 'servicios'} registrados.</p>;
+        }
+
+        return (
+            <div className="mt-4">
+                <h5>{tipo_requisicion === 'bien' ? 'Productos' : 'Servicios'} asociados</h5>
+                <Table striped bordered hover size="sm">
+                    <thead className="table-light">
+                        <tr>
+                            <th>#</th>
+                            <th>{tipo_requisicion === 'bien' ? 'SKU' : 'Descripción'}</th>
+                            <th>Cantidad</th>
+                            <th>Precio</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {data.map((item, idx) => (
+                            <tr key={idx}>
+                                <td>{idx + 1}</td>
+                                <td>{tipo_requisicion === 'bien' ? item.sku : item.descripcion}</td>
+                                <td>{item.cantidad}</td>
+                                <td>{item.precio}</td>
+                                <td>{item.total}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </Table>
+            </div>
+        );
+    };
 
     return (
         <Modal show={showModal} onHide={cerrarModal} size="lg" centered>
@@ -122,6 +160,9 @@ const ModalRequisicion = () => {
                         />
                     </Form.Group>
                 </Form>
+
+                {/* Detalle dinámico de productos o servicios */}
+                {renderDetalle()}
             </Modal.Body>
 
             <Modal.Footer className="justify-content-between flex-wrap gap-2">
