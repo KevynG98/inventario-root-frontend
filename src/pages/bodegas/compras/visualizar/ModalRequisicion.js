@@ -66,10 +66,10 @@ const ModalRequisicion = () => {
     };
 
     const handleGuardar = () => lanzarSweetAlert('Cambios guardados', estadoSimulado);
-    const handleNoRequiereVB = () => lanzarSweetAlert('Marcada como "No requiere visto bueno"', 'Orden de Compra');
-    const handlePendienteVB = () => lanzarSweetAlert('Marcada como "Pendiente de visto bueno"', 'Revisión');
-    const handleDarVB = () => lanzarSweetAlert('Visto bueno otorgado', 'Orden de Compra');
-    const handleAnular = () => lanzarSweetAlert('Requisición anulada', 'Anulada');
+    const handleNoRequiereVB = () => lanzarSweetAlert('Marcada como "No requiere visto bueno"', 'aprobada');
+    const handlePendienteVB = () => lanzarSweetAlert('Marcada como "Pendiente de visto bueno"', 'pendiente');
+    const handleDarVB = () => lanzarSweetAlert('Visto bueno otorgado', 'aprobada');
+    const handleAnular = () => lanzarSweetAlert('Requisición rechazada', 'rechazada');
 
     const renderDetalle = () => {
         const { tipo_requisicion, productos, servicios } = requisicionSeleccionada;
@@ -166,12 +166,24 @@ const ModalRequisicion = () => {
             </Modal.Body>
 
             <Modal.Footer className="justify-content-between flex-wrap gap-2">
-                <Button variant="success" className="w-100" onClick={handleGuardar}>Guardar</Button>
-                <Button variant="warning" className="w-100" onClick={handleNoRequiereVB}>No requiere visto bueno</Button>
-                <Button variant="info" className="w-100" onClick={handlePendienteVB}>Pendiente de visto bueno</Button>
-                <Button variant="primary" className="w-100" onClick={handleDarVB}>Dar visto bueno</Button>
-                <Button variant="danger" className="w-100" onClick={handleAnular}>Anular</Button>
-                <Button variant="secondary" className="w-100" onClick={cerrarModal}>Cerrar</Button>
+                <Button variant="success" className="btn-sm flex-fill" onClick={handleGuardar}>
+                    Guardar
+                </Button>
+                <Button variant="warning" className="btn-sm flex-fill" onClick={handleNoRequiereVB}>
+                    No requiere VB
+                </Button>
+                <Button variant="info" className="btn-sm flex-fill" onClick={handlePendienteVB}>
+                    Pendiente VB
+                </Button>
+                <Button variant="primary" className="btn-sm flex-fill" onClick={handleDarVB}>
+                    Dar VB
+                </Button>
+                <Button variant="danger" className="btn-sm flex-fill" onClick={handleAnular}>
+                    Anular
+                </Button>
+                <Button variant="secondary" className="btn-sm flex-fill" onClick={cerrarModal}>
+                    Cerrar
+                </Button>
             </Modal.Footer>
         </Modal>
     );

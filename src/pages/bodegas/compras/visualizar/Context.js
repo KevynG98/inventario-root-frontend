@@ -1,6 +1,6 @@
 // Context.js
 import React, { createContext, useState, useEffect } from 'react';
-import { getData } from '../../../../apiService';
+import { getData, patchData } from '../../../../apiService';
 
 export const AppContext = createContext();
 
@@ -11,7 +11,7 @@ export const ContextProvider = ({ children }) => {
 
   const cargarRequisiciones = async () => {
     try {
-      const data = await getData('requisisiones/');
+      const data = await getData('requisisiones/?excluir=aprobada');
       console.log('🧪 Respuesta original del backend:', data);
 
       if (!Array.isArray(data.data)) {
@@ -48,10 +48,17 @@ export const ContextProvider = ({ children }) => {
     setShowModal(false);
   };
 
-  const actualizarEstado = (id, nuevoEstado) => {
-    setRequisiciones((prev) =>
-      prev.map((r) => (r.id === id ? { ...r, estado: nuevoEstado } : r))
-    );
+  const actualizarEstado = async (id, nuevoEstado) => {
+    try {
+      await patchData(`requisisiones/estado/${id}/`, { estado: nuevoEstado });
+
+      setRequisiciones((prev) =>
+        prev.map((r) => (r.id === id ? { ...r, estado: nuevoEstado } : r))
+      );
+    } catch (error) {
+      console.error('❌ Error actualizando estado:', error.response?.data || error.message);
+    }
+    cargarRequisiciones();
   };
 
   return (

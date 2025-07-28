@@ -1,99 +1,49 @@
-import React, { useState, useContext } from 'react';
-import { Form, Button, Row, Col } from 'react-bootstrap';
+// Form.js
+import React, { useContext } from 'react';
+import { Table, Spinner } from 'react-bootstrap';
 import { AppContext } from './Context';
 
 const FormularioOrdenCompra = () => {
-  const { message } = useContext(AppContext); // Si luego deseas usar más variables del contexto, aquí puedes ampliarlo
-
-  const [fechaEntrega, setFechaEntrega] = useState('');
-  const [pago, setPago] = useState('');
-  const [diasCredito, setDiasCredito] = useState('');
-  const [observacion, setObservacion] = useState('');
-  const [modo, setModo] = useState('ver'); // puede ser: ver | editar | anular | generado
-
-  const diasOpciones = [7, 15, 21, 30, 45, 60, 75, 90];
-
-  const handleGuardar = () => {
-    setModo('generado');
-    alert('Orden generada correctamente');
-  };
-
-  const handleImprimir = () => {
-    alert('Simulación: descargando PDF...');
-  };
+  const { soloAprobadas } = useContext(AppContext);
 
   return (
     <div className="container mt-4">
-      <h4 className="mb-3">Formulario de Orden de Compra</h4>
-      <Form>
-        <Row>
-          <Col md={4}>
-            <Form.Group>
-              <Form.Label>Fecha de Entrega</Form.Label>
-              <Form.Control
-                type="date"
-                value={fechaEntrega}
-                onChange={(e) => setFechaEntrega(e.target.value)}
-              />
-            </Form.Group>
-          </Col>
+      <h4 className="mb-3">Listado de Requisiciones Aprobadas</h4>
 
-          <Col md={4}>
-            <Form.Group>
-              <Form.Label>Condiciones de Pago</Form.Label>
-              <Form.Control
-                as="select"
-                value={pago}
-                onChange={(e) => setPago(e.target.value)}
-              >
-                <option value="">Seleccione</option>
-                <option value="Contado">Contado</option>
-                <option value="Credito">Crédito</option>
-              </Form.Control>
-            </Form.Group>
-          </Col>
-
-          {pago === 'Credito' && (
-            <Col md={4}>
-              <Form.Group>
-                <Form.Label>Días de Crédito</Form.Label>
-                <Form.Control
-                  as="select"
-                  value={diasCredito}
-                  onChange={(e) => setDiasCredito(e.target.value)}
-                >
-                  <option value="">Seleccione</option>
-                  {diasOpciones.map((dia) => (
-                    <option key={dia} value={dia}>{dia} días</option>
-                  ))}
-                </Form.Control>
-              </Form.Group>
-            </Col>
-          )}
-        </Row>
-
-        {(modo === 'editar' || modo === 'anular') && (
-          <Form.Group className="mt-3">
-            <Form.Label>Observaciones</Form.Label>
-            <Form.Control
-              as="textarea"
-              rows={3}
-              value={observacion}
-              onChange={(e) => setObservacion(e.target.value)}
-              placeholder="Ingrese observaciones..."
-            />
-          </Form.Group>
-        )}
-
-        <div className="mt-4 d-flex gap-2">
-          <Button variant="warning" onClick={() => setModo('editar')}>Editar</Button>
-          <Button variant="danger" onClick={() => setModo('anular')}>Anular</Button>
-          <Button variant="success" onClick={handleGuardar}>Generar</Button>
-          {modo === 'generado' && (
-            <Button variant="info" onClick={handleImprimir}>Imprimir PDF</Button>
-          )}
+      {!soloAprobadas ? (
+        <Spinner animation="border" variant="primary" />
+      ) : soloAprobadas.length === 0 ? (
+        <p className="text-muted">No hay requisiciones aprobadas.</p>
+      ) : (
+        <div className="table-responsive">
+          <Table striped bordered hover size="sm">
+            <thead className="table-primary">
+              <tr>
+                <th className="text-center">ID</th>
+                <th>Descripción</th>
+                <th>Centro Costo</th>
+                <th>Área Solicitante</th>
+                <th>Tipo</th>
+                <th>Prioridad</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody>
+              {soloAprobadas.map((req) => (
+                <tr key={req.id}>
+                  <td className="text-center">{req.id}</td>
+                  <td>{req.descripcion}</td>
+                  <td>{req.centro_costo}</td>
+                  <td>{req.area_solicitante}</td>
+                  <td>{req.tipo_requisicion}</td>
+                  <td>{req.prioridad}</td>
+                  <td>{req.estado}</td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
         </div>
-      </Form>
+      )}
     </div>
   );
 };
