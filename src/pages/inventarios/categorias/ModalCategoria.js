@@ -2,24 +2,23 @@ import React, { useState, useEffect } from 'react';
 import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
-import Tabs from 'react-bootstrap/Tabs';
-import Tab from 'react-bootstrap/Tab';
 import { useMyContext } from './Context';
 import { useForm } from 'react-hook-form';
 
 const ModalCategoria = () => {
   const {
     show, showModal, enviarDatos,
-    proveedorSeleccionado, modoFormulario, actualizarProveedor
+    proveedorSeleccionado, modoFormulario, actualizarProveedor,
+    subcategorias, setSubcategorias
   } = useMyContext();
 
   const { register, handleSubmit, setValue, reset } = useForm();
-  const [key, setKey] = useState('contables');
   const readOnly = modoFormulario === 'ver';
 
   useEffect(() => {
     if (modoFormulario === 'crear') {
-      reset(); // limpia todos los campos
+      reset();
+      setSubcategorias(['']);
     }
 
     if ((modoFormulario === 'editar' || modoFormulario === 'ver') && proveedorSeleccionado) {
@@ -29,16 +28,33 @@ const ModalCategoria = () => {
     }
   }, [modoFormulario, proveedorSeleccionado, reset, setValue]);
 
-
-  const onSubmit = (data) => {
-    if (modoFormulario === 'crear') {
-      enviarDatos(data);
-    } else if (modoFormulario === 'editar') {
-      console.log("Datos editados", data);
-      actualizarProveedor(data)
-    }
+  const handleAddSubcategoria = () => {
+    setSubcategorias([...subcategorias, '']);
   };
 
+  const handleRemoveSubcategoria = (index) => {
+    const nuevas = subcategorias.filter((_, i) => i !== index);
+    setSubcategorias(nuevas);
+  };
+
+  const handleChangeSubcategoria = (index, value) => {
+    const nuevas = [...subcategorias];
+    nuevas[index] = value;
+    setSubcategorias(nuevas);
+  };
+
+  const onSubmit = (data) => {
+    const payload = {
+      ...data,
+      subcategorias: subcategorias.filter((s) => s.trim() !== '')
+    };
+
+    if (modoFormulario === 'crear') {
+      enviarDatos(payload);
+    } else if (modoFormulario === 'editar') {
+      actualizarProveedor(payload);
+    }
+  };
 
   return (
     <Modal show={show} onHide={showModal} size="sm" centered scrollable>
@@ -63,7 +79,30 @@ const ModalCategoria = () => {
               <option value="baja">Baja</option>
             </Form.Control>
           </Form.Group>
-          <div className='d-flex justify-content-end'>
+
+          <hr />
+          <Form.Label>Subcategorías</Form.Label>
+          {subcategorias?.map((sub, index) => (
+            <div key={index} className="d-flex mb-2 gap-2">
+              <Form.Control
+                type="text"
+                value={sub}
+                disabled={readOnly}
+                onChange={(e) => handleChangeSubcategoria(index, e.target.value)}
+              />
+              {!readOnly && (
+                <Button variant="danger" onClick={() => handleRemoveSubcategoria(index)}>X</Button>
+              )}
+            </div>
+          ))}
+
+          {!readOnly && (
+            <Button variant="success" onClick={handleAddSubcategoria} className="mb-3">
+              + Añadir Subcategoría
+            </Button>
+          )}
+
+          <div className="d-flex justify-content-end">
             <Button variant="secondary" onClick={showModal}>Cerrar</Button>
             {modoFormulario !== 'ver' && (
               <Button variant="primary" type="submit">Guardar</Button>
