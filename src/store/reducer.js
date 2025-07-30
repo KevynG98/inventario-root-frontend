@@ -1,13 +1,24 @@
 import * as actionTypes from './actions';
 import config from './../config';
 
+// Validar y parsear de forma segura los datos del usuario desde localStorage
+const rawUser = localStorage.getItem("user");
+let parsedUser = null;
+
+try {
+    parsedUser = rawUser && rawUser !== "undefined" ? JSON.parse(rawUser) : null;
+} catch (e) {
+    console.error("Error parsing user from localStorage:", e);
+    parsedUser = null;
+}
+
 const initialState = {
     isOpen: [],
     isTrigger: [],
     ...config,
     isFullScreen: false,
     token: localStorage.getItem("token") || null,
-    user: localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user")) : null,
+    user: parsedUser,
 };
 
 const reducer = (state = initialState, action) => {
@@ -25,7 +36,10 @@ const reducer = (state = initialState, action) => {
                 const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
                 const userData = JSON.parse(atob(base64));
 
-                localStorage.setItem("user", JSON.stringify(userData));
+                // Validar antes de guardar
+                if (userData && typeof userData === "object") {
+                    localStorage.setItem("user", JSON.stringify(userData));
+                }
 
                 return {
                     ...state,
@@ -49,7 +63,7 @@ const reducer = (state = initialState, action) => {
         case actionTypes.COLLAPSE_MENU:
             return {
                 ...state,
-                collapseMenu: !state.collapseMenu
+                collapseMenu: !state.collapseMenu,
             };
 
         case actionTypes.COLLAPSE_TOGGLE:
