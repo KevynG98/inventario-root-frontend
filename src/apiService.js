@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 // Configuración general
-const DEV = true; // Cambia a false para producción
+const DEV = false; // Cambia a false para producción
 const API_URL = DEV ? process.env.REACT_APP_API_URL_DEV : process.env.REACT_APP_API_URL_PROD;
 
 // Cliente Axios
