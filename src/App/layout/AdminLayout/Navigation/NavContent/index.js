@@ -29,7 +29,7 @@ class NavContent extends Component {
 
   renderNavItems = (items, parentKey = '') => {
     return items.map((item, index) => {
-      const currentKey = parentKey ? `${parentKey}.${index}` : `${index}`;
+      const currentKey = parentKey ? `${parentKey}-${index}` : `${index}`;
       const hasChildren = item.children && item.children.length > 0;
       const isOpen = !!this.state.activeMenus[currentKey];
 
@@ -106,7 +106,7 @@ class NavContent extends Component {
                 transition: 'all 0.5s cubic-bezier(0.25, 1, 0.5, 1)'
               }}
             >
-              {this.renderNavItems(item.children, `${currentKey}-`)}
+              {this.renderNavItems(item.children, currentKey)}
             </ul>
           </li>
         );
