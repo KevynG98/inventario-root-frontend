@@ -9,6 +9,7 @@ import OutsideClick from './OutsideClick';
 import Aux from './../../../../hoc/_Aux';
 import * as actionTypes from './../../../../store/actions';
 import staticRoutes from '../../../../utils/menuRoutes';
+
 class Navigation extends Component {
   resize = () => {
     const contentWidth = document.getElementById('root').clientWidth;
@@ -28,13 +29,14 @@ class Navigation extends Component {
 
   render() {
     const user = localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user")) : null;
-    const userRoles = user?.roles.map(role => role.id) || [];
 
+    // ✅ Normalizamos los roles del usuario como string
+    const userRoles = new Set((user?.roles || []).map(role => String(role.id ?? role)));
 
-
+    // ✅ Filtro corregido
     const filterByRoles = (items) => {
       return items
-        .filter(item => !item.roles || item.roles.some(role => userRoles.includes(role)))
+        .filter(item => !item.roles || item.roles.some(role => userRoles.has(String(role))))
         .map(item => ({
           ...item,
           children: item.children ? filterByRoles(item.children) : undefined
@@ -89,9 +91,9 @@ class Navigation extends Component {
           className="pcoded-navbar no-scrollbar"
           style={{
             height: '100vh',
-            width: '260px',  // << AÑADE ESTO
+            width: '260px',
             overflowY: 'auto',
-            overflowX: 'hidden',  // Opcional, oculta el scroll horizontal
+            overflowX: 'hidden',
             scrollbarWidth: 'none',
             msOverflowStyle: 'none',
             backgroundColor: '#2f3e5a',
