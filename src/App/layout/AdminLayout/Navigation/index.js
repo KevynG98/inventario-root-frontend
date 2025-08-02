@@ -35,6 +35,7 @@ class Navigation extends Component {
 
     // ✅ Filtro corregido
     const filterByRoles = (items) => {
+      if (!Array.isArray(items)) return [];
       return items
         .filter(item => !item.roles || item.roles.some(role => userRoles.has(String(role))))
         .map(item => ({
