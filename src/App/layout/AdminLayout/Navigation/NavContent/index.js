@@ -17,12 +17,14 @@ class NavContent extends Component {
     };
     this.submenuRefs = {};
     this.parentMap = {};
+    this.childMap = {};
     this.buildParentMap(props.navigation);
   }
 
   componentDidUpdate(prevProps) {
     if (prevProps.navigation !== this.props.navigation) {
       this.parentMap = {};
+      this.childMap = {};
       this.buildParentMap(this.props.navigation);
     }
   }
@@ -30,6 +32,7 @@ class NavContent extends Component {
   buildParentMap = (items) => {
     items.forEach(item => {
       this.parentMap[item.id] = item.parentId || null;
+      this.childMap[item.id] = item.children ? item.children.map(child => child.id) : [];
       if (item.children) {
         this.buildParentMap(item.children);
       }
@@ -54,6 +57,15 @@ class NavContent extends Component {
           activeMenus[parentId] = true;
           parentId = this.parentMap[parentId];
         }
+      } else {
+        const closeDescendants = (id) => {
+          const children = this.childMap[id] || [];
+          children.forEach(childId => {
+            activeMenus[childId] = false;
+            closeDescendants(childId);
+          });
+        };
+        closeDescendants(key);
       }
 
       return { activeMenus };
