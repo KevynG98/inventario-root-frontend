@@ -136,4 +136,4 @@ const staticRoutes = [
     }
 ];
 
-export default staticRoutes
+export default staticRoutes;
