@@ -8,7 +8,6 @@ import * as actionTypes from "../../../../../../store/actions";
 import NavIcon from './../NavIcon';
 import NavBadge from './../NavBadge';
 import NavItem from "../NavItem";
-import LoopNavCollapse from './index';
 
 class NavCollapse extends Component {
 
@@ -29,7 +28,7 @@ class NavCollapse extends Component {
                 item = collapses[item];
                 switch (item.type) {
                     case 'collapse':
-                        return <LoopNavCollapse key={item.id} collapse={item} type="sub" />;
+                        return <NavCollapseItem key={item.id} collapse={item} type="sub" />;
                     case 'item':
                         return <NavItem layout={this.props.layout} key={item.id} item={item}/>;
                     default:
@@ -117,4 +116,6 @@ const mapDispatchToProps = dispatch => {
     }
 };
 
-export default withRouter(connect(mapStateToProps, mapDispatchToProps)(NavCollapse));
+const NavCollapseItem = withRouter(connect(mapStateToProps, mapDispatchToProps)(NavCollapse));
+
+export default NavCollapseItem;
