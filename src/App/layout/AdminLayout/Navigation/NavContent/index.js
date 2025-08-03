@@ -16,7 +16,25 @@ class NavContent extends Component {
       activeMenus: {}
     };
     this.submenuRefs = {};
+    this.parentMap = {};
+    this.buildParentMap(props.navigation);
   }
+
+  componentDidUpdate(prevProps) {
+    if (prevProps.navigation !== this.props.navigation) {
+      this.parentMap = {};
+      this.buildParentMap(this.props.navigation);
+    }
+  }
+
+  buildParentMap = (items) => {
+    items.forEach(item => {
+      this.parentMap[item.id] = item.parentId || null;
+      if (item.children) {
+        this.buildParentMap(item.children);
+      }
+    });
+  };
 
   // Maneja la apertura y cierre de los submenús sin colapsar los padres
   toggleSubmenu = (e, key) => {
@@ -31,10 +49,10 @@ class NavContent extends Component {
 
       // Si abrimos un submenú, aseguramos que todos sus ancestros estén abiertos
       if (isOpen) {
-        const parts = key.split('-');
-        while (parts.length > 1) {
-          parts.pop();
-          activeMenus[parts.join('-')] = true;
+        let parentId = this.parentMap[key];
+        while (parentId) {
+          activeMenus[parentId] = true;
+          parentId = this.parentMap[parentId];
         }
       }
 
@@ -42,14 +60,9 @@ class NavContent extends Component {
     });
   };
 
-  renderNavItems = (items, parentKey = '') => {
-    return items.map((item, index) => {
-      // Se genera un identificador estable utilizando la URL o el título.
-      // Antes se usaba únicamente el índice del arreglo, lo que provocaba
-      // que en compilaciones de producción los menús anidados perdieran su
-      // estado cuando la lista se filtraba por roles y cambiaba el orden.
-      const keySegment = item.url || item.title || index;
-      const currentKey = parentKey ? `${parentKey}-${keySegment}` : `${keySegment}`;
+  renderNavItems = (items) => {
+    return items.map((item) => {
+      const currentKey = item.id;
       const hasChildren = item.children && item.children.length > 0;
       const isOpen = !!this.state.activeMenus[currentKey];
 
@@ -124,7 +137,7 @@ class NavContent extends Component {
                 display: isOpen ? 'block' : 'none'
               }}
             >
-              {this.renderNavItems(item.children, currentKey)}
+              {this.renderNavItems(item.children)}
             </ul>
           </li>
         );
@@ -148,7 +161,7 @@ class NavContent extends Component {
             to={item.url}
             style={linkStyle}
             onClick={() => {
-              if (!parentKey) {
+              if (!item.parentId) {
                 this.setState({ activeMenus: {} });
               }
             }}
