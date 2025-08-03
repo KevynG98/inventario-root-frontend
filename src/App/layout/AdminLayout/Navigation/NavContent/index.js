@@ -97,13 +97,7 @@ class NavContent extends Component {
               style={{
                 paddingLeft: '20px',
                 margin: 0,
-                maxHeight: isOpen
-                  ? `${this.submenuRefs[currentKey]?.scrollHeight || 0}px`
-                  : '0px',
-                opacity: isOpen ? 1 : 0,
-                overflow: 'hidden',
-                transform: isOpen ? 'translateY(0)' : 'translateY(-5px)',
-                transition: 'all 0.5s cubic-bezier(0.25, 1, 0.5, 1)'
+                display: isOpen ? 'block' : 'none'
               }}
             >
               {this.renderNavItems(item.children, currentKey)}
