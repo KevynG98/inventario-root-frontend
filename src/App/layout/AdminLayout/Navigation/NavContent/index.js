@@ -65,7 +65,11 @@ class NavContent extends Component {
         padding: '8px 16px',
         minHeight: '40px',
         color: '#fff',
-        textDecoration: 'none'
+        textDecoration: 'none',
+        background: 'none',
+        border: 'none',
+        cursor: 'pointer',
+        width: '100%'
       };
 
       const iconSpan = (
@@ -93,8 +97,8 @@ class NavContent extends Component {
       if (hasChildren) {
         return (
           <li key={currentKey} style={containerStyle}>
-            <a
-              href="#"
+            <button
+              type="button"
               onClick={(e) => this.toggleSubmenu(e, currentKey)}
               style={linkStyle}
             >
@@ -106,7 +110,7 @@ class NavContent extends Component {
                 transition: 'transform 0.3s',
                 transform: isOpen ? 'rotate(90deg)' : 'rotate(0deg)'
               }} />
-            </a>
+            </button>
             <ul
               ref={el => (this.submenuRefs[currentKey] = el)}
               style={{
