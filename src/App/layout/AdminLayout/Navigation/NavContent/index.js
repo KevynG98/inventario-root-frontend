@@ -44,7 +44,12 @@ class NavContent extends Component {
 
   renderNavItems = (items, parentKey = '') => {
     return items.map((item, index) => {
-      const currentKey = parentKey ? `${parentKey}-${index}` : `${index}`;
+      // Se genera un identificador estable utilizando la URL o el título.
+      // Antes se usaba únicamente el índice del arreglo, lo que provocaba
+      // que en compilaciones de producción los menús anidados perdieran su
+      // estado cuando la lista se filtraba por roles y cambiaba el orden.
+      const keySegment = item.url || item.title || index;
+      const currentKey = parentKey ? `${parentKey}-${keySegment}` : `${keySegment}`;
       const hasChildren = item.children && item.children.length > 0;
       const isOpen = !!this.state.activeMenus[currentKey];
 
