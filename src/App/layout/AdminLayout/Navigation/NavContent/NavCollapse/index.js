@@ -68,11 +68,18 @@ class NavCollapse extends Component {
 
         const subContent = (
             <Aux>
-                <a href={DEMO.BLANK_LINK} className={navLinkClass.join(' ')} onClick={() => this.props.onCollapseToggle(this.props.collapse.id, this.props.type)}>
+                <button
+                    type="button"
+                    className={navLinkClass.join(' ')}
+                    onClick={(e) => {
+                        e.preventDefault();
+                        this.props.onCollapseToggle(this.props.collapse.id, this.props.type);
+                    }}
+                >
                     <NavIcon items={this.props.collapse} />
                     {itemTitle}
                     <NavBadge layout={this.props.layout} items={this.props.collapse} />
-                </a>
+                </button>
                 <ul className="pcoded-submenu">
                     {navItems}
                 </ul>
