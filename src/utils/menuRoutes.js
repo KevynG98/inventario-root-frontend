@@ -136,4 +136,21 @@ const staticRoutes = [
     }
 ];
 
-export default staticRoutes;
+let menuIdCounter = 0;
+
+const addIds = (items, parentId = null) =>
+    items.map(item => {
+        const id = `menu-${menuIdCounter++}`;
+        const newItem = { ...item, id };
+        if (parentId) {
+            newItem.parentId = parentId;
+        }
+        if (item.children) {
+            newItem.children = addIds(item.children, id);
+        }
+        return newItem;
+    });
+
+const routesWithIds = addIds(staticRoutes);
+
+export default routesWithIds;
