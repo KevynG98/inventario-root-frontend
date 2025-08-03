@@ -18,13 +18,28 @@ class NavContent extends Component {
     this.submenuRefs = {};
   }
 
-  toggleSubmenu = (key) => {
-    this.setState(prevState => ({
-      activeMenus: {
-        ...prevState.activeMenus,
-        [key]: !prevState.activeMenus[key]
+  // Maneja la apertura y cierre de los submenús sin colapsar los padres
+  toggleSubmenu = (e, key) => {
+    // Evitamos que el click se propague y cierre niveles superiores
+    e.preventDefault();
+    e.stopPropagation();
+
+    this.setState(prevState => {
+      const activeMenus = { ...prevState.activeMenus };
+      const isOpen = !activeMenus[key];
+      activeMenus[key] = isOpen;
+
+      // Si abrimos un submenú, aseguramos que todos sus ancestros estén abiertos
+      if (isOpen) {
+        const parts = key.split('-');
+        while (parts.length > 1) {
+          parts.pop();
+          activeMenus[parts.join('-')] = true;
+        }
       }
-    }));
+
+      return { activeMenus };
+    });
   };
 
   renderNavItems = (items, parentKey = '') => {
@@ -79,8 +94,8 @@ class NavContent extends Component {
         return (
           <li key={currentKey} style={containerStyle}>
             <a
-              href="javascript:void(0)"
-              onClick={() => this.toggleSubmenu(currentKey)}
+              href="#"
+              onClick={(e) => this.toggleSubmenu(e, currentKey)}
               style={linkStyle}
             >
               {iconSpan}
