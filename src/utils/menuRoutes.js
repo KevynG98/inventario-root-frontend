@@ -51,16 +51,19 @@ const staticRoutes = [
         icon: <FiPackage />,
         roles: [1, 2],
         children: [
-            {
-                title: 'Compras',
-                icon: <FiFileText />,
-                roles: [1, 2],
-                children: [
-                    { title: 'Generar Requsicion', url: '/dashboard/bodegas/compras/generar', icon: <FiFileText />, roles: [1, 2] },
-                    { title: 'Visualizar Requisiciones', url: '/dashboard/bodegas/compras/visualizar', icon: <FiFileText />, roles: [1, 2] },
-                    { title: 'Orden de Compra', url: '/dashboard/bodegas/compras/orden', icon: <FiFileText />, roles: [1, 2] },
-                ]
-            },
+            // {
+            //     title: 'Compras',
+            //     icon: <FiFileText />,
+            //     roles: [1, 2],
+            //     children: [
+            //         { title: 'Generar Requsicion', url: '/dashboard/bodegas/compras/generar', icon: <FiFileText />, roles: [1, 2] },
+            //         { title: 'Visualizar Requisiciones', url: '/dashboard/bodegas/compras/visualizar', icon: <FiFileText />, roles: [1, 2] },
+            //         { title: 'Orden de Compra', url: '/dashboard/bodegas/compras/orden', icon: <FiFileText />, roles: [1, 2] },
+            //     ]
+            // },
+            { title: 'Compras - Generar Requsicion', url: '/dashboard/bodegas/compras/generar', icon: <FiFileText />, roles: [1, 2] },
+            { title: 'Compras - Visualizar Requisiciones', url: '/dashboard/bodegas/compras/visualizar', icon: <FiFileText />, roles: [1, 2] },
+            { title: 'Compras - Orden de Compra', url: '/dashboard/bodegas/compras/orden', icon: <FiFileText />, roles: [1, 2] },
             { title: 'Entradas', url: '/dashboard/bodegas/entradas', icon: <FiLogOut />, roles: [1, 2] },
             { title: 'Salidas', url: '/dashboard/bodegas/salidas', icon: <FiFilePlus />, roles: [1, 2] },
             { title: 'Traslados', url: '/dashboard/bodegas/traslados', icon: <FiTruck />, roles: [1, 2] }
