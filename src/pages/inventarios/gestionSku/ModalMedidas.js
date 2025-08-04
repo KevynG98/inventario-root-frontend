@@ -251,6 +251,16 @@ const ModalMedidas = () => {
                 <Form.Control {...register('barcode', { required: true })} readOnly={readOnly} />
               </Form.Group>
             </Col>
+            <Col md={4}>
+              <Form.Group>
+                <Form.Label>IVA *</Form.Label>
+                <Form.Control as="select" {...register('iva', { required: true })} readOnly={readOnly}>
+                  <option value="">Seleccionar</option>
+                  <option value="afecto">Afecto</option>
+                  <option value="extento">Extento</option>
+                </Form.Control>
+              </Form.Group>
+            </Col>
           </Row>
 
           {/* <Row className="mt-2">
