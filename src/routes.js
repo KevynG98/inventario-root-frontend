@@ -35,6 +35,7 @@ const InventarioStock = React.lazy(() => import('./pages/inventarios/stock/Index
 const InventarioPrecios = React.lazy(() => import('./pages/inventarios/actualizarPrecio/Index'))
 const InventarioConsignacion = React.lazy(() => import('./pages/inventarios/consignacion/Index'));
 const InventarioControlados = React.lazy(() => import('./pages/inventarios/controlados/Index'));
+const InventarioPrincipiosActivos = React.lazy(() => import('./pages/inventarios/principiosActivos/Index'));
 /* Bodegas */
 const InventarioComprasGenerar = React.lazy(() => import('./pages/bodegas/compras/generar/Index'));
 const InventarioComprasVisualizar = React.lazy(() => import('./pages/bodegas/compras/visualizar/Index'));
@@ -110,6 +111,7 @@ const routes = [
     { path: '/dashboard/inventario/precios', exact: true, name: 'Precios', component: InventarioPrecios },
     { path: '/dashboard/inventario/consignacion', exact: true, name: 'Precios', component: InventarioConsignacion },
     { path: '/dashboard/inventario/controlados', exact: true, name: 'Precios', component: InventarioControlados },
+    { path: '/dashboard/inventario/principiosActivos', exact: true, name: 'Precios', component: InventarioPrincipiosActivos },
     /*Bodegas*/
     { path: '/dashboard/bodegas/compras/generar', exact: true, name: 'Precios', component: InventarioComprasGenerar },
     { path: '/dashboard/bodegas/compras/visualizar', exact: true, name: 'Precios', component: InventarioComprasVisualizar },

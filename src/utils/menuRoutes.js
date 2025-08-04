@@ -43,7 +43,8 @@ const staticRoutes = [
             { title: 'Examenes', url: '/dashboard/futuro', icon: <FiHeart />, roles: [1, 2] },
             { title: 'Historico de Movimientos', url: '/dashboard/inventario/movimientos', icon: <FiArchive />, roles: [1, 2] },
             { title: 'Consignacion', url: '/dashboard/inventario/consignacion', icon: <FiPackage />, roles: [1, 2] },
-            { title: 'Controlados', url: '/dashboard/inventario/controlados', icon: <FiShield />, roles: [1, 2] }
+            { title: 'Controlados', url: '/dashboard/inventario/controlados', icon: <FiShield />, roles: [1, 2] },
+            { title: 'Principios Activos', url: '/dashboard/inventario/principiosActivos', icon: <FiList />, roles: [1, 2] },
         ]
     },
     {

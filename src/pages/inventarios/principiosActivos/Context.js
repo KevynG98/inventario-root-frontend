@@ -10,20 +10,19 @@ export const ContextProvider = ({ children }) => {
   const [show, setShow] = useState(false);
   const [modoFormulario, setModoFormulario] = useState('crear'); // 'crear', 'editar' o 'ver'
   const [proveedorSeleccionado, setProveedorSeleccionado] = useState(null);
-  const [subcategorias, setSubcategorias] = useState([]); // 👈 NUEVO
 
-  // paginación
+  //paginacion
   const [page, setPage] = useState(1);
   const [nullNextPage, setNullNextPage] = useState(null)
   const [nullPrevPage, setPrevNextPage] = useState(null)
 
   const nextPage = () => {
     setPage(prev => prev + 1);
-  };
+  }
 
   const prevPage = () => {
     setPage(prev => prev - 1);
-  };
+  }
 
   const cargarDatos = async () => {
     Swal.fire({
@@ -35,7 +34,7 @@ export const ContextProvider = ({ children }) => {
     });
 
     try {
-      const response = await getData(`inventario/categorias/?page=${page}&page_size=50`);
+      const response = await getData(`inventario/principios/?page=${page}`);
       const resultados = response.data.results;
 
       setData(resultados);
@@ -57,66 +56,51 @@ export const ContextProvider = ({ children }) => {
       Swal.fire({
         icon: 'error',
         title: 'Error',
-        text: 'Error al cargar categorías',
+        text: 'Error al cargar admisiones',
       });
 
-      console.error('Error al cargar categorías:', error);
+      console.error('Error al cargar admisiones:', error);
     }
   };
 
   const enviarDatos = async (data) => {
-    const { subcategorias: subcats, ...categoriaData } = data;
+    console.log("DATOS", data)
     try {
-      const response = await postData("inventario/categorias-crear/", categoriaData);
+      const response = await postData("inventario/principios-crear/", data);
       if (response?.status === 201 && response.data) {
-        NotificationManager.success("Categoría creada", "Éxito", 3000);
-
-        const categoriaId = response.data.id;
-
-        // Crear subcategorías si hay
-        if (subcats && subcats.length > 0) {
-          for (const nombre of subcats) {
-            await postData("inventario/subcategorias-crear/", {
-              nombre,
-              categoria: categoriaId,
-              is_active: true,
-            });
-          }
-        }
-
-        setSubcategorias([]);
-        showModal();
+        NotificationManager.success("Marca Creada", "Éxito", 3000);
+        showModal()
       } else {
         NotificationManager.error("Algo salió mal", "Error", 5000);
+        console.log("Algo salió mal", "Error", 5000)
       }
     } catch (err) {
-      console.error('Error al crear categoría:', err);
-      NotificationManager.error("Error al crear categoría", "Error", 5000);
+      console.error('Error al crear usuario:', err);
     }
-
-    cargarDatos();
-  };
+    cargarDatos()
+  }
 
   const actualizarProveedor = async (datos) => {
     try {
-      const response = await putData(`inventario/categorias-actualizar/${datos.id}/`, datos);
+      const response = await putData(`inventario/principios-actualizar/${datos.id}/`, datos);
 
       if (response.status === 200 || response.status === 204) {
-        NotificationManager.success("Categoría actualizada", "Éxito", 3000);
-        cargarDatos();
-        setShow(false);
+        console.log("Proveedor actualizado con éxito:", response.data);
+        NotificationManager.success("Marca Editada con exito", "Éxito", 3000);
+        cargarDatos(); // recarga el listado si tenés esta función
+        setShow(false); // cierra el modal
       } else {
         console.warn("Algo salió mal al actualizar:", response);
       }
     } catch (error) {
-      console.error("Error al actualizar categoría:", error);
+      console.error("Error al actualizar proveedor:", error);
     }
   };
 
   const eliminarProveedor = async (id) => {
     const confirmed = await Swal.fire({
       title: '¿Estás seguro?',
-      text: 'Esta acción eliminará permanentemente la categoría.',
+      text: 'Esta acción eliminará permanentemente la marca.',
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#3085d6',
@@ -127,11 +111,14 @@ export const ContextProvider = ({ children }) => {
 
     if (confirmed.isConfirmed) {
       try {
-        const response = await deleteData(`inventario/categorias-eliminar/${id}/`);
-        NotificationManager.success("Categoría eliminada", "Éxito", 3000);
-        cargarDatos();
+        const response = await deleteData(`inventario/principios-eliminar/${id}/`);
+        console.log('Proveedor eliminado:', response.status);
+        NotificationManager.success("Marca eliminada con éxito", "Éxito", 3000);
+
+        // Recargar listado o actualizar estado
+        cargarDatos && cargarDatos();
       } catch (error) {
-        console.error('Error al eliminar categoría:', error);
+        console.error('Error al eliminar proveedor:', error);
         NotificationManager.error("Hubo un error al eliminar", "Error", 3000);
       }
     }
@@ -142,44 +129,24 @@ export const ContextProvider = ({ children }) => {
   const abrirModalCrear = () => {
     setProveedorSeleccionado(null);
     setModoFormulario('crear');
-    setSubcategorias(['']); // 👈 inicia con una subcategoría vacía
     showModal();
   };
 
-  const abrirModalEditar = async (proveedor) => {
+  const abrirModalEditar = (proveedor) => {
     setProveedorSeleccionado(proveedor);
     setModoFormulario('editar');
-
-    try {
-      const response = await getData(`inventario/categorias/subcategorias/${proveedor.id}/`);
-      const nombres = response.data.map(sub => sub.nombre);
-      setSubcategorias(nombres);
-    } catch (error) {
-      console.error('Error al obtener subcategorías:', error);
-      setSubcategorias([]);
-    }
-
     showModal();
   };
 
-  const abrirModalVer = async (proveedor) => {
+  const abrirModalVer = (proveedor) => {
     setProveedorSeleccionado(proveedor);
     setModoFormulario('ver');
-
-    try {
-      const response = await getData(`inventario/categorias/subcategorias/${proveedor.id}`);
-      const nombres = response.data.map(sub => sub.nombre);
-      setSubcategorias(nombres);
-    } catch (error) {
-      console.error('Error al obtener subcategorías:', error);
-      setSubcategorias([]);
-    }
-
     showModal();
   };
 
+
   useEffect(() => {
-    cargarDatos();
+    cargarDatos()
   }, [page]);
 
   const values = {
@@ -199,9 +166,7 @@ export const ContextProvider = ({ children }) => {
     abrirModalCrear,
     abrirModalVer,
     actualizarProveedor,
-    eliminarProveedor,
-    subcategorias, // 👈 exportado
-    setSubcategorias // 👈 exportado
+    eliminarProveedor
   };
 
   return <MyContext.Provider value={values}>{children}</MyContext.Provider>;
