@@ -11,7 +11,7 @@ const ModalMedidas = () => {
   const {
     show, showModal, enviarDatos, actualizarProveedor,
     proveedorSeleccionado, modoFormulario,
-    categorias, marcas, unidadMedida, bodega
+    categorias, marcas, unidadMedida, bodega, principiosActivos
   } = useMyContext();
 
   const {
@@ -150,10 +150,21 @@ const ModalMedidas = () => {
           <Row>
             <Col md={4}>
               <Form.Group>
+                <Form.Label>Principio activo *</Form.Label>
+                <Form.Control as="select" {...register('principio_activo', { required: true })} readOnly={readOnly}>
+                  <option value="">Seleccionar</option>
+                  {principiosActivos?.map((data, i) => (
+                    <option key={i} value={data.nombre}>{data.nombre}</option>
+                  ))}
+                </Form.Control>
+              </Form.Group>
+            </Col>
+            {/* <Col md={4}>
+              <Form.Group>
                 <Form.Label>Principio activo</Form.Label>
                 <Form.Control {...register('principio_activo')} readOnly={readOnly} />
               </Form.Group>
-            </Col>
+            </Col> */}
             <Col md={4}>
               <Form.Group>
                 <Form.Label>Sub Categoría *</Form.Label>

@@ -15,6 +15,7 @@ export const ContextProvider = ({ children }) => {
   const [unidadMedida, setUnidadMedida] = useState([]) //unidad de despacho
   const [bodega, setBodega] = useState([])
   const [skuActivo, setSkuActivo] = useState(null); // SKU seleccionado
+  const [principiosActivos, setPrincipiosActivos] = useState([]); // Para almacenar principios activos si es necesario
   const [showModalMovimiento, setShowModalMovimiento] = useState(false);
 
   //paginacion
@@ -110,6 +111,16 @@ export const ContextProvider = ({ children }) => {
       const response = await getData(`inventario/bodegas/?page=1&page_size=20`);
       console.log(response.data)
       setBodega(response.data.results);
+    } catch (error) {
+      console.error('Error al cargar admisiones:', error);
+    }
+  }
+
+  const cargarPrincipiosActivos = async () => {
+    try {
+      const response = await getData(`inventario/principios/?page=1&page_size=20`);
+      console.log(response.data)
+      setPrincipiosActivos(response.data.results);
     } catch (error) {
       console.error('Error al cargar admisiones:', error);
     }
@@ -238,6 +249,7 @@ export const ContextProvider = ({ children }) => {
     cargarMarcas()
     cargarMedida()
     cargarBodega()
+    cargarPrincipiosActivos()
   }, [page]);
 
   const values = {
@@ -268,7 +280,7 @@ export const ContextProvider = ({ children }) => {
     setShowModalMovimiento,
     abrirModalMovimiento,
     moverProducto,
-
+    principiosActivos
   };
 
   return <MyContext.Provider value={values}>{children}</MyContext.Provider>;
