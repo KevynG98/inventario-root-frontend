@@ -1,6 +1,6 @@
 // Context.js
-import React, { createContext, useState } from 'react';
-import { postData, putData } from '../../../../apiService';
+import React, { createContext, useEffect, useState } from 'react';
+import { postData, putData, getData } from '../../../../apiService';
 
 
 export const AppContext = createContext();
@@ -9,6 +9,46 @@ export const ContextProvider = ({ children }) => {
   const [showModalProveedor, setShowModalProveedor] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [requisicionSeleccionada, setRequisicionSeleccionada] = useState(null);
+  const [bodegas, setBodegas] = useState([]);
+  const [proveedores, setProveedores] = useState([]); // Lista de proveedores
+  const [categorias, setCategorias] = useState([]); // Lista de categorias
+  const [skus, setSkus] = useState([]); // Lista de SKUs
+
+  const getBodegas = async () => {
+    try {
+      const response = await getData('/inventario/bodegas/');
+      setBodegas(response.data.results);
+    } catch (error) {
+      console.error('Error al cargar bodegas:', error);
+    }
+  };
+
+  const getProveedores = async () => {
+    try {
+      const response = await getData('/inventario/proveedores/');
+      setProveedores(response.data.results);
+    } catch (error) {
+      console.error('Error al cargar proveedores:', error);
+    }
+  };
+
+  const getCategorias = async () => {
+    try {
+      const response = await getData('/inventario/categorias/');
+      setCategorias(response.data.results);
+    } catch (error) {
+      console.error('Error al cargar categorias:', error);
+    }
+  };
+
+  const getSkus = async () => {
+    try {
+      const response = await getData('/inventario/skus/');
+      setSkus(response.data.results);
+    } catch (error) {
+      console.error('Error al cargar SKUs:', error);
+    }
+  };
 
   const toggleModalProveedor = () => {
     setShowModalProveedor(!showModalProveedor);
@@ -45,6 +85,13 @@ export const ContextProvider = ({ children }) => {
     }
   };
 
+  useEffect(() => {
+    getBodegas();
+    getProveedores();
+    getCategorias();
+    getSkus();
+  }, []);
+
   const values = {
     showModalProveedor,
     setShowModalProveedor,
@@ -54,6 +101,10 @@ export const ContextProvider = ({ children }) => {
     cerrarModal,
     requisicionSeleccionada,
     crearRequisicion, // ✅ exportado al context
+    bodegas,
+    proveedores,
+    categorias,
+    skus
   };
 
   return (

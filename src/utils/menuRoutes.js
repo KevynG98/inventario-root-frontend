@@ -10,7 +10,7 @@ const staticRoutes = [
         title: 'Dashboard',
         url: '/dashboard/default',
         icon: <FiHome />,
-        roles: [1, 2, 3]
+        roles: [...Array(25).keys()].map(i => i + 1)
     },
     {
         title: 'Admisiones',
