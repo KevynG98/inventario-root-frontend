@@ -8,6 +8,7 @@ import '../../node_modules/font-awesome/scss/font-awesome.scss';
 import Loader from './layout/Loader'
 import Aux from "../hoc/_Aux";
 import ScrollToTop from './layout/ScrollToTop';
+import SimpleLayout from './layout/SimpleLayout';
 import routes from "../route";
 
 const AdminLayout = Loadable({
@@ -39,23 +40,25 @@ class App extends Component {
                 {/* Agregar NotificationContainer aquí */}
                 <NotificationContainer />
                 <ScrollToTop>
-                    <Suspense fallback={<Loader />}>
-                        <Switch>
-                            {menu}
+                    <SimpleLayout>
+                        <Suspense fallback={<Loader />}>
+                            <Switch>
+                                {menu}
 
-                            {/* Redirige desde raíz */}
-                            <Route exact path="/">
-                                <Redirect to="/auth/signin-1" />
-                            </Route>
+                                {/* Redirige desde raíz */}
+                                <Route exact path="/">
+                                    <Redirect to="/auth/signin-1" />
+                                </Route>
 
-                            {/* Solo rutas dashboard */}
-                            <Route path="/dashboard" component={AdminLayout} />
+                                {/* Solo rutas dashboard */}
+                                <Route path="/dashboard" component={AdminLayout} />
 
-                            {/* Opcional: si quieres manejar otras rutas */}
-                            <Route path="*" render={() => <Redirect to="/auth/signin-1" />} />
-                        </Switch>
+                                {/* Opcional: si quieres manejar otras rutas */}
+                                <Route path="*" render={() => <Redirect to="/auth/signin-1" />} />
+                            </Switch>
 
-                    </Suspense>
+                        </Suspense>
+                    </SimpleLayout>
                 </ScrollToTop>
             </Aux>
         );

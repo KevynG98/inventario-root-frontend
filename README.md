@@ -1,8 +1,11 @@
-<<<<<<< HEAD
 # SHEN---FronEnd
 Sistema Hospitalario El Naranjo
-=======
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+
+## Simple Layout
+
+The project includes a `SimpleLayout` component that wraps any number of children and allows color customization through CSS variables. Override the values in `src/App/layout/SimpleLayout/layout.css` or pass a `theme` prop to change `background`, `text`, and `primary` colors.
 
 ## Available Scripts
 
@@ -70,4 +73,3 @@ This section has moved here: https://facebook.github.io/create-react-app/docs/de
 ### `npm run build` fails to minify
 
 This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify
->>>>>>> master
