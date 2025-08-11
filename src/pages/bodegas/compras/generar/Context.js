@@ -16,7 +16,7 @@ export const ContextProvider = ({ children }) => {
 
   const getBodegas = async () => {
     try {
-      const response = await getData('/inventario/bodegas/');
+      const response = await getData('/inventario/bodegas/?page_size=100');
       setBodegas(response.data.results);
     } catch (error) {
       console.error('Error al cargar bodegas:', error);
@@ -25,7 +25,7 @@ export const ContextProvider = ({ children }) => {
 
   const getProveedores = async () => {
     try {
-      const response = await getData('/inventario/proveedores/');
+      const response = await getData('/inventario/proveedores/?page_size=100');
       setProveedores(response.data.results);
     } catch (error) {
       console.error('Error al cargar proveedores:', error);
@@ -34,7 +34,7 @@ export const ContextProvider = ({ children }) => {
 
   const getCategorias = async () => {
     try {
-      const response = await getData('/inventario/categorias/');
+      const response = await getData('/inventario/categorias/?page_size=100');
       setCategorias(response.data.results);
     } catch (error) {
       console.error('Error al cargar categorias:', error);
@@ -43,7 +43,7 @@ export const ContextProvider = ({ children }) => {
 
   const getSkus = async () => {
     try {
-      const response = await getData('/inventario/skus/');
+      const response = await getData('/inventario/skus/?page_size=100');
       setSkus(response.data.results);
     } catch (error) {
       console.error('Error al cargar SKUs:', error);
