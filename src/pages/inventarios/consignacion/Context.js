@@ -46,7 +46,7 @@ export const ContextProvider = ({ children }) => {
     });
 
     try {
-      const url = `inventario/skus-filtrados/?page=${page}&clasificacion=consignacion`;
+      const url = `inventario/skus-filtrados/?page=${page}&clasificacion=consignacion&page_size=50`;
       const response = await getData(url);
       const resultados = response.data.results;
 

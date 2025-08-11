@@ -34,7 +34,7 @@ export const ContextProvider = ({ children }) => {
     });
 
     try {
-      const response = await getData(`inventario/proveedores/?page=${page}`);
+      const response = await getData(`inventario/proveedores/?page=${page}&page_size=50`);
       const resultados = response.data.results;
 
       setData(resultados);

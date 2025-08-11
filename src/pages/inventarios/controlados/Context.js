@@ -46,7 +46,7 @@ export const ContextProvider = ({ children }) => {
     });
 
     try {
-      const url = `inventario/skus-filtrados/?page=${page}&clasificacion=controlado`;
+      const url = `inventario/skus-filtrados/?page=${page}&clasificacion=controlado&page_size=50`;
       const response = await getData(url);
       const resultados = response.data.results;
 
