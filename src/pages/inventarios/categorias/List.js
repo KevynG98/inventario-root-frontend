@@ -19,6 +19,17 @@ const Marcas = () => {
   const handleVer = (prov) => abrirModalVer(prov);
   const handleEditar = (prov) => abrirModalEditar(prov);
 
+  const renderEstado = (prov) => {
+    // Soporta string 'alta'/'baja' o boolean is_active (por si backend cambia)
+    if (typeof prov?.estado === 'string') {
+      return prov.estado === 'alta' ? 'Alta' : 'Baja';
+    }
+    if (typeof prov?.is_active === 'boolean') {
+      return prov.is_active ? 'Alta' : 'Baja';
+    }
+    return prov?.estado ?? '';
+  };
+
   return (
     <div className="mb-4">
       <h5 className="mb-3">Listado de Categorías</h5>
@@ -51,11 +62,11 @@ const Marcas = () => {
             </tr>
           </thead>
           <tbody>
-            {data.map((prov, idx) => (
-              <tr key={idx}>
+            {data.map((prov) => (
+              <tr key={prov.id}>
                 <td>{prov.id}</td>
                 <td>{prov.nombre}</td>
-                <td>{prov.estado === 'alta' ? 'Alta' : 'Baja'}</td>
+                <td>{renderEstado(prov)}</td>
                 <td className="text-center">
                   <OverlayTrigger overlay={<Tooltip>Ver Categoría</Tooltip>}>
                     <Button className="btn btn-outline-secondary btn-sm me-1" onClick={() => handleVer(prov)}>

@@ -10,33 +10,28 @@ export const ContextProvider = ({ children }) => {
   const [show, setShow] = useState(false);
   const [modoFormulario, setModoFormulario] = useState('crear'); // 'crear', 'editar' o 'ver'
   const [proveedorSeleccionado, setProveedorSeleccionado] = useState(null);
-  const [subcategorias, setSubcategorias] = useState([]); // 👈 NUEVO
+
+  // subcategorías se manejarán como objetos: { id?: number, nombre: string, _delete?: boolean, _dirty?: boolean }
+  const [subcategorias, setSubcategorias] = useState([]);
 
   // paginación
   const [page, setPage] = useState(1);
-  const [nullNextPage, setNullNextPage] = useState(null)
-  const [nullPrevPage, setPrevNextPage] = useState(null)
+  const [nullNextPage, setNullNextPage] = useState(null);
+  const [nullPrevPage, setPrevNextPage] = useState(null);
 
-  const nextPage = () => {
-    setPage(prev => prev + 1);
-  };
-
-  const prevPage = () => {
-    setPage(prev => prev - 1);
-  };
+  const nextPage = () => setPage(prev => prev + 1);
+  const prevPage = () => setPage(prev => prev - 1);
 
   const cargarDatos = async () => {
     Swal.fire({
       title: 'Cargando...',
       allowOutsideClick: false,
-      didOpen: () => {
-        Swal.showLoading();
-      }
+      didOpen: () => Swal.showLoading()
     });
 
     try {
       const response = await getData(`inventario/categorias/?page=${page}&page_size=50`);
-      const resultados = response.data.results;
+      const resultados = response.data.results || [];
 
       setData(resultados);
       setNullNextPage(response.data.next);
@@ -53,29 +48,26 @@ export const ContextProvider = ({ children }) => {
       }
     } catch (error) {
       Swal.close();
-
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'Error al cargar categorías',
-      });
-
+      Swal.fire({ icon: 'error', title: 'Error', text: 'Error al cargar categorías' });
       console.error('Error al cargar categorías:', error);
     }
   };
 
-  const enviarDatos = async (data) => {
-    const { subcategorias: subcats, ...categoriaData } = data;
+  // CREAR
+  const enviarDatos = async (dataForm) => {
+    // dataForm.subcategorias viene como [{id?, nombre, ...}] desde el modal
+    const { subcategorias: subcats = [], ...categoriaData } = dataForm;
+
     try {
       const response = await postData("inventario/categorias-crear/", categoriaData);
       if (response?.status === 201 && response.data) {
         NotificationManager.success("Categoría creada", "Éxito", 3000);
-
         const categoriaId = response.data.id;
 
-        // Crear subcategorías si hay
-        if (subcats && subcats.length > 0) {
-          for (const nombre of subcats) {
+        // Crear subcategorías nuevas
+        for (const sc of subcats) {
+          const nombre = (typeof sc === 'string') ? sc : sc?.nombre;
+          if (nombre && nombre.trim() !== '') {
             await postData("inventario/subcategorias-crear/", {
               nombre,
               categoria: categoriaId,
@@ -85,7 +77,7 @@ export const ContextProvider = ({ children }) => {
         }
 
         setSubcategorias([]);
-        showModal();
+        showModal(); // cerrar
       } else {
         NotificationManager.error("Algo salió mal", "Error", 5000);
       }
@@ -97,22 +89,78 @@ export const ContextProvider = ({ children }) => {
     cargarDatos();
   };
 
+  // EDITAR (actualiza categoría y resuelve altas/bajas/renombres de subcategorías)
   const actualizarProveedor = async (datos) => {
-    try {
-      const response = await putData(`inventario/categorias-actualizar/${datos.id}/`, datos);
+    const { subcategorias: subcats = [], ...categoriaData } = datos;
 
-      if (response.status === 200 || response.status === 204) {
+    try {
+      // 1) Actualizar la categoría
+      const resCat = await putData(`inventario/categorias-actualizar/${categoriaData.id}/`, categoriaData);
+
+      if (resCat.status === 200 || resCat.status === 204) {
+        // 2) Sin IDs, no se puede CRUD de subcats -> por eso guardamos objetos con id/estado
+        // estrategia:
+        //  - si item._delete === true y tiene id -> eliminar
+        //  - si !id y nombre válido -> crear
+        //  - si id y _dirty === true -> actualizar nombre
+        for (const sc of subcats) {
+          const id = sc?.id;
+          const nombre = (typeof sc === 'string') ? sc : sc?.nombre;
+          const marcadoEliminar = sc?._delete === true;
+          const cambiado = sc?._dirty === true;
+
+          // eliminar
+          if (marcadoEliminar && id) {
+            try {
+              await deleteData(`inventario/subcategorias-eliminar/${id}/`);
+            } catch (e) {
+              console.error('Error al eliminar subcategoría:', e);
+            }
+            continue;
+          }
+
+          // crear
+          if (!id && nombre && nombre.trim() !== '') {
+            try {
+              await postData("inventario/subcategorias-crear/", {
+                nombre,
+                categoria: categoriaData.id,
+                is_active: true,
+              });
+            } catch (e) {
+              console.error('Error al crear subcategoría:', e);
+            }
+            continue;
+          }
+
+          // actualizar nombre
+          if (id && cambiado) {
+            try {
+              await putData(`inventario/subcategorias-actualizar/${id}/`, {
+                id,
+                nombre,
+                categoria: categoriaData.id,
+                is_active: true,
+              });
+            } catch (e) {
+              console.error('Error al actualizar subcategoría:', e);
+            }
+          }
+        }
+
         NotificationManager.success("Categoría actualizada", "Éxito", 3000);
         cargarDatos();
         setShow(false);
       } else {
-        console.warn("Algo salió mal al actualizar:", response);
+        console.warn("Algo salió mal al actualizar:", resCat);
       }
     } catch (error) {
       console.error("Error al actualizar categoría:", error);
+      NotificationManager.error("No se pudo actualizar la categoría", "Error", 4000);
     }
   };
 
+  // ELIMINAR
   const eliminarProveedor = async (id) => {
     const confirmed = await Swal.fire({
       title: '¿Estás seguro?',
@@ -127,7 +175,7 @@ export const ContextProvider = ({ children }) => {
 
     if (confirmed.isConfirmed) {
       try {
-        const response = await deleteData(`inventario/categorias-eliminar/${id}/`);
+        await deleteData(`inventario/categorias-eliminar/${id}/`);
         NotificationManager.success("Categoría eliminada", "Éxito", 3000);
         cargarDatos();
       } catch (error) {
@@ -142,34 +190,38 @@ export const ContextProvider = ({ children }) => {
   const abrirModalCrear = () => {
     setProveedorSeleccionado(null);
     setModoFormulario('crear');
-    setSubcategorias(['']); // 👈 inicia con una subcategoría vacía
+    // comenzamos con una fila vacía como objeto para no perder estructura
+    setSubcategorias([{ id: undefined, nombre: '' }]);
     showModal();
   };
 
-  const abrirModalEditar = async (proveedor) => {
-    setProveedorSeleccionado(proveedor);
+  const abrirModalEditar = async (categoria) => {
+    setProveedorSeleccionado(categoria);
     setModoFormulario('editar');
 
     try {
-      const response = await getData(`inventario/categorias/subcategorias/${proveedor.id}/`);
-      const nombres = response.data.map(sub => sub.nombre);
-      setSubcategorias(nombres);
+      // ¡IMPORTANTE! conservar id y nombre
+      const response = await getData(`inventario/categorias/subcategorias/${categoria.id}/`);
+      const items = Array.isArray(response.data) ? response.data : [];
+      const normalizados = items.map(sc => ({ id: sc.id, nombre: sc.nombre }));
+      setSubcategorias(normalizados.length ? normalizados : [{ id: undefined, nombre: '' }]);
     } catch (error) {
       console.error('Error al obtener subcategorías:', error);
-      setSubcategorias([]);
+      setSubcategorias([{ id: undefined, nombre: '' }]);
     }
 
     showModal();
   };
 
-  const abrirModalVer = async (proveedor) => {
-    setProveedorSeleccionado(proveedor);
+  const abrirModalVer = async (categoria) => {
+    setProveedorSeleccionado(categoria);
     setModoFormulario('ver');
 
     try {
-      const response = await getData(`inventario/categorias/subcategorias/${proveedor.id}`);
-      const nombres = response.data.map(sub => sub.nombre);
-      setSubcategorias(nombres);
+      const response = await getData(`inventario/categorias/subcategorias/${categoria.id}/`);
+      const items = Array.isArray(response.data) ? response.data : [];
+      const normalizados = items.map(sc => ({ id: sc.id, nombre: sc.nombre }));
+      setSubcategorias(normalizados);
     } catch (error) {
       console.error('Error al obtener subcategorías:', error);
       setSubcategorias([]);
@@ -180,6 +232,7 @@ export const ContextProvider = ({ children }) => {
 
   useEffect(() => {
     cargarDatos();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page]);
 
   const values = {
@@ -200,8 +253,8 @@ export const ContextProvider = ({ children }) => {
     abrirModalVer,
     actualizarProveedor,
     eliminarProveedor,
-    subcategorias, // 👈 exportado
-    setSubcategorias // 👈 exportado
+    subcategorias,
+    setSubcategorias
   };
 
   return <MyContext.Provider value={values}>{children}</MyContext.Provider>;
