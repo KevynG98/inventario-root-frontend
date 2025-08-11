@@ -45,10 +45,13 @@ const List = () => {
         <table className="table table-bordered table-sm mt-2">
           <thead className="table-primary text-dark fw-semibold">
             <tr>
-              <th className="text-center">ID</th>
-              <th className="text-center">Proveedor</th>
+              <th className="text-center">No. Requisicion</th>
               <th className="text-center">Fecha</th>
-              <th className="text-center">Estado</th>
+              <th className="text-center">Descripcion</th>
+              <th className="text-center">Bodega</th>
+              <th className="text-center">Tipo de Requisicion</th>
+              <th className="text-center">Prioridad</th>
+              <th className="text-center">Estatus</th>
               <th className="text-center">Acciones</th>
             </tr>
           </thead>
@@ -61,8 +64,11 @@ const List = () => {
               filteredData.map((req, idx) => (
                 <tr key={idx}>
                   <td className="text-center">{req.id}</td>
-                  <td>{req.proveedor}</td>
                   <td className="text-center">{req.fecha}</td>
+                  <td className="text-center">{req.descripcion}</td>
+                  <td className="text-center">{req.bodega}</td>
+                  <td className="text-center">{req.tipo_requisicion}</td>
+                  <td>{req.prioridad}</td>
                   <td className="text-center">{req.estado}</td>
                   <td className="text-center">
                     <OverlayTrigger overlay={<Tooltip>Ver Detalle</Tooltip>}>

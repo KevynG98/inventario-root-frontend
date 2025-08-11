@@ -112,7 +112,7 @@ const ModalRequisicion = () => {
     return (
         <Modal show={showModal} onHide={cerrarModal} size="lg" centered>
             <Modal.Header closeButton className="bg-primary text-white">
-                <Modal.Title>Requisición #{requisicionSeleccionada.id}</Modal.Title>
+                <Modal.Title>{requisicionSeleccionada.proveedor}</Modal.Title>
             </Modal.Header>
             <Modal.Body>
                 <Form>
