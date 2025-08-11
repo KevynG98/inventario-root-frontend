@@ -55,7 +55,7 @@ const R = {
 
 // If you want the dashboard visible for absolutely everyone, include 26 too:
 const ALL_NON_ADMIN = [
-  2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26
+  2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26
 ];
 const DASHBOARD_ROLES = [R.ADMIN, ...ALL_NON_ADMIN];
 
@@ -112,9 +112,15 @@ const staticRoutes = [
     icon: <FiPackage />,
     roles: R.BODEGAS,
     children: [
-      { title: 'Compras - Generar Requsicion', url: '/dashboard/bodegas/compras/generar', icon: <FiFileText /> },
-      { title: 'Compras - Visualizar Requisiciones', url: '/dashboard/bodegas/compras/visualizar', icon: <FiFileText /> },
-      { title: 'Compras - Orden de Compra', url: '/dashboard/bodegas/compras/orden', icon: <FiFileText /> },
+      {
+        title: 'Compras',
+        icon: <FiFileText />,
+        children: [
+          { title: 'Generar Requsicion', url: '/dashboard/bodegas/compras/generar', icon: <FiFileText /> },
+          { title: 'Visualizar Requisiciones', url: '/dashboard/bodegas/compras/visualizar', icon: <FiFileText /> },
+          { title: 'Orden de Compra', url: '/dashboard/bodegas/compras/orden', icon: <FiFileText /> },
+        ].map(item => ({ ...item, roles: R.BODEGAS })),
+      },
       { title: 'Entradas', url: '/dashboard/bodegas/entradas', icon: <FiLogOut /> },
       { title: 'Salidas', url: '/dashboard/bodegas/salidas', icon: <FiFilePlus /> },
       { title: 'Traslados', url: '/dashboard/bodegas/traslados', icon: <FiTruck /> },
