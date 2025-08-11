@@ -8,21 +8,19 @@ const MyContext = createContext();
 export const ContextProvider = ({ children }) => {
   const [data, setData] = useState([]);
   const [show, setShow] = useState(false);
-  const [modoFormulario, setModoFormulario] = useState('crear'); // 'crear', 'editar' o 'ver'
+  const [modoFormulario, setModoFormulario] = useState('crear'); // 'crear', 'editar', 'ver'
   const [proveedorSeleccionado, setProveedorSeleccionado] = useState(null);
 
-  //paginacion
+  // función de reset del formulario expuesta por el modal
+  const [resetForm, setResetForm] = useState(null);
+
+  // paginación
   const [page, setPage] = useState(1);
-  const [nullNextPage, setNullNextPage] = useState(null)
-  const [nullPrevPage, setPrevNextPage] = useState(null)
+  const [nullNextPage, setNullNextPage] = useState(null);
+  const [nullPrevPage, setPrevNextPage] = useState(null);
 
-  const nextPage = () => {
-    setPage(prev => prev + 1);
-  }
-
-  const prevPage = () => {
-    setPage(prev => prev - 1);
-  }
+  const nextPage = () => setPage(prev => prev + 1);
+  const prevPage = () => setPage(prev => prev - 1);
 
   const cargarDatos = async () => {
     Swal.fire({
@@ -52,48 +50,44 @@ export const ContextProvider = ({ children }) => {
       }
     } catch (error) {
       Swal.close();
-
       Swal.fire({
         icon: 'error',
         title: 'Error',
         text: 'Error al cargar admisiones',
       });
-
       console.error('Error al cargar admisiones:', error);
     }
   };
 
-  const enviarDatos = async (data) => {
-    console.log("DATOS", data)
+  const enviarDatos = async (payload) => {
     try {
-      const response = await postData("inventario/principios-crear/", data);
+      const response = await postData("inventario/principios-crear/", payload);
       if (response?.status === 201 && response.data) {
         NotificationManager.success("Marca Creada", "Éxito", 3000);
-        showModal()
+        showModal(); // cerrar modal
       } else {
         NotificationManager.error("Algo salió mal", "Error", 5000);
-        console.log("Algo salió mal", "Error", 5000)
       }
     } catch (err) {
-      console.error('Error al crear usuario:', err);
+      console.error('Error al crear:', err);
+      NotificationManager.error("Error al crear", "Error", 5000);
     }
-    cargarDatos()
-  }
+    cargarDatos();
+  };
 
   const actualizarProveedor = async (datos) => {
     try {
       const response = await putData(`inventario/principios-actualizar/${datos.id}/`, datos);
-
       if (response.status === 200 || response.status === 204) {
-        console.log("Proveedor actualizado con éxito:", response.data);
-        NotificationManager.success("Marca Editada con exito", "Éxito", 3000);
-        cargarDatos(); // recarga el listado si tenés esta función
-        setShow(false); // cierra el modal
+        NotificationManager.success("Marca Editada con éxito", "Éxito", 3000);
+        cargarDatos();
+        setShow(false);
       } else {
         console.warn("Algo salió mal al actualizar:", response);
       }
     } catch (error) {
-      console.error("Error al actualizar proveedor:", error);
+      console.error("Error al actualizar:", error);
+      NotificationManager.error("Error al actualizar", "Error", 5000);
     }
   };
 
@@ -114,8 +108,6 @@ export const ContextProvider = ({ children }) => {
         const response = await deleteData(`inventario/principios-eliminar/${id}/`);
         console.log('Proveedor eliminado:', response.status);
         NotificationManager.success("Marca eliminada con éxito", "Éxito", 3000);
-
-        // Recargar listado o actualizar estado
         cargarDatos && cargarDatos();
       } catch (error) {
         console.error('Error al eliminar proveedor:', error);
@@ -124,11 +116,15 @@ export const ContextProvider = ({ children }) => {
     }
   };
 
-  const showModal = () => setShow(!show);
+  const showModal = () => setShow(prev => !prev);
 
   const abrirModalCrear = () => {
     setProveedorSeleccionado(null);
     setModoFormulario('crear');
+    // resetear el formulario ANTES de abrir el modal (si el modal ya expuso su reset)
+    if (typeof resetForm === 'function') {
+      resetForm();
+    }
     showModal();
   };
 
@@ -144,9 +140,9 @@ export const ContextProvider = ({ children }) => {
     showModal();
   };
 
-
   useEffect(() => {
-    cargarDatos()
+    cargarDatos();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page]);
 
   const values = {
@@ -166,7 +162,9 @@ export const ContextProvider = ({ children }) => {
     abrirModalCrear,
     abrirModalVer,
     actualizarProveedor,
-    eliminarProveedor
+    eliminarProveedor,
+    // para permitir que el modal registre su reset()
+    setResetForm
   };
 
   return <MyContext.Provider value={values}>{children}</MyContext.Provider>;

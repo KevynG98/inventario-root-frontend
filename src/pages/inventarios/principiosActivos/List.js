@@ -33,11 +33,8 @@ const Marcas = () => {
             />
           </div>
           <div className="col-12 col-md-2">
-            <Button
-              className="w-100"
-              onClick={abrirModalCrear}
-            >
-              Nueva Marca
+            <Button className="w-100" onClick={abrirModalCrear}>
+              Nuevo principio activo
             </Button>
           </div>
         </div>

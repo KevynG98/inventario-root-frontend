@@ -93,6 +93,7 @@ const staticRoutes = [
       { title: 'Proveedores', url: '/dashboard/inventario/proveedores', icon: <FiTruck /> },
       { title: 'Marcas', url: '/dashboard/inventario/marcas', icon: <FiPackage /> },
       { title: 'Unidades de Medidas', url: '/dashboard/inventario/unidades-medida', icon: <FiGrid /> },
+      { title: 'Principios Activos', url: '/dashboard/inventario/principiosActivos', icon: <FiList /> },
       { title: 'Categorias', url: '/dashboard/inventario/categorias', icon: <FiClipboard /> },
       { title: 'Bodegas', url: '/dashboard/inventario/bodegas', icon: <FiPackage /> },
       { title: 'Gestión de SKU', url: '/dashboard/inventario/sku', icon: <FiList /> },
@@ -102,7 +103,6 @@ const staticRoutes = [
       { title: 'Historico de Movimientos', url: '/dashboard/inventario/movimientos', icon: <FiArchive /> },
       { title: 'Consignacion', url: '/dashboard/inventario/consignacion', icon: <FiPackage /> },
       { title: 'Controlados', url: '/dashboard/inventario/controlados', icon: <FiShield /> },
-      { title: 'Principios Activos', url: '/dashboard/inventario/principiosActivos', icon: <FiList /> },
     ].map(item => ({ ...item, roles: R.INVENTARIO })),
   },
 
