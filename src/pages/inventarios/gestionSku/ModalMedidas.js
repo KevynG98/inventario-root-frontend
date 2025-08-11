@@ -11,7 +11,8 @@ const ModalMedidas = () => {
   const {
     show, showModal, enviarDatos, actualizarProveedor,
     proveedorSeleccionado, modoFormulario,
-    categorias, marcas, unidadMedida, bodega, principiosActivos
+    categorias, marcas, unidadMedida, bodega, principiosActivos,
+    subcategorias, cargarSubcategoriasPorCategoria
   } = useMyContext();
 
   const {
@@ -19,11 +20,14 @@ const ModalMedidas = () => {
     handleSubmit,
     setValue,
     reset,
+    watch,
     formState: { errors }
   } = useForm();
 
   const readOnly = modoFormulario === 'ver';
+  const categoriaSeleccionada = watch('categoria');
 
+  // Reset / Prefill
   useEffect(() => {
     if (modoFormulario === 'crear') {
       reset({
@@ -34,13 +38,13 @@ const ModalMedidas = () => {
         marca: '',
         subcategoria: '',
         principio_activo: '',
-        cantidad: 0,                 // stock inicial
-        cantidad_adicional: 0,       // solo se usa en edición
+        cantidad: 0,
+        cantidad_adicional: 0,
         unidad_compra: '',
         unidad_despacho: '',
         unidades_por_paquete: 1,
         descripcion_estado_cuenta: '',
-        barcode: '',                 // se mapeará a codigo_barras al enviar
+        barcode: '',
         iva: ''
       });
     }
@@ -49,7 +53,6 @@ const ModalMedidas = () => {
       Object.entries(proveedorSeleccionado).forEach(([key, value]) => {
         setValue(key, value);
       });
-      // campos que no existen en el objeto original
       setValue('cantidad_adicional', 0);
       if (proveedorSeleccionado.codigo_barras) {
         setValue('barcode', proveedorSeleccionado.codigo_barras);
@@ -57,17 +60,31 @@ const ModalMedidas = () => {
     }
   }, [modoFormulario, proveedorSeleccionado, reset, setValue]);
 
+  // Pre-cargar subcategorías SOLO una vez cuando ya tenemos categoría del registro
+  useEffect(() => {
+    if ((modoFormulario === 'editar' || modoFormulario === 'ver') && proveedorSeleccionado?.categoria) {
+      cargarSubcategoriasPorCategoria(proveedorSeleccionado.categoria);
+    }
+    // ⚠️ intencionalmente NO incluimos la función en deps; está memoizada y no necesitamos re-ejecutar
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [modoFormulario, proveedorSeleccionado?.categoria]);
+
+  // Al cambiar categoría en el formulario -> cargar sus subcategorías y limpiar subcategoria actual
+  useEffect(() => {
+    if (!readOnly && categoriaSeleccionada !== undefined) {
+      cargarSubcategoriasPorCategoria(categoriaSeleccionada);
+      setValue('subcategoria', '');
+    }
+  }, [categoriaSeleccionada, readOnly, setValue, cargarSubcategoriasPorCategoria]);
+
   const onSubmit = (data) => {
-    // Normalización previa del payload
     const payload = { ...data };
 
-    // Mapear 'barcode' -> 'codigo_barras'
     if (payload.barcode) {
       payload.codigo_barras = payload.barcode;
       delete payload.barcode;
     }
 
-    // Asegurar tipos numéricos
     payload.unidades_por_paquete = parseInt(payload.unidades_por_paquete || 1, 10);
     payload.cantidad = parseInt(payload.cantidad || 0, 10);
     const cantidadAdicional = parseInt(payload.cantidad_adicional || 0, 10);
@@ -88,29 +105,19 @@ const ModalMedidas = () => {
 
       enviarDatos(jsonData);
     } else {
-      // EDITAR: sumar cantidad_adicional a la bodega seleccionada
       if (proveedorSeleccionado?.bodegas && proveedorSeleccionado.bodegas.length > 0) {
         nuevasBodegas = proveedorSeleccionado.bodegas.map(b => {
           if (b.nombre_bodega === bodega[0]?.nombre) {
-            return {
-              ...b,
-              cantidad: b.cantidad + cantidadAdicional
-            };
+            return { ...b, cantidad: b.cantidad + cantidadAdicional };
           }
           return b;
         });
 
         if (!nuevasBodegas.find(b => b.nombre_bodega === bodega[0]?.nombre)) {
-          nuevasBodegas.push({
-            nombre_bodega: bodega[0]?.nombre,
-            cantidad: cantidadAdicional
-          });
+          nuevasBodegas.push({ nombre_bodega: bodega[0]?.nombre, cantidad: cantidadAdicional });
         }
       } else {
-        nuevasBodegas = [{
-          nombre_bodega: bodega[0]?.nombre,
-          cantidad: cantidadAdicional
-        }];
+        nuevasBodegas = [{ nombre_bodega: bodega[0]?.nombre, cantidad: cantidadAdicional }];
       }
 
       const jsonData = {
@@ -183,7 +190,19 @@ const ModalMedidas = () => {
             <Col md={4}>
               <Form.Group>
                 <Form.Label>Sub Categoría *</Form.Label>
-                <Form.Control {...register('subcategoria', { required: true })} readOnly={readOnly} />
+                <Form.Control
+                  as="select"
+                  {...register('subcategoria', { required: true })}
+                  readOnly={readOnly}
+                  disabled={readOnly || !categoriaSeleccionada}
+                >
+                  <option value="">Seleccionar</option>
+                  {subcategorias?.map((sc) => (
+                    <option key={sc.id} value={sc.nombre}>
+                      {sc.nombre}
+                    </option>
+                  ))}
+                </Form.Control>
               </Form.Group>
             </Col>
             <Col md={4}>
@@ -220,7 +239,6 @@ const ModalMedidas = () => {
             </Col>
           </Row>
 
-          {/* Campo oculto para registrar 'cantidad' en creación */}
           <input type="hidden" {...register('cantidad')} />
 
           <Row className="mt-2">
@@ -280,18 +298,6 @@ const ModalMedidas = () => {
               </Col>
             )}
           </Row>
-
-          {/* Si decides usar descripción en estado de cuenta, descomenta esto */}
-          {/*
-          <Row className="mt-2">
-            <Col>
-              <Form.Group>
-                <Form.Label>Descripción en el Estado de Cuenta *</Form.Label>
-                <Form.Control as="textarea" rows={2} {...register('descripcion_estado_cuenta')} readOnly={readOnly} />
-              </Form.Group>
-            </Col>
-          </Row>
-          */}
 
           <div className="d-flex justify-content-end mt-4">
             <Button variant="secondary" onClick={showModal} className="me-2">

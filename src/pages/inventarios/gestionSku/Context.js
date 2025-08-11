@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
 import { getData, postData, putData, deleteData } from '../../../apiService';
 import { NotificationManager } from "react-notifications";
 import Swal from 'sweetalert2';
@@ -10,40 +10,35 @@ export const ContextProvider = ({ children }) => {
   const [show, setShow] = useState(false);
   const [modoFormulario, setModoFormulario] = useState('crear'); // 'crear', 'editar' o 'ver'
   const [proveedorSeleccionado, setProveedorSeleccionado] = useState(null);
-  const [categorias, setCategorias] = useState([])
-  const [marcas, setMarcas] = useState([])
-  const [unidadMedida, setUnidadMedida] = useState([]) //unidad de despacho
-  const [bodega, setBodega] = useState([])
-  const [skuActivo, setSkuActivo] = useState(null); // SKU seleccionado
-  const [principiosActivos, setPrincipiosActivos] = useState([]); // Para almacenar principios activos si es necesario
+  const [categorias, setCategorias] = useState([]);
+  const [marcas, setMarcas] = useState([]);
+  const [unidadMedida, setUnidadMedida] = useState([]);
+  const [bodega, setBodega] = useState([]);
+  const [skuActivo, setSkuActivo] = useState(null);
+  const [principiosActivos, setPrincipiosActivos] = useState([]);
   const [showModalMovimiento, setShowModalMovimiento] = useState(false);
 
-  //paginacion
+  // subcategorías filtradas
+  const [subcategorias, setSubcategorias] = useState([]);
+
+  // paginación
   const [page, setPage] = useState(1);
-  const [nullNextPage, setNullNextPage] = useState(null)
-  const [nullPrevPage, setPrevNextPage] = useState(null)
+  const [nullNextPage, setNullNextPage] = useState(null);
+  const [nullPrevPage, setPrevNextPage] = useState(null);
 
-  const nextPage = () => {
-    setPage(prev => prev + 1);
-  }
-
-  const prevPage = () => {
-    setPage(prev => prev - 1);
-  }
+  const nextPage = () => setPage(prev => prev + 1);
+  const prevPage = () => setPage(prev => prev - 1);
 
   const abrirModalMovimiento = (sku) => {
     setSkuActivo(sku);
     setShowModalMovimiento(true);
   };
 
-
   const cargarDatos = async () => {
     Swal.fire({
       title: 'Cargando...',
       allowOutsideClick: false,
-      didOpen: () => {
-        Swal.showLoading();
-      }
+      didOpen: () => Swal.showLoading()
     });
 
     try {
@@ -53,7 +48,6 @@ export const ContextProvider = ({ children }) => {
       setData(resultados);
       setNullNextPage(response.data.next);
       setPrevNextPage(response.data.previous);
-
       Swal.close();
 
       if (resultados.length === 0) {
@@ -65,13 +59,7 @@ export const ContextProvider = ({ children }) => {
       }
     } catch (error) {
       Swal.close();
-
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'Error al cargar admisiones',
-      });
-
+      Swal.fire({ icon: 'error', title: 'Error', text: 'Error al cargar admisiones' });
       console.error('Error al cargar admisiones:', error);
     }
   };
@@ -79,55 +67,79 @@ export const ContextProvider = ({ children }) => {
   const cargarCategorias = async () => {
     try {
       const response = await getData(`inventario/categorias/?page_size=100`);
-      //console.log(responseCategorias.data)
       setCategorias(response.data.results);
     } catch (error) {
-      console.error('Error al cargar admisiones:', error);
+      console.error('Error al cargar categorías:', error);
     }
-  }
+  };
 
   const cargarMarcas = async () => {
     try {
       const response = await getData(`inventario/marcas/?page_size=100`);
-      //console.log(response.data)
       setMarcas(response.data.results);
     } catch (error) {
-      console.error('Error al cargar admisiones:', error);
+      console.error('Error al cargar marcas:', error);
     }
-  }
+  };
 
   const cargarMedida = async () => {
     try {
       const response = await getData(`inventario/medidas/?page_size=100`);
-      console.log(response.data)
       setUnidadMedida(response.data.results);
     } catch (error) {
-      console.error('Error al cargar admisiones:', error);
+      console.error('Error al cargar medidas:', error);
     }
-  }
+  };
 
   const cargarBodega = async () => {
     try {
       const response = await getData(`inventario/bodegas/?page=1&page_size=20`);
-      console.log(response.data)
       setBodega(response.data.results);
     } catch (error) {
-      console.error('Error al cargar admisiones:', error);
+      console.error('Error al cargar bodegas:', error);
     }
-  }
+  };
 
   const cargarPrincipiosActivos = async () => {
     try {
       const response = await getData(`inventario/principios/?page=1&page_size=20`);
-      console.log(response.data)
       setPrincipiosActivos(response.data.results);
     } catch (error) {
-      console.error('Error al cargar admisiones:', error);
+      console.error('Error al cargar principios activos:', error);
     }
-  }
+  };
+
+  // ✅ FIX: memoizar para que no cambie la referencia en cada render
+  const cargarSubcategoriasPorCategoria = useCallback(async (categoriaNombre) => {
+    try {
+      if (!categoriaNombre) {
+        setSubcategorias([]);
+        return;
+      }
+      const cat = categorias.find(c => c?.nombre === categoriaNombre);
+      const catId = cat?.id;
+      if (!catId) {
+        setSubcategorias([]);
+        return;
+      }
+
+      const res = await getData(`inventario/categorias/subcategorias/${catId}?page_size=200`);
+      const list = res.data?.results ?? res.data ?? [];
+
+      // evitar re-render innecesario si la lista es igual (comparación simple por length + nombres)
+      const next = Array.isArray(list) ? list : [];
+      setSubcategorias(prev => {
+        const sameLen = prev.length === next.length;
+        const sameNames = sameLen && prev.every((p, i) => p.nombre === next[i]?.nombre);
+        return sameLen && sameNames ? prev : next;
+      });
+    } catch (error) {
+      console.error('Error al cargar subcategorías:', error);
+      setSubcategorias([]);
+    }
+  }, [categorias]);
 
   const enviarDatos = async (data) => {
-    console.log("DATOS", data);
     try {
       const response = await postData("inventario/skus-crear/", data);
       if (response?.status === 201 && response.data) {
@@ -148,16 +160,13 @@ export const ContextProvider = ({ children }) => {
     cargarDatos();
   };
 
-
   const actualizarProveedor = async (datos) => {
     try {
       const response = await putData(`inventario/skus-actualizar/${datos.id}/`, datos);
-
       if (response.status === 200 || response.status === 204) {
-        console.log("Proveedor actualizado con éxito:", response.data);
         NotificationManager.success("Marca Editada con exito", "Éxito", 3000);
-        cargarDatos(); // recarga el listado si tenés esta función
-        setShow(false); // cierra el modal
+        cargarDatos();
+        setShow(false);
       } else {
         console.warn("Algo salió mal al actualizar:", response);
       }
@@ -180,11 +189,8 @@ export const ContextProvider = ({ children }) => {
 
     if (confirmed.isConfirmed) {
       try {
-        const response = await deleteData(`inventario/skus-eliminar/${id}/`);
-        console.log('Proveedor eliminado:', response.status);
+        await deleteData(`inventario/skus-eliminar/${id}/`);
         NotificationManager.success("Marca eliminada con éxito", "Éxito", 3000);
-
-        // Recargar listado o actualizar estado
         cargarDatos && cargarDatos();
       } catch (error) {
         console.error('Error al eliminar proveedor:', error);
@@ -204,15 +210,15 @@ export const ContextProvider = ({ children }) => {
 
   const moverProducto = async (datos) => {
     try {
-      const res = await postData("inventario/skus/mover/", {
+      await postData("inventario/skus/mover/", {
         sku: datos.sku,
         bodega_origen: datos.bodega_origen,
         bodega_destino: datos.bodega_destino,
         cantidad: parseInt(datos.cantidad),
       });
       NotificationManager.success("Movimiento realizado", "Éxito", 3000);
-      cargarDatos(); // Refresca lista de SKUs
-      cargarBodega(); // Por si se modifica algo
+      cargarDatos();
+      cargarBodega();
       await recargarSkuActivo(datos.sku);
     } catch (error) {
       console.error("Error al mover producto:", error);
@@ -220,17 +226,16 @@ export const ContextProvider = ({ children }) => {
     }
   };
 
-
   const showModal = () => setShow(!show);
 
   const abrirModalCrear = () => {
     setProveedorSeleccionado(null);
     setModoFormulario('crear');
+    setSubcategorias([]); // reset
     showModal();
   };
 
   const abrirModalEditar = (proveedor) => {
-    console.log(proveedor)
     setProveedorSeleccionado(proveedor);
     setModoFormulario('editar');
     showModal();
@@ -242,14 +247,13 @@ export const ContextProvider = ({ children }) => {
     showModal();
   };
 
-
   useEffect(() => {
-    cargarDatos()
-    cargarCategorias()
-    cargarMarcas()
-    cargarMedida()
-    cargarBodega()
-    cargarPrincipiosActivos()
+    cargarDatos();
+    cargarCategorias();
+    cargarMarcas();
+    cargarMedida();
+    cargarBodega();
+    cargarPrincipiosActivos();
   }, [page]);
 
   const values = {
@@ -280,7 +284,12 @@ export const ContextProvider = ({ children }) => {
     setShowModalMovimiento,
     abrirModalMovimiento,
     moverProducto,
-    principiosActivos
+    principiosActivos,
+
+    // subcategorías (memo)
+    subcategorias,
+    cargarSubcategoriasPorCategoria,
+    setSubcategorias
   };
 
   return <MyContext.Provider value={values}>{children}</MyContext.Provider>;
