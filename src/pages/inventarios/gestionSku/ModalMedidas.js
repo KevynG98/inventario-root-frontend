@@ -34,11 +34,14 @@ const ModalMedidas = () => {
         marca: '',
         subcategoria: '',
         principio_activo: '',
-        cantidad: 0,
+        cantidad: 0,                 // stock inicial
+        cantidad_adicional: 0,       // solo se usa en edición
         unidad_compra: '',
         unidad_despacho: '',
         unidades_por_paquete: 1,
-        descripcion_estado_cuenta: ''
+        descripcion_estado_cuenta: '',
+        barcode: '',                 // se mapeará a codigo_barras al enviar
+        iva: ''
       });
     }
 
@@ -46,28 +49,46 @@ const ModalMedidas = () => {
       Object.entries(proveedorSeleccionado).forEach(([key, value]) => {
         setValue(key, value);
       });
+      // campos que no existen en el objeto original
+      setValue('cantidad_adicional', 0);
+      if (proveedorSeleccionado.codigo_barras) {
+        setValue('barcode', proveedorSeleccionado.codigo_barras);
+      }
     }
   }, [modoFormulario, proveedorSeleccionado, reset, setValue]);
 
   const onSubmit = (data) => {
-    console.log("SUBMIT DATA", data);
-    const cantidadAdicional = parseInt(data.cantidad_adicional || 0);
+    // Normalización previa del payload
+    const payload = { ...data };
+
+    // Mapear 'barcode' -> 'codigo_barras'
+    if (payload.barcode) {
+      payload.codigo_barras = payload.barcode;
+      delete payload.barcode;
+    }
+
+    // Asegurar tipos numéricos
+    payload.unidades_por_paquete = parseInt(payload.unidades_por_paquete || 1, 10);
+    payload.cantidad = parseInt(payload.cantidad || 0, 10);
+    const cantidadAdicional = parseInt(payload.cantidad_adicional || 0, 10);
+
     let nuevasBodegas = [];
 
     if (modoFormulario === 'crear') {
       nuevasBodegas = [{
         nombre_bodega: bodega[0]?.nombre,
-        cantidad: parseInt(data.cantidad) || 0,
+        cantidad: payload.cantidad
       }];
 
       const jsonData = {
-        ...data,
+        ...payload,
         bodegas: nuevasBodegas,
         is_active: true
       };
 
       enviarDatos(jsonData);
     } else {
+      // EDITAR: sumar cantidad_adicional a la bodega seleccionada
       if (proveedorSeleccionado?.bodegas && proveedorSeleccionado.bodegas.length > 0) {
         nuevasBodegas = proveedorSeleccionado.bodegas.map(b => {
           if (b.nombre_bodega === bodega[0]?.nombre) {
@@ -94,7 +115,7 @@ const ModalMedidas = () => {
 
       const jsonData = {
         ...proveedorSeleccionado,
-        ...data,
+        ...payload,
         bodegas: nuevasBodegas
       };
 
@@ -117,7 +138,7 @@ const ModalMedidas = () => {
             <Col md={4}>
               <Form.Group>
                 <Form.Label>Estado *</Form.Label>
-                <Form.Control as="select" {...register('estado', { required: true })} readOnly={readOnly}>
+                <Form.Control as="select" {...register('estado', { required: true })} readOnly={readOnly} disabled={readOnly}>
                   <option value="alta">Disponible</option>
                   <option value="baja">No Disponible</option>
                 </Form.Control>
@@ -126,7 +147,7 @@ const ModalMedidas = () => {
             <Col md={4}>
               <Form.Group>
                 <Form.Label>Categoría *</Form.Label>
-                <Form.Control as="select" {...register('categoria', { required: true })} readOnly={readOnly}>
+                <Form.Control as="select" {...register('categoria', { required: true })} readOnly={readOnly} disabled={readOnly}>
                   <option value="">Seleccionar</option>
                   {categorias?.map((data, i) => (
                     <option key={i} value={data.nombre}>{data.nombre}</option>
@@ -137,7 +158,7 @@ const ModalMedidas = () => {
             <Col md={4}>
               <Form.Group>
                 <Form.Label>Marca *</Form.Label>
-                <Form.Control as="select" {...register('marca', { required: true })} readOnly={readOnly}>
+                <Form.Control as="select" {...register('marca', { required: true })} readOnly={readOnly} disabled={readOnly}>
                   <option value="">Seleccionar</option>
                   {marcas?.map((data, i) => (
                     <option key={i} value={data.nombre}>{data.nombre}</option>
@@ -151,7 +172,7 @@ const ModalMedidas = () => {
             <Col md={4}>
               <Form.Group>
                 <Form.Label>Principio activo *</Form.Label>
-                <Form.Control as="select" {...register('principio_activo', { required: true })} readOnly={readOnly}>
+                <Form.Control as="select" {...register('principio_activo', { required: true })} readOnly={readOnly} disabled={readOnly}>
                   <option value="">Seleccionar</option>
                   {principiosActivos?.map((data, i) => (
                     <option key={i} value={data.nombre}>{data.nombre}</option>
@@ -159,12 +180,6 @@ const ModalMedidas = () => {
                 </Form.Control>
               </Form.Group>
             </Col>
-            {/* <Col md={4}>
-              <Form.Group>
-                <Form.Label>Principio activo</Form.Label>
-                <Form.Control {...register('principio_activo')} readOnly={readOnly} />
-              </Form.Group>
-            </Col> */}
             <Col md={4}>
               <Form.Group>
                 <Form.Label>Sub Categoría *</Form.Label>
@@ -178,7 +193,7 @@ const ModalMedidas = () => {
                   as="select"
                   {...register('clasificacion_producto', { required: true })}
                   readOnly={readOnly}
-                  disabled={readOnly} // por compatibilidad visual
+                  disabled={readOnly}
                 >
                   <option value="">Seleccionar</option>
                   <option value="consignacion">Consignación</option>
@@ -187,7 +202,6 @@ const ModalMedidas = () => {
                 </Form.Control>
               </Form.Group>
             </Col>
-
           </Row>
 
           <Row className="mt-2">
@@ -204,20 +218,16 @@ const ModalMedidas = () => {
                 <Form.Control {...register('nombre', { required: true })} readOnly={readOnly} />
               </Form.Group>
             </Col>
-            {/* <Col md={4}>
-              <Form.Group>
-                <Form.Label>Cantidad (stock inicial)</Form.Label>
-                <Form.Control type="number" {...register('cantidad')} readOnly={readOnly} />
-              </Form.Group>
-            </Col> */}
           </Row>
+
+          {/* Campo oculto para registrar 'cantidad' en creación */}
+          <input type="hidden" {...register('cantidad')} />
 
           <Row className="mt-2">
             <Col md={4}>
               <Form.Group>
                 <Form.Label>Unidad de Compra *</Form.Label>
-                {/* <Form.Control {...register('unidad_compra', { required: true })} readOnly={readOnly} /> */}
-                <Form.Control as="select" {...register('unidad_compra', { required: true })} readOnly={readOnly}>
+                <Form.Control as="select" {...register('unidad_compra', { required: true })} readOnly={readOnly} disabled={readOnly}>
                   <option value="">Seleccionar</option>
                   {unidadMedida?.map((data, i) => (
                     <option key={i} value={data.nombre}>{data.nombre}</option>
@@ -228,7 +238,7 @@ const ModalMedidas = () => {
             <Col md={4}>
               <Form.Group>
                 <Form.Label>Unidad de despacho *</Form.Label>
-                <Form.Control as="select" {...register('unidad_despacho', { required: true })} readOnly={readOnly}>
+                <Form.Control as="select" {...register('unidad_despacho', { required: true })} readOnly={readOnly} disabled={readOnly}>
                   <option value="">Seleccionar</option>
                   {unidadMedida?.map((data, i) => (
                     <option key={i} value={data.nombre}>{data.nombre}</option>
@@ -247,30 +257,41 @@ const ModalMedidas = () => {
           <Row className="mt-2">
             <Col md={4}>
               <Form.Group>
-                <Form.Label>Codigo de Barras</Form.Label>
-                <Form.Control {...register('barcode', { required: true })} readOnly={readOnly} />
+                <Form.Label>Código de Barras</Form.Label>
+                <Form.Control {...register('barcode')} readOnly={readOnly} />
               </Form.Group>
             </Col>
             <Col md={4}>
               <Form.Group>
                 <Form.Label>IVA *</Form.Label>
-                <Form.Control as="select" {...register('iva', { required: true })} readOnly={readOnly}>
+                <Form.Control as="select" {...register('iva', { required: true })} readOnly={readOnly} disabled={readOnly}>
                   <option value="">Seleccionar</option>
                   <option value="afecto">Afecto</option>
-                  <option value="extento">Extento</option>
+                  <option value="exento">Exento</option>
                 </Form.Control>
               </Form.Group>
             </Col>
+            {modoFormulario === 'editar' && (
+              <Col md={4}>
+                <Form.Group>
+                  <Form.Label>Cantidad adicional</Form.Label>
+                  <Form.Control type="number" min={0} {...register('cantidad_adicional')} readOnly={readOnly} />
+                </Form.Group>
+              </Col>
+            )}
           </Row>
 
-          {/* <Row className="mt-2">
+          {/* Si decides usar descripción en estado de cuenta, descomenta esto */}
+          {/*
+          <Row className="mt-2">
             <Col>
               <Form.Group>
                 <Form.Label>Descripción en el Estado de Cuenta *</Form.Label>
                 <Form.Control as="textarea" rows={2} {...register('descripcion_estado_cuenta')} readOnly={readOnly} />
               </Form.Group>
             </Col>
-          </Row> */}
+          </Row>
+          */}
 
           <div className="d-flex justify-content-end mt-4">
             <Button variant="secondary" onClick={showModal} className="me-2">
