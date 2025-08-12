@@ -1,7 +1,6 @@
 // Context.js
-import React, { createContext, useEffect, useState } from 'react';
+import React, { createContext, useEffect, useState, useCallback } from 'react';
 import { postData, putData, getData } from '../../../../apiService';
-
 
 export const AppContext = createContext();
 
@@ -9,10 +8,15 @@ export const ContextProvider = ({ children }) => {
   const [showModalProveedor, setShowModalProveedor] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [requisicionSeleccionada, setRequisicionSeleccionada] = useState(null);
+
   const [bodegas, setBodegas] = useState([]);
-  const [proveedores, setProveedores] = useState([]); // Lista de proveedores
-  const [categorias, setCategorias] = useState([]); // Lista de categorias
-  const [skus, setSkus] = useState([]); // Lista de SKUs
+  const [proveedores, setProveedores] = useState([]); 
+  const [categorias, setCategorias] = useState([]); 
+  const [skus, setSkus] = useState([]); 
+
+  // NUEVO: subcategorías dependientes de la categoría seleccionada
+  const [subcategorias, setSubcategorias] = useState([]);
+  const [loadingSubcats, setLoadingSubcats] = useState(false);
 
   const getBodegas = async () => {
     try {
@@ -49,6 +53,25 @@ export const ContextProvider = ({ children }) => {
       console.error('Error al cargar SKUs:', error);
     }
   };
+
+  // NUEVO: cargar subcategorías por categoría (id)
+  const getSubcategoriasByCategoria = useCallback(async (categoriaId) => {
+    if (!categoriaId) {
+      setSubcategorias([]);
+      return;
+    }
+    try {
+      setLoadingSubcats(true);
+      const res = await getData(`/inventario/categorias/subcategorias/${categoriaId}?page_size=200`);
+      const list = res?.data?.results ?? res?.data ?? [];
+      setSubcategorias(Array.isArray(list) ? list : []);
+    } catch (error) {
+      console.error('Error al cargar subcategorías:', error);
+      setSubcategorias([]);
+    } finally {
+      setLoadingSubcats(false);
+    }
+  }, []);
 
   const toggleModalProveedor = () => {
     setShowModalProveedor(!showModalProveedor);
@@ -100,11 +123,18 @@ export const ContextProvider = ({ children }) => {
     abrirModal,
     cerrarModal,
     requisicionSeleccionada,
-    crearRequisicion, // ✅ exportado al context
+    crearRequisicion,
+
     bodegas,
     proveedores,
     categorias,
-    skus
+    skus,
+
+    // Exponer subcategorías y loader
+    subcategorias,
+    loadingSubcats,
+    getSubcategoriasByCategoria,
+    setSubcategorias,
   };
 
   return (

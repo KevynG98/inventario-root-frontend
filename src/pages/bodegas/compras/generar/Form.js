@@ -1,13 +1,23 @@
 // Form.js
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { AppContext } from './Context';
 import { Form, Button, Row, Col, Card, Table } from 'react-bootstrap';
 
 const FormularioRequisicion = () => {
-  const { crearRequisicion, bodegas, proveedores,
+  const {
+    crearRequisicion,
+    bodegas,
+    proveedores,
     categorias,
-    skus } = useContext(AppContext);
+    skus,
+    // NUEVO:
+    subcategorias,
+    loadingSubcats,
+    getSubcategoriasByCategoria,
+    setSubcategorias
+  } = useContext(AppContext);
+
   const {
     register,
     handleSubmit,
@@ -17,12 +27,22 @@ const FormularioRequisicion = () => {
   } = useForm();
 
   const tipoRequisicion = watch('tipo_requisicion');
+  const categoriaSeleccionada = watch('categoria'); // id de categoría
 
   const [productos, setProductos] = useState([]);
   const [servicios, setServicios] = useState([]);
   const [descripcionServicio, setDescripcionServicio] = useState('');
   const [cantidadServicio, setCantidadServicio] = useState('');
   const [precioServicio, setPrecioServicio] = useState('');
+
+  // NUEVO: cuando cambia la categoría, traer subcategorías
+  useEffect(() => {
+    if (categoriaSeleccionada) {
+      getSubcategoriasByCategoria(categoriaSeleccionada);
+    } else {
+      setSubcategorias([]);
+    }
+  }, [categoriaSeleccionada, getSubcategoriasByCategoria, setSubcategorias]);
 
   const handleAgregarProducto = () => {
     const values = getValues();
@@ -142,11 +162,11 @@ const FormularioRequisicion = () => {
                     <Form.Label><strong>Proveedor</strong></Form.Label>
                     <Form.Control as="select" size="sm" {...register('proveedor')}>
                       <option value="">Selecciona un proveedor</option>
-                      [{proveedores.map((prov) => (
+                      {proveedores.map((prov) => (
                         <option key={prov.id} value={prov.id}>
                           {prov.nombre}
                         </option>
-                      ))}]
+                      ))}
                     </Form.Control>
                   </Form.Group>
                 </Col>
@@ -156,11 +176,11 @@ const FormularioRequisicion = () => {
                     <Form.Label><strong>Categoría</strong></Form.Label>
                     <Form.Control as="select" size="sm" {...register('categoria')}>
                       <option value="">Selecciona una categoría</option>
-                      [{categorias.map((cat) => (
+                      {categorias.map((cat) => (
                         <option key={cat.id} value={cat.id}>
                           {cat.nombre}
                         </option>
-                      ))}]
+                      ))}
                     </Form.Control>
                   </Form.Group>
                 </Col>
@@ -168,11 +188,20 @@ const FormularioRequisicion = () => {
                 <Col md={3} className="mb-3">
                   <Form.Group>
                     <Form.Label><strong>Subcategoría</strong></Form.Label>
-                    <Form.Control as="select" size="sm" {...register('subcategoria')}>
-                      <option value="">Selecciona una subcategoría</option>
-                      <option value="1">Subcategoría A</option>
-                      <option value="2">Subcategoría B</option>
-                      <option value="3">Subcategoría C</option>
+                    <Form.Control
+                      as="select"
+                      size="sm"
+                      {...register('subcategoria')}
+                      disabled={!categoriaSeleccionada || loadingSubcats}
+                    >
+                      <option value="">
+                        {loadingSubcats ? 'Cargando subcategorías…' : 'Selecciona una subcategoría'}
+                      </option>
+                      {subcategorias.map((sc) => (
+                        <option key={sc.id} value={sc.id}>
+                          {sc.nombre}
+                        </option>
+                      ))}
                     </Form.Control>
                   </Form.Group>
                 </Col>
@@ -182,11 +211,11 @@ const FormularioRequisicion = () => {
                     <Form.Label><strong>Seleccionar SKU</strong></Form.Label>
                     <Form.Control as="select" size="sm" {...register('SKU')}>
                       <option value="">Selecciona un SKU</option>
-                      [{skus.map((sku) => (
+                      {skus.map((sku) => (
                         <option key={sku.id} value={sku.id}>
-                          {sku.codigo_sku} - {sku.descripcion}
+                          {sku.codigo_sku} - {sku.descripcion ?? sku.nombre}
                         </option>
-                      ))}]
+                      ))}
                     </Form.Control>
                   </Form.Group>
                 </Col>
