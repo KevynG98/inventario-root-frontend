@@ -9,6 +9,7 @@ const ModalUserForm = () => {
     handleSubmit,
     formState: { errors },
     reset,
+    setValue
   } = useForm();
 
   const {
@@ -34,6 +35,35 @@ const ModalUserForm = () => {
   const [availableGroups, setAvailableGroups] = useState([]);
   const [assignedGroups, setAssignedGroups] = useState([]);
   const [isMedico, setIsMedico] = useState(false);
+
+  const calcularEdadTexto = (fechaNacimiento) => {
+    const hoy = new Date();
+    const nacimiento = new Date(fechaNacimiento);
+
+    let años = hoy.getFullYear() - nacimiento.getFullYear();
+    let meses = hoy.getMonth() - nacimiento.getMonth();
+    let dias = hoy.getDate() - nacimiento.getDate();
+
+    // Ajuste si aún no llegó el día del mes
+    if (dias < 0) {
+      meses--;
+      dias += new Date(hoy.getFullYear(), hoy.getMonth(), 0).getDate();
+    }
+
+    // Ajuste si aún no llegó el mes
+    if (meses < 0) {
+      años--;
+      meses += 12;
+    }
+
+    if (años > 0) {
+      return `${años} año${años > 1 ? "s" : ""}`;
+    } else if (meses > 0) {
+      return `${meses} mes${meses > 1 ? "es" : ""}`;
+    } else {
+      return `${dias} día${dias > 1 ? "s" : ""}`;
+    }
+  }
 
   useEffect(() => {
     if (getRol.length > 0) {
@@ -165,10 +195,41 @@ const ModalUserForm = () => {
                 <Col md={5}><Form.Label>Correo</Form.Label><Form.Control type="email" {...register("email")} /></Col>
               </Row>
               <Row className="mb-3">
-                <Col md={3}><Form.Label>Estado civil</Form.Label><Form.Control {...register("estado_civil")} /></Col>
-                <Col md={3}><Form.Label>Género</Form.Label><Form.Control {...register("genero")} /></Col>
-                <Col md={3}><Form.Label>Fecha de nacimiento</Form.Label><Form.Control type="date" {...register("fecha_nacimiento")} /></Col>
-                <Col md={3}><Form.Label>Edad</Form.Label><Form.Control type="number" {...register("edad")} /></Col>
+                <Col md={3}>
+                  <Form.Label>Estado civil</Form.Label>
+                  <Form.Control as="select" {...register("estado_civil")}>
+                    <option value="">Seleccione...</option>
+                    <option value="soltero">Soltero/a</option>
+                    <option value="casado">Casado/a</option>
+                    <option value="divorciado">Divorciado/a</option>
+                    <option value="union">Unión de Hecho</option>
+                    <option value="viudo">Viudo/a</option>
+                  </Form.Control>
+                </Col>
+                <Col md={3}>
+                  <Form.Label>Género</Form.Label>
+                  <Form.Control as="select" {...register("genero")}>
+                    <option value="">Seleccione...</option>
+                    <option value="masculino">Masculino</option>
+                    <option value="femenino">Femenino</option>
+                  </Form.Control>
+                </Col>
+                <Col md={3}><Form.Label>Fecha de nacimiento</Form.Label><Form.Control
+                  type="date"
+                  {...register("fecha_nacimiento")}
+                  onChange={(e) => {
+                    const valor = e.target.value;
+                    const edadTexto = calcularEdadTexto(valor);
+                    setValue("edad", edadTexto); // <-- llenamos el campo edad con el texto calculado
+                  }}
+                /></Col>
+                <Col md={3}><Form.Label>Edad</Form.Label>
+                  <Form.Control
+                    type="text"
+                    {...register("edad")}
+                    readOnly
+                  />
+                </Col>
               </Row>
               <Form.Label>Dirección</Form.Label>
               <Form.Control as="textarea" rows={2} {...register("direccion")} />
