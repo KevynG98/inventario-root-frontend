@@ -23,6 +23,7 @@ const getAuthToken = () => {
   return token || null;
 };
 
+
 // GET
 const getData = async (endpoint) => {
   try {

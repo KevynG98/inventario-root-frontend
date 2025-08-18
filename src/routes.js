@@ -52,6 +52,9 @@ const Users = React.lazy(() => import('./pages/mantenimiento/users/Index'));
 const UsersDoctores = React.lazy(() => import('./pages/mantenimiento/doctor/Index'));
 const InventarioSeguros = React.lazy(() => import('./pages/mantenimiento/seguros/Index'));
 const DirectorioExtensiones = React.lazy(() => import('./pages/mantenimiento/directorioExtensiones/Index'));
+const centroCostos = React.lazy(() => import('./pages/mantenimiento/centroCostos/Index'));
+const departamentos = React.lazy(() => import('./pages/mantenimiento/departamentos/Index')); 
+const cuentasContables = React.lazy(() => import('./pages/mantenimiento/cuentasContables/Index'));
 
 /* Reportes */
 const HIstorialGeneral = React.lazy(() => import('./pages/reportes/historialGeneral/Index'));
@@ -307,6 +310,24 @@ const routes = [
     exact: true,
     name: 'Directorio Extensiones',
     component: allow(R.MANTENIMIENTO) ? DirectorioExtensiones : Error404,
+  },
+  {
+    path: '/dashboard/mantenimiento/centroCostos',
+    exact: true,
+    name: 'Directorio Extensiones',
+    component: allow(R.MANTENIMIENTO) ? centroCostos : Error404,
+  },
+  {
+    path: '/dashboard/mantenimiento/departamentos',
+    exact: true,
+    name: 'Directorio Extensiones',
+    component: allow(R.MANTENIMIENTO) ? departamentos : Error404,
+  },
+  {
+    path: '/dashboard/mantenimiento/cuentasContables',
+    exact: true,
+    name: 'Directorio Extensiones',
+    component: allow(R.MANTENIMIENTO) ? cuentasContables : Error404,
   },
 
   /* Reportes (abierto a todos los roles del sistema) */

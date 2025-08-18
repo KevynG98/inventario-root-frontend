@@ -13,6 +13,8 @@ export const ContextProvider = ({ children }) => {
   const [proveedores, setProveedores] = useState([]); 
   const [categorias, setCategorias] = useState([]); 
   const [skus, setSkus] = useState([]); 
+  const [centrosCosto, setCentrosCosto] = useState([]);
+  const [departamentos, setDepartamentos] = useState([]);
 
   // NUEVO: subcategorías dependientes de la categoría seleccionada
   const [subcategorias, setSubcategorias] = useState([]);
@@ -51,6 +53,26 @@ export const ContextProvider = ({ children }) => {
       setSkus(response.data.results);
     } catch (error) {
       console.error('Error al cargar SKUs:', error);
+    }
+  };
+
+  const getCentrosCosto = async () => {
+    try {
+      const res = await getData('/mantenimiento/centros-costo/?page_size=200');
+      setCentrosCosto(res?.data?.results ?? res?.data ?? []);
+    } catch (error) {
+      console.error('Error al cargar centros de costo:', error);
+      setCentrosCosto([]);
+    }
+  };
+
+  const getDepartamentos = async () => {
+    try {
+      const res = await getData('/mantenimiento/departamentos/?page_size=200');
+      setDepartamentos(res?.data?.results ?? res?.data ?? []);
+    } catch (error) {
+      console.error('Error al cargar departamentos:', error);
+      setDepartamentos([]);
     }
   };
 
@@ -113,6 +135,8 @@ export const ContextProvider = ({ children }) => {
     getProveedores();
     getCategorias();
     getSkus();
+    getCentrosCosto();
+    getDepartamentos();
   }, []);
 
   const values = {
@@ -129,6 +153,8 @@ export const ContextProvider = ({ children }) => {
     proveedores,
     categorias,
     skus,
+    centrosCosto,
+    departamentos,
 
     // Exponer subcategorías y loader
     subcategorias,

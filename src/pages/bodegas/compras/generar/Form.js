@@ -11,6 +11,8 @@ const FormularioRequisicion = () => {
     proveedores,
     categorias,
     skus,
+    centrosCosto,
+    departamentos,
     // NUEVO:
     subcategorias,
     loadingSubcats,
@@ -47,22 +49,22 @@ const FormularioRequisicion = () => {
   const handleAgregarProducto = () => {
     const values = getValues();
 
-    const sku = values.SKU;
+    const skuId = values.SKU;
     const cantidad = values.cantidadSku;
     const precio = values.precioSku;
+    const skuObj = skus.find((s) => String(s.id) === String(skuId));
+    const skuCodigo = skuObj?.codigo_sku || '';
+    const descripcion = skuObj?.nombre || skuObj?.descripcion || '';
+    const unidad = skuObj?.unidad_despacho || skuObj?.unidad_compra || '';
 
-    // Datos temporales si aún no conectas descripción y unidad
-    const descripcion = 'Descripción genérica';
-    const unidad = 'Unidad';
-
-    if (!sku || !cantidad || !precio) {
+    if (!skuId || !cantidad || !precio) {
       alert('Todos los campos del producto son obligatorios');
       return;
     }
 
     const nuevo = {
       id: Date.now(),
-      sku,
+      sku: skuCodigo,
       descripcion,
       unidad,
       cantidad: parseFloat(cantidad),
@@ -129,6 +131,35 @@ const FormularioRequisicion = () => {
                 <option value="alta">Alta</option>
                 <option value="normal">Normal</option>
                 <option value="baja">Baja</option>
+              </Form.Control>
+            </Form.Group>
+          </Col>
+        </Row>
+
+        <Row>
+          <Col md={6}>
+            <Form.Group className="mb-3">
+              <Form.Label>Centro de Costo</Form.Label>
+              <Form.Control as="select" {...register('centro_costo')}>
+                <option value="">Seleccione</option>
+                {centrosCosto.map((cc) => (
+                  <option key={cc.id} value={cc.nombre}>
+                    {cc.nombre}
+                  </option>
+                ))}
+              </Form.Control>
+            </Form.Group>
+          </Col>
+          <Col md={6}>
+            <Form.Group className="mb-3">
+              <Form.Label>Departamento</Form.Label>
+              <Form.Control as="select" {...register('area_solicitante')}>
+                <option value="">Seleccione</option>
+                {departamentos.map((d) => (
+                  <option key={d.id} value={d.nombre}>
+                    {d.nombre}
+                  </option>
+                ))}
               </Form.Control>
             </Form.Group>
           </Col>

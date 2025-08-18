@@ -2,7 +2,7 @@ import {
   FiHome, FiUsers, FiSettings, FiShield, FiPackage, FiBox, FiUserPlus,
   FiList, FiFileText, FiEdit3, FiLogOut, FiUserCheck, FiCreditCard, FiGrid, FiTruck,
   FiClipboard, FiHeart, FiFilePlus, FiArchive, FiUser, FiCalendar, FiFileMinus,
-  FiDollarSign, FiBookOpen, FiBarChart2, FiMonitor, FiDatabase,
+  FiDollarSign, FiBookOpen, FiBarChart2, FiMonitor, FiDatabase
 } from 'react-icons/fi';
 
 /**
@@ -166,6 +166,9 @@ const staticRoutes = [
       { title: 'Medicos', url: '/dashboard/mantenimiento/medicos', icon: <FiUser /> },
       { title: 'Directorio Extensiones', url: '/dashboard/mantenimiento/extensiones', icon: <FiBookOpen /> },
       { title: 'Seguros', url: '/dashboard/mantenimiento/seguros', icon: <FiList /> },
+      { title: 'Centros de Costo', url: '/dashboard/mantenimiento/centroCostos', icon: <FiGrid /> },
+      { title: 'Departamentos', url: '/dashboard/mantenimiento/departamentos', icon: <FiUsers /> },
+      { title: 'Cuentas Contables', url: '/dashboard/mantenimiento/cuentasContables', icon: <FiBookOpen /> },
     ].map(item => ({ ...item, roles: R.MANTENIMIENTO })),
   },
 
