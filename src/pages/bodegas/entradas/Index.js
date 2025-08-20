@@ -1,13 +1,30 @@
-import React from 'react';
-import { ContextProvider } from './Context';
-import Form from './Form';
+import React, { useContext, useEffect } from 'react';
+import { ContextProvider, AppContext } from './Context';
+import List from './List';
+import EntradaForm from './Form';
+import DetalleModal from './DetalleModal';
 
-const Index = () => {
+const Inner = () => {
+  const { showForm, aplicarEntrada } = useContext(AppContext);
+
+  // Opcional: exponer para pruebas manuales en consola
+  useEffect(() => {
+    window.applyEntrada = aplicarEntrada;
+  }, [aplicarEntrada]);
+
   return (
-    <ContextProvider>
-      <Form />
-    </ContextProvider>
+    <>
+      {!showForm && <List />}
+      {showForm && <EntradaForm />}
+      <DetalleModal />
+    </>
   );
 };
+
+const Index = () => (
+  <ContextProvider>
+    <Inner />
+  </ContextProvider>
+);
 
 export default Index;

@@ -1,11 +1,16 @@
-import React from 'react';
-import { ContextProvider } from './Context';
+import React, { useContext } from 'react';
+import { ContextProvider, AppContext } from './Context';
+import List from './List';
 import Form from './Form';
 
 const Index = () => {
+  const Inner = () => {
+    const { showForm } = useContext(AppContext);
+    return <>{!showForm ? <List /> : <Form />}</>;
+  };
   return (
     <ContextProvider>
-      <Form />
+      <Inner />
     </ContextProvider>
   );
 };
