@@ -42,6 +42,7 @@ const InventarioPrincipiosActivos = React.lazy(() => import('./pages/inventarios
 const InventarioComprasGenerar = React.lazy(() => import('./pages/bodegas/compras/generar/Index'));
 const InventarioComprasVisualizar = React.lazy(() => import('./pages/bodegas/compras/visualizar/Index'));
 const InventarioComprasOrden = React.lazy(() => import('./pages/bodegas/compras/orden/Index'));
+const InventarioComprasOrdenDetalle = React.lazy(() => import('./pages/bodegas/compras/orden/Detail'));
 const InventarioEntradas = React.lazy(() => import('./pages/bodegas/entradas/Index'));
 const InventarioSalidas = React.lazy(() => import('./pages/bodegas/salidas/Index'));
 const InventarioTraslados = React.lazy(() => import('./pages/bodegas/traslados/Index'));
@@ -260,6 +261,12 @@ const routes = [
     exact: true,
     name: 'Compras - Orden de Compra',
     component: allow(R.BODEGAS) ? InventarioComprasOrden : Error404,
+  },
+  {
+    path: '/dashboard/bodegas/compras/orden/:id',
+    exact: true,
+    name: 'Compras - Orden de Compra Detalle',
+    component: allow(R.BODEGAS) ? InventarioComprasOrdenDetalle : Error404,
   },
   {
     path: '/dashboard/bodegas/entradas',

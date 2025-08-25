@@ -39,6 +39,21 @@ const getData = async (endpoint) => {
   }
 };
 
+// GET binary (e.g., PDF) with auth
+const getBinary = async (endpoint) => {
+  try {
+    const authToken = getAuthToken();
+    const headers = {
+      ...(authToken && { 'Authorization': `Token ${authToken}` }),
+    };
+    const response = await apiClient.get(endpoint, { headers, responseType: 'blob' });
+    return response;
+  } catch (error) {
+    console.error(`Error al descargar binario de ${endpoint}:`, error.response ? error.response.data : error);
+    throw error;
+  }
+};
+
 // POST
 const postData = async (endpoint, data) => {
   try {
@@ -125,4 +140,4 @@ const logout = async () => {
 
 // Exportar funciones
 export default apiClient;
-export { getData, postData, putData, patchData, deleteData, logout, API_URL };
+export { getData, getBinary, postData, putData, patchData, deleteData, logout, API_URL };

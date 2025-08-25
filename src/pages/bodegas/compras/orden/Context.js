@@ -1,27 +1,35 @@
 // Context.js
-import React, { createContext, useEffect, useState } from 'react';
-import { getData } from '../../../../apiService'; 
+import React, { createContext, useEffect, useState, useCallback } from 'react';
+import { getData, postData } from '../../../../apiService'; 
 
 export const AppContext = createContext();
 
 export const ContextProvider = ({ children }) => {
-  const [requisiciones, setRequisiciones] = useState([]);
   const [soloAprobadas, setSoloAprobadas] = useState([]);
-  const [sinAprobadas, setSinAprobadas] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
+  const [selectedReq, setSelectedReq] = useState(null);
 
-  const cargarRequisiciones = async () => {
+  const cargarRequisiciones = useCallback(async () => {
     try {
-      const todas = await getData('requisisiones/');
-      const aprobadas = await getData('requisisiones/?estado=aprobada');
-      const noAprobadas = await getData('requisisiones/?excluir=aprobada');
-
-      setRequisiciones(todas.data || []);
-      setSoloAprobadas(aprobadas.data || []);
-      setSinAprobadas(noAprobadas.data || []);
+      setLoading(true);
+      const aprobadas = await getData('compras/requisiciones/?estatus=AUTORIZADA');
+      const rows = aprobadas.data?.results || [];
+      setSoloAprobadas(rows);
     } catch (error) {
       console.error('❌ Error al cargar requisiciones:', error.response?.data || error.message);
+    } finally {
+      setLoading(false);
     }
+  }, []);
+
+  const crearOCDesdeRequisicion = async (requisicionId) => {
+    const res = await postData(`compras/ordenes-compra/crear-desde-requisicion/${requisicionId}/`, {});
+    return res.data; // {id, ...}
   };
+
+  const openPreview = (row) => { setSelectedReq(row); setShowPreview(true); };
+  const closePreview = () => { setShowPreview(false); setSelectedReq(null); };
 
   useEffect(() => {
     cargarRequisiciones();
@@ -29,11 +37,7 @@ export const ContextProvider = ({ children }) => {
 
   return (
     <AppContext.Provider
-      value={{
-        requisiciones,
-        soloAprobadas,
-        sinAprobadas,
-      }}
+      value={{ soloAprobadas, loading, cargarRequisiciones, crearOCDesdeRequisicion, showPreview, setShowPreview, selectedReq, setSelectedReq, openPreview, closePreview }}
     >
       {children}
     </AppContext.Provider>
