@@ -12,7 +12,9 @@ const ModalMedidas = () => {
     show, showModal, enviarDatos, actualizarProveedor,
     proveedorSeleccionado, modoFormulario,
     categorias, marcas, unidadMedida, bodega, principiosActivos,
-    subcategorias, cargarSubcategoriasPorCategoria
+    subcategorias, cargarSubcategoriasPorCategoria,
+    // ⬇️ NEW: proveedores desde el contexto
+    proveedores
   } = useMyContext();
 
   const {
@@ -38,6 +40,7 @@ const ModalMedidas = () => {
         marca: '',
         subcategoria: '',
         principio_activo: '',
+        proveedor: '', // ⬅️ NEW default
         cantidad: 0,
         cantidad_adicional: 0,
         unidad_compra: '',
@@ -65,7 +68,6 @@ const ModalMedidas = () => {
     if ((modoFormulario === 'editar' || modoFormulario === 'ver') && proveedorSeleccionado?.categoria) {
       cargarSubcategoriasPorCategoria(proveedorSeleccionado.categoria);
     }
-    // ⚠️ intencionalmente NO incluimos la función en deps; está memoizada y no necesitamos re-ejecutar
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [modoFormulario, proveedorSeleccionado?.categoria]);
 
@@ -175,7 +177,28 @@ const ModalMedidas = () => {
             </Col>
           </Row>
 
-          <Row>
+          {/* ⬇️ NEW: Proveedor select desde endpoint inventario/proveedores/ */}
+          <Row className="mt-2">
+            <Col md={6}>
+              <Form.Group>
+                <Form.Label>Proveedor *</Form.Label>
+                <Form.Control
+                  as="select"
+                  {...register('proveedor', { required: true })}
+                  readOnly={readOnly}
+                  disabled={readOnly}
+                >
+                  <option value="">Seleccionar</option>
+                  {proveedores?.map((p, i) => (
+                    <option key={p.id ?? i} value={p.nombre}>{p.nombre}</option>
+                  ))}
+                </Form.Control>
+                {errors.proveedor && <small className="text-danger">Proveedor es obligatorio</small>}
+              </Form.Group>
+            </Col>
+          </Row>
+
+          <Row className="mt-2">
             <Col md={4}>
               <Form.Group>
                 <Form.Label>Principio activo *</Form.Label>
@@ -218,6 +241,7 @@ const ModalMedidas = () => {
                   <option value="consignacion">Consignación</option>
                   <option value="controlado">Controlado</option>
                   <option value="normal">Inventario Normal</option>
+                  <option value="amor">Fundacion Amor</option>
                 </Form.Control>
               </Form.Group>
             </Col>

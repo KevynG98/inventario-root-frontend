@@ -18,6 +18,9 @@ export const ContextProvider = ({ children }) => {
   const [principiosActivos, setPrincipiosActivos] = useState([]);
   const [showModalMovimiento, setShowModalMovimiento] = useState(false);
 
+  // ⬇️ NEW: proveedores
+  const [proveedores, setProveedores] = useState([]);
+
   // subcategorías filtradas
   const [subcategorias, setSubcategorias] = useState([]);
 
@@ -106,6 +109,18 @@ export const ContextProvider = ({ children }) => {
       setPrincipiosActivos(response.data.results);
     } catch (error) {
       console.error('Error al cargar principios activos:', error);
+    }
+  };
+
+  // ⬇️ NEW: cargar proveedores desde endpoint
+  const cargarProveedores = async () => {
+    try {
+      const response = await getData(`inventario/proveedores/?page=1&page_size=200`);
+      const list = response?.data?.results ?? response?.data ?? [];
+      setProveedores(Array.isArray(list) ? list : []);
+    } catch (error) {
+      console.error('Error al cargar proveedores:', error);
+      setProveedores([]);
     }
   };
 
@@ -254,6 +269,8 @@ export const ContextProvider = ({ children }) => {
     cargarMedida();
     cargarBodega();
     cargarPrincipiosActivos();
+    // ⬇️ NEW: también cargar proveedores
+    cargarProveedores();
   }, [page]);
 
   const values = {
@@ -289,7 +306,10 @@ export const ContextProvider = ({ children }) => {
     // subcategorías (memo)
     subcategorias,
     cargarSubcategoriasPorCategoria,
-    setSubcategorias
+    setSubcategorias,
+
+    // ⬇️ NEW: exponer proveedores
+    proveedores,
   };
 
   return <MyContext.Provider value={values}>{children}</MyContext.Provider>;

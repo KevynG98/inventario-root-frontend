@@ -103,6 +103,7 @@ const staticRoutes = [
       { title: 'Historico de Movimientos', url: '/dashboard/inventario/movimientos', icon: <FiArchive /> },
       { title: 'Consignacion', url: '/dashboard/inventario/consignacion', icon: <FiPackage /> },
       { title: 'Controlados', url: '/dashboard/inventario/controlados', icon: <FiShield /> },
+      { title: 'Ver Precios', url: '/dashboard/inventario/ver-precios', icon: <FiPackage /> },
     ].map(item => ({ ...item, roles: R.INVENTARIO })),
   },
 

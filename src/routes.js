@@ -37,6 +37,7 @@ const InventarioPrecios = React.lazy(() => import('./pages/inventarios/actualiza
 const InventarioConsignacion = React.lazy(() => import('./pages/inventarios/consignacion/Index'));
 const InventarioControlados = React.lazy(() => import('./pages/inventarios/controlados/Index'));
 const InventarioPrincipiosActivos = React.lazy(() => import('./pages/inventarios/principiosActivos/Index'));
+const InventarioVerPrecios = React.lazy(() => import('./pages/inventarios/verPrecio/Index'));
 
 /* Bodegas */
 const InventarioComprasGenerar = React.lazy(() => import('./pages/bodegas/compras/generar/Index'));
@@ -242,7 +243,12 @@ const routes = [
     name: 'Principios Activos',
     component: allow(R.INVENTARIO) ? InventarioPrincipiosActivos : Error404,
   },
-
+  {
+    path: '/dashboard/inventario/ver-precios',
+    exact: true,
+    name: 'Principios Activos',
+    component: allow(R.INVENTARIO) ? InventarioVerPrecios : Error404,
+  },
   /* Bodegas */
   {
     path: '/dashboard/bodegas/compras/generar',
