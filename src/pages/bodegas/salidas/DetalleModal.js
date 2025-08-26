@@ -3,27 +3,26 @@ import { Modal, Table, Button } from 'react-bootstrap';
 import { AppContext } from './Context';
 
 const DetalleModal = () => {
-  const { showDetail, setShowDetail, selectedEntrada } = useContext(AppContext);
-  if (!showDetail || !selectedEntrada) return null;
+  const { showDetail, setShowDetail, selectedSalida } = useContext(AppContext);
+  if (!showDetail || !selectedSalida) return null;
 
-  const items = selectedEntrada.items || [];
+  const items = selectedSalida.items || [];
 
   return (
     <Modal show={showDetail} onHide={() => setShowDetail(false)} size="lg" centered>
       <Modal.Header closeButton>
-        <Modal.Title>Entrada #{selectedEntrada.id}</Modal.Title>
+        <Modal.Title>Salida #{selectedSalida.id}</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <p>
           <strong>Fecha:</strong>{' '}
-          {selectedEntrada.created_at ? new Date(selectedEntrada.created_at).toLocaleString() : '-'}
+          {selectedSalida.created_at ? new Date(selectedSalida.created_at).toLocaleString() : '-'}
         </p>
-        <p><strong>Creado por:</strong> {selectedEntrada.usuario || '-'}</p>
-        <p><strong>Aplicado por:</strong> {selectedEntrada.aplicado_por || '-'}</p>
-        <p><strong>Estado:</strong> {selectedEntrada.estado || '-'}</p>
-        <p><strong>Bodega:</strong> {selectedEntrada.bodega ?? '-'}</p>
-        <p><strong>Tipo:</strong> {selectedEntrada.tipo_entrada ?? '-'}</p>
-        <p><strong>Proveedor:</strong> {selectedEntrada.proveedor ?? '-'}</p>
+        <p><strong>Bodega:</strong> {selectedSalida.bodega ?? '-'}</p>
+        <p><strong>Tipo:</strong> {selectedSalida.tipo_salida ?? '-'}</p>
+        <p><strong>Observaciones:</strong> {selectedSalida.observaciones ?? '-'}</p>
+        <p><strong>Creado por:</strong> {selectedSalida.usuario || '-'}</p>
+        <p><strong>Aplicado por:</strong> {selectedSalida.aplicado_por || '-'}</p>
 
         <Table bordered size="sm" className="mt-3">
           <thead>
@@ -63,3 +62,4 @@ const DetalleModal = () => {
 };
 
 export default DetalleModal;
+

@@ -78,9 +78,26 @@ const SalidaForm = () => {
 
   const onSubmit = async (e) => {
     e.preventDefault();
-    const payload = { ...form, items };
-    const res = await crearSalida(payload);
-    if (res?.status === 201) setShowForm(false);
+    try {
+      // El backend de salidas no acepta "lote" ni "fecha_vencimiento" en items.
+      // Enviar solo las llaves soportadas para evitar 400 (campos desconocidos).
+      const cleanItems = items.map(({ sku, descripcion, costo, cantidad, precio_sin_iva, iva, total }) => ({
+        sku,
+        descripcion,
+        costo,
+        cantidad,
+        precio_sin_iva,
+        iva,
+        total,
+      }));
+      const payload = { ...form, items: cleanItems };
+      const res = await crearSalida(payload);
+      if (res?.status === 201) setShowForm(false);
+    } catch (err) {
+      // Mostrar mensaje claro cuando el backend devuelva 400
+      const msg = err?.response?.data?.error || err?.response?.data || 'No se pudo crear la salida';
+      window?.NotificationManager?.error?.(typeof msg === 'string' ? msg : JSON.stringify(msg), 'Error', 5000);
+    }
   };
 
   return (
@@ -203,7 +220,7 @@ const SalidaForm = () => {
         <div className="d-flex gap-2 mt-3">
           <Button type="submit">Aplicar</Button>
           <Button variant="secondary" onClick={() => setShowForm(false)}>
-            Cancelar
+            Regresar al listado
           </Button>
         </div>
       </Form>

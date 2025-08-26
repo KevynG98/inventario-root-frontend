@@ -3,27 +3,26 @@ import { Modal, Table, Button } from 'react-bootstrap';
 import { AppContext } from './Context';
 
 const DetalleModal = () => {
-  const { showDetail, setShowDetail, selectedEntrada } = useContext(AppContext);
-  if (!showDetail || !selectedEntrada) return null;
+  const { showDetail, setShowDetail, selectedTraslado } = useContext(AppContext);
+  if (!showDetail || !selectedTraslado) return null;
 
-  const items = selectedEntrada.items || [];
+  const items = selectedTraslado.items || [];
 
   return (
     <Modal show={showDetail} onHide={() => setShowDetail(false)} size="lg" centered>
       <Modal.Header closeButton>
-        <Modal.Title>Entrada #{selectedEntrada.id}</Modal.Title>
+        <Modal.Title>Traslado #{selectedTraslado.id}</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <p>
-          <strong>Fecha:</strong>{' '}
-          {selectedEntrada.created_at ? new Date(selectedEntrada.created_at).toLocaleString() : '-'}
-        </p>
-        <p><strong>Creado por:</strong> {selectedEntrada.usuario || '-'}</p>
-        <p><strong>Aplicado por:</strong> {selectedEntrada.aplicado_por || '-'}</p>
-        <p><strong>Estado:</strong> {selectedEntrada.estado || '-'}</p>
-        <p><strong>Bodega:</strong> {selectedEntrada.bodega ?? '-'}</p>
-        <p><strong>Tipo:</strong> {selectedEntrada.tipo_entrada ?? '-'}</p>
-        <p><strong>Proveedor:</strong> {selectedEntrada.proveedor ?? '-'}</p>
+        <p><strong>Fecha envío:</strong> {selectedTraslado.fecha_envio ? new Date(selectedTraslado.fecha_envio).toLocaleString() : '-'}</p>
+        <p><strong>Fecha recibido:</strong> {selectedTraslado.fecha_recibido ? new Date(selectedTraslado.fecha_recibido).toLocaleString() : '-'}</p>
+        <p><strong>Origen:</strong> {selectedTraslado.bodega_origen}</p>
+        <p><strong>Destino:</strong> {selectedTraslado.bodega_destino}</p>
+        <p><strong>Estatus:</strong> {selectedTraslado.estatus}</p>
+        <p><strong>Comentarios:</strong> {selectedTraslado.comentarios || '-'}</p>
+        <p><strong>Enviado por:</strong> {selectedTraslado.enviado_por || '-'}</p>
+        <p><strong>Entregamos a:</strong> {selectedTraslado.entregamos_a || '-'}</p>
+        <p><strong>Recibido por:</strong> {selectedTraslado.recibido_por || '-'}</p>
 
         <Table bordered size="sm" className="mt-3">
           <thead>
@@ -31,8 +30,6 @@ const DetalleModal = () => {
               <th>SKU</th>
               <th>Descripción</th>
               <th className="text-end">Cantidad</th>
-              <th className="text-end">Costo</th>
-              <th className="text-end">Total</th>
             </tr>
           </thead>
           <tbody>
@@ -41,13 +38,11 @@ const DetalleModal = () => {
                 <td>{it.sku ?? '-'}</td>
                 <td>{it.descripcion ?? '-'}</td>
                 <td className="text-end">{it.cantidad ?? '-'}</td>
-                <td className="text-end">{Number(it.costo ?? 0).toFixed(2)}</td>
-                <td className="text-end">{Number(it.total ?? 0).toFixed(2)}</td>
               </tr>
             ))}
             {items.length === 0 && (
               <tr>
-                <td colSpan={5} className="text-center">Sin items</td>
+                <td colSpan={3} className="text-center">Sin items</td>
               </tr>
             )}
           </tbody>
@@ -63,3 +58,4 @@ const DetalleModal = () => {
 };
 
 export default DetalleModal;
+

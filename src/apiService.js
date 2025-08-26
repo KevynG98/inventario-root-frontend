@@ -23,6 +23,19 @@ const getAuthToken = () => {
   return token || null;
 };
 
+// Obtener username del usuario logueado (para auditoría) desde localStorage
+const getUsername = () => {
+  try {
+    const raw = localStorage.getItem('user');
+    if (!raw) return null;
+    const obj = typeof raw === 'string' ? JSON.parse(raw) : raw;
+    const username = obj?.username || null;
+    return username;
+  } catch (e) {
+    return null;
+  }
+};
+
 
 // GET
 const getData = async (endpoint) => {
@@ -30,6 +43,7 @@ const getData = async (endpoint) => {
     const authToken = getAuthToken();
     const headers = {
       ...(authToken && { 'Authorization': `Token ${authToken}` }),
+      ...(getUsername() && { 'X-User': getUsername() }),
     };
     const response = await apiClient.get(endpoint, { headers });
     return response;
@@ -45,6 +59,7 @@ const getBinary = async (endpoint) => {
     const authToken = getAuthToken();
     const headers = {
       ...(authToken && { 'Authorization': `Token ${authToken}` }),
+      ...(getUsername() && { 'X-User': getUsername() }),
     };
     const response = await apiClient.get(endpoint, { headers, responseType: 'blob' });
     return response;
@@ -61,6 +76,7 @@ const postData = async (endpoint, data) => {
     const headers = {
       'Content-Type': 'application/json',
       ...(authToken && { 'Authorization': `Token ${authToken}` }),
+      ...(getUsername() && { 'X-User': getUsername() }),
     };
     const response = await apiClient.post(endpoint, data, { headers });
     return response;
@@ -77,6 +93,7 @@ const putData = async (url, data) => {
     const headers = {
       'Content-Type': 'application/json',
       ...(authToken && { 'Authorization': `Token ${authToken}` }),
+      ...(getUsername() && { 'X-User': getUsername() }),
     };
     const response = await fetch(`${API_URL}${url}`, {
       method: 'PUT',
@@ -98,6 +115,7 @@ const patchData = async (endpoint, data) => {
     const headers = {
       'Content-Type': 'application/json',
       ...(authToken && { 'Authorization': `Token ${authToken}` }),
+      ...(getUsername() && { 'X-User': getUsername() }),
     };
     const response = await apiClient.patch(endpoint, data, { headers });
     return response;
@@ -113,6 +131,7 @@ const deleteData = async (endpoint) => {
     const authToken = getAuthToken();
     const headers = {
       ...(authToken && { 'Authorization': `Token ${authToken}` }),
+      ...(getUsername() && { 'X-User': getUsername() }),
     };
     const response = await apiClient.delete(endpoint, { headers });
     return response;
@@ -129,6 +148,7 @@ const logout = async () => {
     const headers = {
       ...(authToken && { 'Authorization': `Token ${authToken}` }),
       'Content-Type': 'application/json',
+      ...(getUsername() && { 'X-User': getUsername() }),
     };
     const response = await apiClient.post('user/logout/', {}, { headers });
     return response;

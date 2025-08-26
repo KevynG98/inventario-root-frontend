@@ -1,13 +1,21 @@
-import React from 'react';
-import { ContextProvider } from './Context';
+import React, { useContext } from 'react';
+import { ContextProvider, AppContext } from './Context';
+import List from './List';
 import Form from './Form';
+import DetalleModal from './DetalleModal';
 
-const Index = () => {
-  return (
-    <ContextProvider>
-      <Form />
-    </ContextProvider>
-  );
+const Inner = () => {
+  const { showForm } = useContext(AppContext);
+  return <>
+    {!showForm ? <List /> : <Form />}
+    <DetalleModal />
+  </>
 };
+
+const Index = () => (
+  <ContextProvider>
+    <Inner />
+  </ContextProvider>
+);
 
 export default Index;

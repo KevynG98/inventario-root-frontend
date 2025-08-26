@@ -97,6 +97,7 @@ const ListEntradas = () => {
             <th>Proveedor</th>
             <th>Referencia</th>
             <th className="text-end">Total</th>
+            <th>Estado</th>
             <th>Acciones</th>
           </tr>
         </thead>
@@ -112,6 +113,7 @@ const ListEntradas = () => {
               <td className="text-end">
                 {typeof e?.total === 'number' ? e.total.toFixed(2) : e?.total ?? '-'}
               </td>
+              <td>{e?.estado || 'no_aplicada'}</td>
               <td className="d-flex gap-2">
                 <Button
                   size="sm"
@@ -140,6 +142,15 @@ const ListEntradas = () => {
                 >
                   Eliminar
                 </Button>
+                {e?.estado !== 'aplicada' && (
+                  <Button
+                    size="sm"
+                    variant="success"
+                    onClick={() => window.applyEntrada ? window.applyEntrada(e.id) : null}
+                  >
+                    Aplicar
+                  </Button>
+                )}
               </td>
             </tr>
           ))}

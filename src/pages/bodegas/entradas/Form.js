@@ -59,20 +59,37 @@ const EntradaForm = () => {
   const addItem = () => {
     const skuObj = skuOptions.find(s => String(s.id) === String(draft.skuId));
     if (!skuObj) return;
+
+    if (!draft.lote || !draft.fecha_vencimiento) {
+      alert('Los campos "Lote" y "Vencimiento" son obligatorios.');
+      return;
+    }
+
     const costo = parseFloat(draft.costo || 0);
     const cantidad = parseFloat(draft.cantidad || 0);
     const gravaIva = (skuObj.iva || '').toString().trim() !== '';
+
     const _round2 = (v) => Math.round((v + Number.EPSILON) * 100) / 100;
-    const precio_sin_iva = _round2(gravaIva ? (costo / 1.12) : costo);
-    const iva = _round2(gravaIva ? (costo - precio_sin_iva) : 0);
+
     const total = _round2(costo * cantidad);
-    setItems(prev => [...prev, {
-      sku: skuObj.codigo_sku,
-      descripcion: skuObj.nombre || skuObj.descripcion || '',
-      costo, cantidad, precio_sin_iva, iva, total,
-      lote: draft.lote,
-      fecha_vencimiento: draft.fecha_vencimiento,
-    }]);
+    const precio_sin_iva = _round2(gravaIva ? (total / 1.12) : total);
+    const iva = _round2(gravaIva ? (total - precio_sin_iva) : 0);
+
+    setItems(prev => [
+      ...prev,
+      {
+        sku: skuObj.codigo_sku,
+        descripcion: skuObj.nombre || skuObj.descripcion || '',
+        costo,
+        cantidad,
+        precio_sin_iva,
+        iva,
+        total,
+        lote: draft.lote,
+        fecha_vencimiento: draft.fecha_vencimiento,
+      },
+    ]);
+
     setDraft({ skuId: '', costo: '', cantidad: '', lote: '', fecha_vencimiento: '' });
   };
 
@@ -81,6 +98,10 @@ const EntradaForm = () => {
     const payload = { ...form, items };
     const res = form.id ? await actualizarEntrada(form.id, payload) : await crearEntrada(payload);
     if (res?.status === 201 || res?.status === 200) setShowForm(false);
+  };
+
+  const eliminarItem = (index) => {
+    setItems((prev) => prev.filter((_, i) => i !== index));
   };
 
   return (
@@ -204,11 +225,14 @@ const EntradaForm = () => {
               <th>Total</th>
               <th>Lote</th>
               <th>Vence</th>
+              <th>Acciones</th> {/* ✅ Nueva columna */}
             </tr>
           </thead>
           <tbody>
             {items.length === 0 ? (
-              <tr><td colSpan={8} className="text-center text-muted">Sin ítems</td></tr>
+              <tr>
+                <td colSpan={9} className="text-center text-muted">Sin ítems</td>
+              </tr>
             ) : items.map((it, idx) => (
               <tr key={idx}>
                 <td>{it.sku}</td>
@@ -219,6 +243,15 @@ const EntradaForm = () => {
                 <td>{Number(it.total).toFixed(2)}</td>
                 <td>{it.lote}</td>
                 <td>{it.fecha_vencimiento || ''}</td>
+                <td>
+                  <Button
+                    variant="danger"
+                    size="sm"
+                    onClick={() => eliminarItem(idx)}
+                  >
+                    Eliminar
+                  </Button>
+                </td>
               </tr>
             ))}
           </tbody>
@@ -227,7 +260,7 @@ const EntradaForm = () => {
         <div className="d-flex gap-2 mt-3">
           <Button type="submit">Guardar</Button>
           <Button variant="secondary" onClick={() => setShowForm(false)}>
-            Cancelar
+            Regresar al listado
           </Button>
         </div>
       </Form>

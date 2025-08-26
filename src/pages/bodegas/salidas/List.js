@@ -3,7 +3,7 @@ import { Button, Card, Col, Form, Row, Table } from 'react-bootstrap';
 import { AppContext } from './Context';
 
 const ListSalidas = () => {
-  const { salidas, filters, setFilters, page, setPage, nextUrl, prevUrl, setShowForm, setSelectedSalida, bodegas } = useContext(AppContext);
+  const { salidas, filters, setFilters, page, setPage, nextUrl, prevUrl, setShowForm, setSelectedSalida, setShowDetail, bodegas } = useContext(AppContext);
 
   return (
     <Card className="p-3">
@@ -35,7 +35,7 @@ const ListSalidas = () => {
       <Table bordered size="sm">
         <thead className="table-primary">
           <tr>
-            <th>ID</th><th>Fecha</th><th>Bodega</th><th>Tipo</th><th>Observaciones</th>
+            <th>ID</th><th>Fecha</th><th>Bodega</th><th>Tipo</th><th>Observaciones</th><th>Acciones</th>
           </tr>
         </thead>
         <tbody>
@@ -48,6 +48,9 @@ const ListSalidas = () => {
               <td>{e.bodega}</td>
               <td>{e.tipo_salida}</td>
               <td>{e.observaciones || ''}</td>
+              <td>
+                <Button size="sm" variant="outline-primary" onClick={() => { setSelectedSalida(e); setShowDetail(true); }}>Ver</Button>
+              </td>
             </tr>
           ))}
         </tbody>
