@@ -57,9 +57,6 @@ const ModalMedidas = () => {
         setValue(key, value);
       });
       setValue('cantidad_adicional', 0);
-      if (proveedorSeleccionado.codigo_barras) {
-        setValue('barcode', proveedorSeleccionado.codigo_barras);
-      }
     }
   }, [modoFormulario, proveedorSeleccionado, reset, setValue]);
 
@@ -75,17 +72,16 @@ const ModalMedidas = () => {
   useEffect(() => {
     if (!readOnly && categoriaSeleccionada !== undefined) {
       cargarSubcategoriasPorCategoria(categoriaSeleccionada);
-      setValue('subcategoria', '');
+      // Limpiar subcategoría solo si el usuario cambió la categoría respecto al valor inicial del registro
+      const categoriaInicial = proveedorSeleccionado?.categoria;
+      if (modoFormulario === 'crear' || (modoFormulario === 'editar' && categoriaSeleccionada !== categoriaInicial)) {
+        setValue('subcategoria', '');
+      }
     }
-  }, [categoriaSeleccionada, readOnly, setValue, cargarSubcategoriasPorCategoria]);
+  }, [categoriaSeleccionada, readOnly, setValue, cargarSubcategoriasPorCategoria, modoFormulario, proveedorSeleccionado?.categoria]);
 
   const onSubmit = (data) => {
     const payload = { ...data };
-
-    if (payload.barcode) {
-      payload.codigo_barras = payload.barcode;
-      delete payload.barcode;
-    }
 
     payload.unidades_por_paquete = parseInt(payload.unidades_por_paquete || 1, 10);
     payload.cantidad = parseInt(payload.cantidad || 0, 10);

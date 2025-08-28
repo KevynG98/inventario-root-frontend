@@ -114,7 +114,7 @@ const FormularioRequisicion = () => {
               <Form.Control as="select" {...register('bodega')}>
                 <option value="">Seleccione</option>
                 {bodegas.map((bodega) => (
-                  <option key={bodega.id} value={bodega.id}>
+                  <option key={bodega.id} value={bodega.nombre}>
                     {bodega.nombre}
                   </option>
                 ))}

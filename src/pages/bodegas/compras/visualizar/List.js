@@ -11,10 +11,12 @@ const List = () => {
   const filteredData = requisiciones.filter((r) => {
     const texto = busqueda.toLowerCase();
     return (
-      (r.proveedor || '').toLowerCase().includes(texto) ||
-      (r.tipo_requisicion || '').toLowerCase().includes(texto) ||
       (r.descripcion || '').toLowerCase().includes(texto) ||
-      (r.estado || '').toLowerCase().includes(texto)
+      (r.tipo_requisicion || '').toLowerCase().includes(texto) ||
+      (r.estado || '').toLowerCase().includes(texto) ||
+      (r.usuario || '').toLowerCase().includes(texto) ||
+      (r.centro_costo || '').toLowerCase().includes(texto) ||
+      (r.area_solicitante || '').toLowerCase().includes(texto)
     );
   });
 
@@ -47,8 +49,11 @@ const List = () => {
             <tr>
               <th className="text-center">No. Requisicion</th>
               <th className="text-center">Fecha</th>
-              <th className="text-center">Descripcion</th>
+              <th className="text-center">Usuario</th>
+              <th className="text-center">Centro de Costo</th>
+              <th className="text-center">Departamento</th>
               <th className="text-center">Bodega</th>
+              <th className="text-center">Descripcion</th>
               <th className="text-center">Tipo de Requisicion</th>
               <th className="text-center">Prioridad</th>
               <th className="text-center">Estatus</th>
@@ -65,8 +70,11 @@ const List = () => {
                 <tr key={idx}>
                   <td className="text-center">{req.id}</td>
                   <td className="text-center">{req.fecha}</td>
+                  <td className="text-center">{req.usuario || '-'}</td>
+                  <td className="text-center">{req.centro_costo || '-'}</td>
+                  <td className="text-center">{req.area_solicitante || '-'}</td>
+                  <td className="text-center">{req.bodega_nombre || req.bodega}</td>
                   <td className="text-center">{req.descripcion}</td>
-                  <td className="text-center">{req.bodega}</td>
                   <td className="text-center">{req.tipo_requisicion}</td>
                   <td>{req.prioridad}</td>
                   <td className="text-center">{req.estado}</td>

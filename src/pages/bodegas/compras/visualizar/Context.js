@@ -1,6 +1,6 @@
 // Context.js
 import React, { createContext, useState, useEffect } from 'react';
-import { getData, patchData } from '../../../../apiService';
+import { getData, patchData, putData } from '../../../../apiService';
 
 export const AppContext = createContext();
 
@@ -8,6 +8,21 @@ export const ContextProvider = ({ children }) => {
   const [requisiciones, setRequisiciones] = useState([]);
   const [requisicionSeleccionada, setRequisicionSeleccionada] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [bodegas, setBodegas] = useState([]);
+  const [skus, setSkus] = useState([]);
+
+  const cargarCatalogos = async () => {
+    try {
+      const [resBodegas, resSkus] = await Promise.all([
+        getData('inventario/bodegas/?page_size=200'),
+        getData('inventario/skus/?page_size=200'),
+      ]);
+      setBodegas(resBodegas?.data?.results ?? resBodegas?.data ?? []);
+      setSkus(resSkus?.data?.results ?? resSkus?.data ?? []);
+    } catch (e) {
+      console.error('❌ Error cargando catálogos:', e.response?.data || e.message);
+    }
+  };
 
   const cargarRequisiciones = async () => {
     try {
@@ -19,13 +34,17 @@ export const ContextProvider = ({ children }) => {
         return;
       }
 
-      const mapeadas = data.data.map((r) => ({
-        ...r,
-        proveedor: r.tipo_requisicion === 'bien'
-          ? (r.productos[0]?.sku || 'Producto sin SKU')
-          : (r.servicios[0]?.descripcion || 'Servicio sin nombre'),
-        fecha: new Date(r.created_at).toISOString().split('T')[0],
-      }));
+      const bodegasMap = new Map((bodegas || []).map((b) => [String(b.id), b.nombre]));
+      const mapeadas = data.data.map((r) => {
+        const bodegaRaw = r.bodega ?? '';
+        const bodegaNombre = bodegasMap.get(String(bodegaRaw)) || bodegaRaw;
+        return {
+          ...r,
+          bodega_nombre: bodegaNombre,
+          usuario: r.usuario || r.creado_por || '',
+          fecha: r.created_at ? new Date(r.created_at).toISOString().split('T')[0] : '',
+        };
+      });
 
       console.log('📦 Requisiciones cargadas:', mapeadas);
       setRequisiciones(mapeadas);
@@ -35,7 +54,7 @@ export const ContextProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    cargarRequisiciones();
+    cargarCatalogos().then(() => cargarRequisiciones());
   }, []);
 
   const abrirModal = (requisicion) => {
@@ -61,6 +80,20 @@ export const ContextProvider = ({ children }) => {
     cargarRequisiciones();
   };
 
+  const actualizarRequisicion = async (id, payload) => {
+    try {
+      const res = await putData(`requisisiones/actualizar/${id}/`, payload);
+      if (res.status >= 200 && res.status < 300) {
+        await cargarRequisiciones();
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('❌ Error actualizando requisición:', error.response?.data || error.message);
+      return false;
+    }
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -70,6 +103,9 @@ export const ContextProvider = ({ children }) => {
         requisicionSeleccionada,
         requisiciones,
         actualizarEstado,
+        actualizarRequisicion,
+        bodegas,
+        skus,
       }}
     >
       {children}
