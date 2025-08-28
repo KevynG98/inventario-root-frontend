@@ -1,75 +1,88 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Button } from 'react-bootstrap';
 import { FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import { useMyContext } from './Context';
 
-const Marcas = () => {
+const Movimientos = () => {
   const {
     data,
     prevPage,
     nextPage,
     nullPrevPage,
     nullNextPage,
-    setFechaInicio,
-    setFechaFin,
-    cargarDatos,
-    fechaFin,
-    fechaInicio,
-    skuFiltro,
-    setSkuFiltro,
+    // filtros
+    bodegas, categorias, subcategorias, skus,
+    bodegaSel, setBodegaSel,
+    categoriaSel, setCategoriaSel,
+    subcategoriaSel, setSubcategoriaSel,
+    skuFiltro, setSkuFiltro,
+    fechaInicio, setFechaInicio,
+    fechaFin, setFechaFin,
+    // paginación
     setPage,
-    skuList,
   } = useMyContext();
+
+  const filteredSkus = useMemo(() => {
+    const catNombre = categorias.find(c => String(c.id) === String(categoriaSel))?.nombre;
+    const subNombre = subcategorias.find(s => String(s.id) === String(subcategoriaSel))?.nombre;
+    return (skus || []).filter(s => {
+      const okCat = !catNombre || s.categoria === catNombre;
+      const okSub = !subNombre || (s.subcategoria || '') === subNombre;
+      return okCat && okSub;
+    });
+  }, [skus, categorias, subcategorias, categoriaSel, subcategoriaSel]);
 
   return (
     <div className="mb-4">
       <h5 className="mb-3">Historial de movimientos</h5>
 
-      <div className="d-flex flex-column flex-md-row align-items-md-end gap-3 mb-3">
-        <div>
-          <label>SKU:</label>
-          <select
-            className="form-control"
-            value={skuFiltro}
-            onChange={(e) => {
-              setSkuFiltro(e.target.value);
-              setPage(1);
-            }}
-          >
-            <option value="">-- Selecciona un SKU --</option>
-            {skuList.map((sku) => (
-              <option key={sku.codigo_sku} value={sku.codigo_sku}>
-                {/* {sku.codigo_sku} - {sku.nombre} */}
-                {sku.codigo_sku}
-              </option>
+      <div className="row g-2 align-items-end mb-3">
+        <div className="col-md-3">
+          <label>Bodega</label>
+          <select className="form-control" value={bodegaSel} onChange={(e) => { setBodegaSel(e.target.value); setPage(1); }}>
+            <option value="">Todas</option>
+            {(bodegas || []).map(b => (
+              <option key={b.id} value={b.nombre}>{b.nombre}</option>
             ))}
           </select>
         </div>
-
-        <div>
-          <label>Desde:</label>
-          <input
-            type="date"
-            className="form-control"
-            value={fechaInicio}
-            onChange={(e) => {
-              setFechaInicio(e.target.value);
-              setPage(1);
-            }}
-          />
+        <div className="col-md-3">
+          <label>Categoría</label>
+          <select className="form-control" value={categoriaSel} onChange={(e) => { setCategoriaSel(e.target.value); setPage(1); }}>
+            <option value="">Todas</option>
+            {(categorias || []).map(c => (
+              <option key={c.id} value={c.id}>{c.nombre}</option>
+            ))}
+          </select>
         </div>
+        <div className="col-md-3">
+          <label>Subcategoría</label>
+          <select className="form-control" value={subcategoriaSel} onChange={(e) => { setSubcategoriaSel(e.target.value); setPage(1); }} disabled={!categoriaSel}>
+            <option value="">Todas</option>
+            {(subcategorias || []).map(sc => (
+              <option key={sc.id} value={sc.id}>{sc.nombre}</option>
+            ))}
+          </select>
+        </div>
+        <div className="col-md-3">
+          <label>SKU</label>
+          <select className="form-control" value={skuFiltro} onChange={(e) => { setSkuFiltro(e.target.value); setPage(1); }}>
+            <option value="">Todos</option>
+            {filteredSkus.map(s => (
+              <option key={s.id} value={s.codigo_sku}>{s.codigo_sku} - {s.nombre}</option>
+            ))}
+          </select>
+        </div>
+      </div>
 
-        <div>
-          <label>Hasta:</label>
-          <input
-            type="date"
-            className="form-control"
-            value={fechaFin}
-            onChange={(e) => {
-              setFechaFin(e.target.value);
-              setPage(1);
-            }}
-          />
+      <div className="row g-2 align-items-end mb-3">
+        <div className="col-md-3">
+          <label>Desde</label>
+          <input type="date" className="form-control" value={fechaInicio} onChange={(e) => { setFechaInicio(e.target.value); setPage(1); }} />
+        </div>
+        <div className="col-md-3">
+          <label>Hasta</label>
+          <input type="date" className="form-control" value={fechaFin} onChange={(e) => { setFechaFin(e.target.value); setPage(1); }} />
         </div>
       </div>
 
@@ -77,43 +90,27 @@ const Marcas = () => {
         <table className="table table-bordered table-sm mt-2 mb-0">
           <thead className="table-primary text-dark fw-semibold">
             <tr>
-              <th className="text-center">Fecha</th>
-              <th className="text-center">SKU</th>
-              <th className="text-center">Inventario Inicial</th>
-              <th className="text-center">Orden de Compra</th>
-              <th className="text-center">Requisición</th>
-              <th className="text-center">Solicitud Med</th>
-              <th className="text-center">Devolución</th>
-              <th className="text-center">Traslado</th>
-              <th className="text-center">Salida</th>
-              <th className="text-center">Inventario Final</th>
-              <th className="text-center">Observaciones</th>
+              <th>Fecha-Hora</th>
+              <th>SKU</th>
+              <th>Nombre</th>
+              <th>Movimiento</th>
+              <th className="text-end">Cantidad</th>
+              <th className="text-end">Inventario</th>
             </tr>
           </thead>
           <tbody>
-            {data.length === 0 ? (
-              <tr>
-                <td colSpan="11" className="text-center">Sin resultados</td>
+            {(!data || data.length === 0) ? (
+              <tr><td colSpan={6} className="text-center text-muted">Sin resultados</td></tr>
+            ) : data.map((m, idx) => (
+              <tr key={idx}>
+                <td>{m.fecha_hora}</td>
+                <td>{m.sku}</td>
+                <td>{m.nombre}</td>
+                <td>{m.movimiento}</td>
+                <td className="text-end">{Number(m.cantidad).toFixed(2)}</td>
+                <td className="text-end">{Number(m.inventario).toFixed(2)}</td>
               </tr>
-            ) : (
-              data.map((item, idx) => (
-                <tr key={idx}>
-                  <td>{item.fecha}</td>
-                  <td>{item.sku_codigo || '-'}</td>
-                  <td className="text-center">{item.inventario_inicial}</td>
-                  <td className="text-center">{item.orden_compra}</td>
-                  <td className="text-center">{item.requisicion}</td>
-                  <td className="text-center">{item.solicitud_med}</td>
-                  <td className="text-center">{item.devolucion}</td>
-                  <td className="text-center">{item.traslado}</td>
-                  <td className="text-center">{item.salida}</td>
-                  <td className="text-center">{item.inventario_final}</td>
-                  <td>{item.observaciones?.split('\n').map((line, i) => (
-                    <div key={i}>{line}</div>
-                  ))}</td>
-                </tr>
-              ))
-            )}
+            ))}
           </tbody>
         </table>
       </div>
@@ -126,4 +123,4 @@ const Marcas = () => {
   );
 };
 
-export default Marcas;
+export default Movimientos;

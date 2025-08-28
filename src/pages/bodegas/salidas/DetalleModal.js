@@ -20,6 +20,12 @@ const DetalleModal = () => {
         </p>
         <p><strong>Bodega:</strong> {selectedSalida.bodega ?? '-'}</p>
         <p><strong>Tipo:</strong> {selectedSalida.tipo_salida ?? '-'}</p>
+        {selectedSalida.tipo_salida === 'paciente' && (
+          <>
+            <p><strong>Área:</strong> {selectedSalida.area || '-'}</p>
+            <p><strong>Admisión:</strong> {selectedSalida.admision || '-'}</p>
+          </>
+        )}
         <p><strong>Observaciones:</strong> {selectedSalida.observaciones ?? '-'}</p>
         <p><strong>Creado por:</strong> {selectedSalida.usuario || '-'}</p>
         <p><strong>Aplicado por:</strong> {selectedSalida.aplicado_por || '-'}</p>
@@ -62,4 +68,3 @@ const DetalleModal = () => {
 };
 
 export default DetalleModal;
-

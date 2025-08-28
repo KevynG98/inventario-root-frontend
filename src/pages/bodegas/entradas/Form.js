@@ -31,6 +31,7 @@ const EntradaForm = () => {
   const [categoriaId, setCategoriaId] = useState('');
   const [subcategoriaNombre, setSubcategoriaNombre] = useState('');
   const [draft, setDraft] = useState({ skuId: '', costo: '', cantidad: '', lote: '', fecha_vencimiento: '' });
+  const [permitirSinLoteVencimiento, setPermitirSinLoteVencimiento] = useState(false);
   const [items, setItems] = useState(selectedEntrada?.items || []);
 
   const onChange = (k) => (e) => {
@@ -60,8 +61,8 @@ const EntradaForm = () => {
     const skuObj = skuOptions.find(s => String(s.id) === String(draft.skuId));
     if (!skuObj) return;
 
-    if (!draft.lote || !draft.fecha_vencimiento) {
-      alert('Los campos "Lote" y "Vencimiento" son obligatorios.');
+    if (!permitirSinLoteVencimiento && (!draft.lote || !draft.fecha_vencimiento)) {
+      alert('Los campos "Lote" y "Vencimiento" son obligatorios. Marque "Agregar sin Lote y Fecha de Vencimiento" si aplica.');
       return;
     }
 
@@ -85,8 +86,8 @@ const EntradaForm = () => {
         precio_sin_iva,
         iva,
         total,
-        lote: draft.lote,
-        fecha_vencimiento: draft.fecha_vencimiento,
+        lote: permitirSinLoteVencimiento ? null : (draft.lote || null),
+        fecha_vencimiento: permitirSinLoteVencimiento ? null : (draft.fecha_vencimiento || null),
       },
     ]);
 
@@ -103,6 +104,10 @@ const EntradaForm = () => {
   const eliminarItem = (index) => {
     setItems((prev) => prev.filter((_, i) => i !== index));
   };
+
+  const totalGeneral = useMemo(() => {
+    return (items || []).reduce((sum, it) => sum + (parseFloat(it.total) || 0), 0);
+  }, [items]);
 
   return (
     <Card className="p-3">
@@ -202,14 +207,26 @@ const EntradaForm = () => {
             </Col>
             <Col md={2}>
               <Form.Label>Lote</Form.Label>
-              <Form.Control value={draft.lote} onChange={(e) => setDraft({ ...draft, lote: e.target.value })} />
+              <Form.Control value={draft.lote} onChange={(e) => setDraft({ ...draft, lote: e.target.value })} disabled={permitirSinLoteVencimiento} placeholder={permitirSinLoteVencimiento ? 'N/A' : ''} />
             </Col>
             <Col md={2}>
               <Form.Label>Vencimiento</Form.Label>
-              <Form.Control type="date" value={draft.fecha_vencimiento} onChange={(e) => setDraft({ ...draft, fecha_vencimiento: e.target.value })} />
+              <Form.Control type="date" value={draft.fecha_vencimiento} onChange={(e) => setDraft({ ...draft, fecha_vencimiento: e.target.value })} disabled={permitirSinLoteVencimiento} />
             </Col>
             <Col md={1}>
               <Button variant="success" onClick={addItem}>Agregar</Button>
+            </Col>
+          </Row>
+
+          <Row className="g-2 mt-2">
+            <Col md={12}>
+              <Form.Check
+                type="checkbox"
+                id="chk-sin-lote-venc"
+                label="Agregar sin Lote y Fecha de Vencimiento"
+                checked={permitirSinLoteVencimiento}
+                onChange={(e) => setPermitirSinLoteVencimiento(e.target.checked)}
+              />
             </Col>
           </Row>
         </Card>
@@ -241,7 +258,7 @@ const EntradaForm = () => {
                 <td>{it.cantidad}</td>
                 <td>{Number(it.iva).toFixed(2)}</td>
                 <td>{Number(it.total).toFixed(2)}</td>
-                <td>{it.lote}</td>
+                <td>{it.lote || ''}</td>
                 <td>{it.fecha_vencimiento || ''}</td>
                 <td>
                   <Button
@@ -256,6 +273,8 @@ const EntradaForm = () => {
             ))}
           </tbody>
         </Table>
+
+        <div className="text-end fw-bold mt-2">Total General: {totalGeneral.toFixed(2)}</div>
 
         <div className="d-flex gap-2 mt-3">
           <Button type="submit">Guardar</Button>

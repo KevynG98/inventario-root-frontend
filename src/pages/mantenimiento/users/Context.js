@@ -20,6 +20,7 @@ export const ContextProvider = ({ children }) => {
   const [formKey, setFormKey] = useState(Date.now());
   const [showResetPassword, setShowResetPassword] = useState(false);
   const [userDetail, setUserDetail] = useState(null);
+  const [departamentos, setDepartamentos] = useState([]);
 
   const showModal = () => setShow(!show);
   const openResetPasswordModal = () => setShowResetPassword(true);
@@ -72,9 +73,11 @@ export const ContextProvider = ({ children }) => {
     try {
       const responseUser = await getData('user/filter-users/');
       const responseRol = await getData('rol/');
+      const responseDeptos = await getData('mantenimiento/departamentos/?page_size=200');
 
       setData(responseUser.data.results);
       setGetRol(responseRol.data);
+      setDepartamentos(responseDeptos?.data?.results ?? responseDeptos?.data ?? []);
 
       setPagination({
         count: responseUser.data.count,
@@ -246,6 +249,7 @@ export const ContextProvider = ({ children }) => {
     openResetPasswordModal,
     closeResetPasswordModal,
     updateUser,
+    departamentos,
     fetchPage,
     searchUsers,
     resetUserPassword,

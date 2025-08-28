@@ -1,205 +1,104 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
-import { getData, postData, putData, deleteData } from '../../../apiService';
-import { NotificationManager } from "react-notifications";
+import React, { createContext, useState, useEffect, useCallback, useContext } from 'react';
 import Swal from 'sweetalert2';
-import { set } from 'react-hook-form';
+import { getData } from '../../../apiService';
 
 const MyContext = createContext();
 
 export const ContextProvider = ({ children }) => {
   const [data, setData] = useState([]);
-  const [show, setShow] = useState(false);
-  const [modoFormulario, setModoFormulario] = useState('crear'); // 'crear', 'editar' o 'ver'
-  const [proveedorSeleccionado, setProveedorSeleccionado] = useState(null);
   const [fechaInicio, setFechaInicio] = useState('');
   const [fechaFin, setFechaFin] = useState(() => {
     const hoy = new Date();
     const yyyy = hoy.getFullYear();
-    const mm = String(hoy.getMonth() + 1).padStart(2, '0'); // meses van de 0 a 11
+    const mm = String(hoy.getMonth() + 1).padStart(2, '0');
     const dd = String(hoy.getDate()).padStart(2, '0');
-    return `${yyyy}-${mm}-${dd}`; // formato YYYY-MM-DD
+    return `${yyyy}-${mm}-${dd}`;
   });
 
+  const [bodegas, setBodegas] = useState([]);
+  const [categorias, setCategorias] = useState([]);
+  const [subcategorias, setSubcategorias] = useState([]);
+  const [skus, setSkus] = useState([]);
+
+  const [bodegaSel, setBodegaSel] = useState('');
+  const [categoriaSel, setCategoriaSel] = useState('');
+  const [subcategoriaSel, setSubcategoriaSel] = useState('');
   const [skuFiltro, setSkuFiltro] = useState('');
-  const [skuList, setSkuList] = useState([]);
-  //paginacion
+
   const [page, setPage] = useState(1);
-  const [nullNextPage, setNullNextPage] = useState(null)
-  const [nullPrevPage, setPrevNextPage] = useState(null)
-  const [pageSize, setPageSize] = useState(20)
+  const [nullNextPage, setNullNextPage] = useState(null);
+  const [nullPrevPage, setPrevNextPage] = useState(null);
+  const [pageSize] = useState(50);
 
-  const nextPage = () => {
-    setPage(prev => prev + 1);
-  }
+  const nextPage = () => setPage((p) => p + 1);
+  const prevPage = () => setPage((p) => Math.max(1, p - 1));
 
-  const prevPage = () => {
-    setPage(prev => prev - 1);
-  }
-
-  const cargarDatos = async () => {
-    const loading = Swal.fire({
-      title: 'Cargando movimientos...',
-      text: 'Por favor espera',
-      allowOutsideClick: false,
-      didOpen: () => {
-        Swal.showLoading();
-      }
-    });
-
+  const cargarCatalogos = useCallback(async () => {
     try {
-      let url = `auditoria/inventario-movimientos/?page=${page}&page_size=${pageSize}`;
-
-      if (skuFiltro) {
-        url += `&sku=${skuFiltro}`;
-      }
-      if (fechaInicio) {
-        url += `&inicio=${fechaInicio}`;
-      }
-      if (fechaFin) {
-        url += `&fin=${fechaFin}`;
-      }
-
-      const response = await getData(url);
-      setData(response.data.results);
-      setNullNextPage(response.data.next);
-      setPrevNextPage(response.data.previous);
-      console.log("MOVIMIENTOS", response.data.results)
-    } catch (error) {
-      console.error('Error al cargar movimientos:', error);
-      Swal.fire('Error', 'No se pudieron cargar los datos', 'error');
-    } finally {
-      Swal.close();
+      const [b, c, sku] = await Promise.all([
+        getData('inventario/bodegas/?page_size=200'),
+        getData('inventario/categorias/?page_size=200'),
+        getData('inventario/skus/?page_size=200'),
+      ]);
+      setBodegas(b?.data?.results ?? b?.data ?? []);
+      setCategorias(c?.data?.results ?? c?.data ?? []);
+      setSkus(sku?.data?.results ?? sku?.data ?? []);
+    } catch (e) {
+      setBodegas([]); setCategorias([]); setSkus([]);
     }
-  };
-
-  const cargarSku = async () => {
-    try {
-      const response = await getData(`inventario/sku-listar/`);
-      setSkuList(response.data.results);
-      console.log("SKU", response.data.results)
-    } catch (error) {
-      console.error('Error al cargar SKU:', error);
-    }
-  }
-
-
-  const enviarDatos = async (data) => {
-    console.log("DATOS", data)
-    try {
-      const response = await postData("inventario/categorias-crear/", data);
-      if (response?.status === 201 && response.data) {
-        NotificationManager.success("Marca Creada", "Éxito", 3000);
-        showModal()
-      } else {
-        NotificationManager.error("Algo salió mal", "Error", 5000);
-        console.log("Algo salió mal", "Error", 5000)
-      }
-    } catch (err) {
-      console.error('Error al crear usuario:', err);
-    }
-    cargarDatos()
-  }
-
-  const actualizarProveedor = async (datos) => {
-    try {
-      const response = await putData(`inventario/categorias-actualizar/${datos.id}/`, datos);
-
-      if (response.status === 200 || response.status === 204) {
-        console.log("Proveedor actualizado con éxito:", response.data);
-        NotificationManager.success("Marca Editada con exito", "Éxito", 3000);
-        cargarDatos(); // recarga el listado si tenés esta función
-        setShow(false); // cierra el modal
-      } else {
-        console.warn("Algo salió mal al actualizar:", response);
-      }
-    } catch (error) {
-      console.error("Error al actualizar proveedor:", error);
-    }
-  };
-
-  const eliminarProveedor = async (id) => {
-    const confirmed = await Swal.fire({
-      title: '¿Estás seguro?',
-      text: 'Esta acción eliminará permanentemente la marca.',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
-      confirmButtonText: 'Sí, eliminar',
-      cancelButtonText: 'Cancelar'
-    });
-
-    if (confirmed.isConfirmed) {
-      try {
-        const response = await deleteData(`inventario/categorias-eliminar/${id}/`);
-        console.log('Proveedor eliminado:', response.status);
-        NotificationManager.success("Marca eliminada con éxito", "Éxito", 3000);
-
-        // Recargar listado o actualizar estado
-        cargarDatos && cargarDatos();
-      } catch (error) {
-        console.error('Error al eliminar proveedor:', error);
-        NotificationManager.error("Hubo un error al eliminar", "Error", 3000);
-      }
-    }
-  };
-
-  const showModal = () => setShow(!show);
-
-  const abrirModalCrear = () => {
-    setProveedorSeleccionado(null);
-    setModoFormulario('crear');
-    showModal();
-  };
-
-  const abrirModalEditar = (proveedor) => {
-    setProveedorSeleccionado(proveedor);
-    setModoFormulario('editar');
-    showModal();
-  };
-
-  const abrirModalVer = (proveedor) => {
-    setProveedorSeleccionado(proveedor);
-    setModoFormulario('ver');
-    showModal();
-  };
-
-
-  useEffect(() => {
-    cargarDatos()
-  }, [page, fechaInicio, fechaFin, skuFiltro]);
-
-  useEffect(() => {
-    cargarSku();
   }, []);
+
+  const cargarSubcategorias = useCallback(async (categoriaId) => {
+    if (!categoriaId) { setSubcategorias([]); return; }
+    try {
+      const res = await getData(`inventario/categorias/subcategorias/${categoriaId}?page_size=200`);
+      const list = res?.data?.results ?? res?.data ?? [];
+      setSubcategorias(Array.isArray(list) ? list : []);
+    } catch { setSubcategorias([]); }
+  }, []);
+
+  const cargarDatos = useCallback(async () => {
+    const loading = Swal.fire({ title: 'Cargando movimientos...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+    try {
+      let url = `inventario/movimientos-detalle/?page=${page}&page_size=${pageSize}`;
+      if (bodegaSel) url += `&bodega=${encodeURIComponent(bodegaSel)}`;
+      if (categoriaSel) {
+        const cat = categorias.find(c => String(c.id) === String(categoriaSel));
+        if (cat?.nombre) url += `&categoria=${encodeURIComponent(cat.nombre)}`;
+      }
+      if (subcategoriaSel) {
+        const sc = subcategorias.find(s => String(s.id) === String(subcategoriaSel));
+        if (sc?.nombre) url += `&subcategoria=${encodeURIComponent(sc.nombre)}`;
+      }
+      if (skuFiltro) url += `&sku=${encodeURIComponent(skuFiltro)}`;
+      if (fechaInicio) url += `&inicio=${fechaInicio}`;
+      if (fechaFin) url += `&fin=${fechaFin}`;
+      const res = await getData(url);
+      setData(res?.data?.results ?? []);
+      setNullNextPage(res?.data?.next ?? null);
+      setPrevNextPage(res?.data?.previous ?? null);
+    } catch { setData([]); }
+    finally { Swal.close(); }
+  }, [page, pageSize, bodegaSel, categoriaSel, subcategoriaSel, skuFiltro, fechaInicio, fechaFin, categorias, subcategorias]);
+
+  useEffect(() => { cargarCatalogos(); }, [cargarCatalogos]);
+  useEffect(() => { cargarSubcategorias(categoriaSel); setSubcategoriaSel(''); setSkuFiltro(''); }, [categoriaSel, cargarSubcategorias]);
+  useEffect(() => { cargarDatos(); }, [cargarDatos]);
 
   const values = {
     data,
-    show,
-    showModal,
-    nullNextPage,
-    nullPrevPage,
-    nextPage,
-    prevPage,
-    enviarDatos,
-    modoFormulario,
-    setModoFormulario,
-    proveedorSeleccionado,
-    setProveedorSeleccionado,
-    abrirModalEditar,
-    abrirModalCrear,
-    abrirModalVer,
-    actualizarProveedor,
-    eliminarProveedor,
-    setFechaInicio,
-    setFechaFin,
-    cargarDatos,
-    fechaFin,
-    fechaInicio,
-    setPage,
-    skuFiltro,
-    setSkuFiltro,
-    skuList,
+    // filtros
+    bodegas, categorias, subcategorias, skus,
+    bodegaSel, setBodegaSel,
+    categoriaSel, setCategoriaSel,
+    subcategoriaSel, setSubcategoriaSel,
+    skuFiltro, setSkuFiltro,
+    fechaInicio, setFechaInicio,
+    fechaFin, setFechaFin,
+    cargarSubcategorias,
+    // paginación
+    page, setPage, nextPage, prevPage,
+    nullPrevPage, nullNextPage,
   };
 
   return <MyContext.Provider value={values}>{children}</MyContext.Provider>;

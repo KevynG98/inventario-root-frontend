@@ -26,7 +26,8 @@ const ModalUserForm = () => {
     openResetPasswordModal,
     updateUser,
     userDetail,
-    unassignRol
+    unassignRol,
+    departamentos,
   } = useMyContext();
 
   const userData = userDetail;
@@ -238,7 +239,16 @@ const ModalUserForm = () => {
             {/* Datos laborales */}
             <Tab eventKey="laborales" title="Datos laborales">
               <Row className="mb-3">
-                <Col md={6}><Form.Label>Departamento</Form.Label><Form.Control {...register("departamento_laboral")} /></Col>
+                <Col md={6}>
+                  <Form.Label>Departamento</Form.Label>
+                  <Form.Control as="select" {...register("departamento_laboral", { required: true })}>
+                    <option value="">Seleccione</option>
+                    {(departamentos || []).map((d) => (
+                      <option key={d.id} value={d.nombre}>{d.nombre}</option>
+                    ))}
+                  </Form.Control>
+                  {errors?.departamento_laboral && <small className="text-danger">Departamento es obligatorio</small>}
+                </Col>
                 <Col md={6}><Form.Label>Puesto</Form.Label><Form.Control {...register("puesto")} /></Col>
               </Row>
               <Form.Label>Perfil de acceso</Form.Label>

@@ -66,6 +66,8 @@ const ListTraslados = () => {
             <th>Fecha recibido</th>
             <th>Origen</th>
             <th>Destino</th>
+            <th>Departamento</th>
+            <th>Entregamos a</th>
             <th>Estatus</th>
             <th>Acciones</th>
           </tr>
@@ -78,6 +80,8 @@ const ListTraslados = () => {
               <td>{t?.fecha_recibido ? new Date(t.fecha_recibido).toLocaleString() : '-'}</td>
               <td>{t?.bodega_origen}</td>
               <td>{t?.bodega_destino}</td>
+              <td>{t?.departamento || ''}</td>
+              <td>{t?.entregamos_a || ''}</td>
               <td>{t?.estatus}</td>
               <td className="d-flex gap-2">
                 <Button size="sm" variant="outline-primary" onClick={() => { setSelectedTraslado(t); setShowDetail(true); }}>Ver</Button>
@@ -91,7 +95,7 @@ const ListTraslados = () => {
             </tr>
           ))}
           {traslados.length === 0 && (
-            <tr><td colSpan={7} className="text-center">Sin resultados</td></tr>
+            <tr><td colSpan={9} className="text-center">Sin resultados</td></tr>
           )}
         </tbody>
       </Table>

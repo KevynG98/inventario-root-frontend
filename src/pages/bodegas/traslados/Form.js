@@ -9,6 +9,8 @@ const TrasladoForm = () => {
     bodegas, categorias, subcategorias, skus,
     getSubcategoriasByCategoria,
     crearTraslado,
+    departamentos,
+    usuarios,
   } = useContext(AppContext);
 
   const [form, setForm] = useState({
@@ -22,8 +24,7 @@ const TrasladoForm = () => {
   const [draft, setDraft] = useState({ skuId: '', cantidad: '' });
   const [items, setItems] = useState([]);
 
-  const [userQuery, setUserQuery] = useState('');
-  const [userOptions, setUserOptions] = useState([]);
+  const [deptoSel, setDeptoSel] = useState('');
 
   const onChange = (k) => (e) => {
     const val = e && e.target ? e.target.value : e;
@@ -46,17 +47,13 @@ const TrasladoForm = () => {
     setSubcategoriaNombre('');
   }, [categoriaId, getSubcategoriasByCategoria]);
 
-  useEffect(() => {
-    const id = setTimeout(async () => {
-      if (!userQuery) { setUserOptions([]); return; }
-      try {
-        const res = await getData(`user/search/?q=${encodeURIComponent(userQuery)}`);
-        const list = res?.data?.results || [];
-        setUserOptions(list);
-      } catch (e) { setUserOptions([]); }
-    }, 300);
-    return () => clearTimeout(id);
-  }, [userQuery]);
+  const filteredUsuarios = useMemo(() => {
+    let list = Array.isArray(usuarios) ? usuarios : [];
+    // Solo activos
+    list = list.filter(u => u.is_active !== false);
+    if (!deptoSel) return list;
+    return list.filter(u => (u.perfil?.departamento_laboral || '').toLowerCase() === String(deptoSel).toLowerCase());
+  }, [usuarios, deptoSel]);
 
   const addItem = () => {
     const skuObj = skuOptions.find(s => String(s.id) === String(draft.skuId));
@@ -75,6 +72,10 @@ const TrasladoForm = () => {
 
   const onSubmit = async (e) => {
     e.preventDefault();
+    if (!form.entregamos_a) {
+      alert('Seleccione la persona a quien se entrega (obligatorio).');
+      return;
+    }
     const payload = { ...form, items };
     const res = await crearTraslado(payload);
     if (res?.status === 201) setShowForm(false);
@@ -104,11 +105,17 @@ const TrasladoForm = () => {
             <Form.Control as="textarea" rows={2} value={form.comentarios} onChange={onChange('comentarios')} />
           </Col>
           <Col md={6}>
-            <Form.Label>Entregamos a</Form.Label>
-            <Form.Control placeholder="Buscar usuario" value={userQuery} onChange={(e) => setUserQuery(e.target.value)} />
-            <Form.Control as="select" className="mt-1" value={form.entregamos_a} onChange={onChange('entregamos_a')}>
+            <Form.Label>Departamento</Form.Label>
+            <Form.Control as="select" value={deptoSel} onChange={(e) => { setDeptoSel(e.target.value); setForm(f => ({ ...f, entregamos_a: '' })); }}>
               <option value="">Seleccione</option>
-              {userOptions.map(u => (
+              {(departamentos || []).map(d => (
+                <option key={d.id} value={d.nombre}>{d.nombre}</option>
+              ))}
+            </Form.Control>
+            <Form.Label className="mt-2">Entregamos a</Form.Label>
+            <Form.Control as="select" value={form.entregamos_a} onChange={onChange('entregamos_a')} required>
+              <option value="">Seleccione usuario</option>
+              {filteredUsuarios.map(u => (
                 <option key={u.id} value={u.username}>{u.username} - {u.first_name} {u.last_name}</option>
               ))}
             </Form.Control>
@@ -185,4 +192,3 @@ const TrasladoForm = () => {
 };
 
 export default TrasladoForm;
-

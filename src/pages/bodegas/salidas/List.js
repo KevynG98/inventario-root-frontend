@@ -28,6 +28,7 @@ const ListSalidas = () => {
             <option value="perdida">Pérdida</option>
             <option value="destruccion">Destrucción</option>
             <option value="venta">Venta</option>
+            <option value="paciente">Paciente</option>
           </Form.Control>
         </Col>
       </Row>
@@ -35,18 +36,20 @@ const ListSalidas = () => {
       <Table bordered size="sm">
         <thead className="table-primary">
           <tr>
-            <th>ID</th><th>Fecha</th><th>Bodega</th><th>Tipo</th><th>Observaciones</th><th>Acciones</th>
+            <th>ID</th><th>Fecha</th><th>Bodega</th><th>Tipo</th><th>Área</th><th>Admisión</th><th>Observaciones</th><th>Acciones</th>
           </tr>
         </thead>
         <tbody>
           {salidas.length === 0 ? (
-            <tr><td colSpan={5} className="text-center text-muted">Sin salidas</td></tr>
+            <tr><td colSpan={8} className="text-center text-muted">Sin salidas</td></tr>
           ) : salidas.map(e => (
             <tr key={e.id}>
               <td>{e.id}</td>
               <td>{new Date(e.created_at).toLocaleString()}</td>
               <td>{e.bodega}</td>
               <td>{e.tipo_salida}</td>
+              <td>{e.area || ''}</td>
+              <td>{e.admision || ''}</td>
               <td>{e.observaciones || ''}</td>
               <td>
                 <Button size="sm" variant="outline-primary" onClick={() => { setSelectedSalida(e); setShowDetail(true); }}>Ver</Button>

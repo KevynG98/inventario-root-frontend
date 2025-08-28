@@ -9,6 +9,8 @@ const SalidaForm = () => {
     bodegas, centrosCosto, cuentasContables, categorias, subcategorias, skus,
     getSubcategoriasByCategoria,
     crearSalida,
+    areas,
+    admisionesPorArea,
   } = useContext(AppContext);
 
   const [form, setForm] = useState({
@@ -20,8 +22,11 @@ const SalidaForm = () => {
   });
   const [categoriaId, setCategoriaId] = useState('');
   const [subcategoriaNombre, setSubcategoriaNombre] = useState('');
-  const [draft, setDraft] = useState({ skuId: '', cantidad: '', lote: '', fecha_vencimiento: '' });
+  const [draft, setDraft] = useState({ skuId: '', cantidad: '' });
   const [items, setItems] = useState([]);
+  // Paciente
+  const [areaSel, setAreaSel] = useState('');
+  const [admisionSel, setAdmisionSel] = useState('');
 
   useEffect(() => {
     if (selectedSalida) {
@@ -71,10 +76,11 @@ const SalidaForm = () => {
       sku: skuObj.codigo_sku,
       descripcion: skuObj.nombre || skuObj.descripcion || '',
       costo, cantidad, precio_sin_iva, iva, total,
-      lote: draft.lote, fecha_vencimiento: draft.fecha_vencimiento,
     }]);
-    setDraft({ skuId: '', cantidad: '', lote: '', fecha_vencimiento: '' });
+    setDraft({ skuId: '', cantidad: '' });
   };
+
+  const removeItem = (index) => setItems(prev => prev.filter((_, i) => i !== index));
 
   const onSubmit = async (e) => {
     e.preventDefault();
@@ -90,7 +96,9 @@ const SalidaForm = () => {
         iva,
         total,
       }));
-      const payload = { ...form, items: cleanItems };
+      // Preparar payload incluyendo área/admision para tipo 'paciente'
+      const extra = (form.tipo_salida === 'paciente') ? { area: areaSel || null, admision: admisionSel ? Number(admisionSel) : null } : {};
+      const payload = { ...form, ...extra, items: cleanItems };
       const res = await crearSalida(payload);
       if (res?.status === 201) setShowForm(false);
     } catch (err) {
@@ -121,6 +129,7 @@ const SalidaForm = () => {
               <option value="perdida">Pérdida</option>
               <option value="destruccion">Destrucción</option>
               <option value="venta">Venta</option>
+              <option value="paciente">Paciente</option>
             </Form.Control>
           </Col>
           <Col md={4}>
@@ -142,6 +151,35 @@ const SalidaForm = () => {
             <Form.Control as="textarea" rows={2} value={form.observaciones || ''} onChange={onChange('observaciones')} />
           </Col>
         </Row>
+
+        {form.tipo_salida === 'paciente' && (
+          <Card className="p-2 mb-2 mt-2" style={{ background: '#fff7ed' }}>
+            <Row className="g-2">
+              <Col md={4}>
+                <Form.Label>Área</Form.Label>
+                <Form.Control as="select" value={areaSel} onChange={(e) => { setAreaSel(e.target.value); setAdmisionSel(''); }}>
+                  <option value="">Seleccione área</option>
+                  {(areas || []).map((a) => (
+                    <option key={a} value={a}>{a}</option>
+                  ))}
+                </Form.Control>
+              </Col>
+              <Col md={8}>
+                <Form.Label>Admisión</Form.Label>
+                <Form.Control as="select" value={admisionSel} onChange={(e) => setAdmisionSel(e.target.value)} disabled={!areaSel}>
+                  <option value="">Seleccione admisión</option>
+                  {(admisionesPorArea?.[areaSel] || []).map((ad) => {
+                    const p = ad.paciente || {};
+                    const nombre = [p.primer_nombre, p.segundo_nombre, p.primer_apellido, p.segundo_apellido, p.apellido_casada].filter(Boolean).join(' ');
+                    return (
+                      <option key={ad.id} value={ad.id}>{ad.id} - {nombre}</option>
+                    );
+                  })}
+                </Form.Control>
+              </Col>
+            </Row>
+          </Card>
+        )}
 
         <Card className="p-2 mb-2 mt-3" style={{ background: '#f7f9fc' }}>
           <Row className="g-2">
@@ -172,14 +210,6 @@ const SalidaForm = () => {
               <Form.Label>Cantidad</Form.Label>
               <Form.Control type="number" step="1" value={draft.cantidad} onChange={(e) => setDraft({ ...draft, cantidad: String(e.target.value) })} />
             </Col>
-            <Col md={2}>
-              <Form.Label>Lote</Form.Label>
-              <Form.Control value={draft.lote || ''} onChange={(e) => setDraft({ ...draft, lote: e.target.value })} />
-            </Col>
-            <Col md={2}>
-              <Form.Label>Vencimiento</Form.Label>
-              <Form.Control type="date" value={draft.fecha_vencimiento || ''} onChange={(e) => setDraft({ ...draft, fecha_vencimiento: e.target.value })} />
-            </Col>
             <Col md={1}>
               <Button variant="success" onClick={addItem}>Agregar</Button>
             </Col>
@@ -191,27 +221,21 @@ const SalidaForm = () => {
             <tr>
               <th>SKU</th>
               <th>Descripción</th>
-              <th>Costo</th>
               <th>Cantidad</th>
-              <th>IVA</th>
-              <th>Total</th>
-              <th>Lote</th>
-              <th>Vence</th>
+              <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
             {items.length === 0 ? (
-              <tr><td colSpan={8} className="text-center text-muted">Sin ítems</td></tr>
+              <tr><td colSpan={4} className="text-center text-muted">Sin ítems</td></tr>
             ) : items.map((it, idx) => (
               <tr key={idx}>
                 <td>{it.sku}</td>
                 <td>{it.descripcion}</td>
-                <td>{Number(it.costo || 0).toFixed(2)}</td>
                 <td>{it.cantidad}</td>
-                <td>{Number(it.iva || 0).toFixed(2)}</td>
-                <td>{Number(it.total || 0).toFixed(2)}</td>
-                <td>{it.lote || ''}</td>
-                <td>{it.fecha_vencimiento || ''}</td>
+                <td>
+                  <Button variant="outline-danger" size="sm" onClick={() => removeItem(idx)}>Eliminar</Button>
+                </td>
               </tr>
             ))}
           </tbody>

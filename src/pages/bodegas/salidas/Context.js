@@ -22,6 +22,9 @@ export const ContextProvider = ({ children }) => {
   const [categorias, setCategorias] = useState([]);
   const [subcategorias, setSubcategorias] = useState([]);
   const [skus, setSkus] = useState([]);
+  // Admisiones por área
+  const [areas, setAreas] = useState([]);
+  const [admisionesPorArea, setAdmisionesPorArea] = useState({});
 
   const loadSalidas = useCallback(async () => {
     try {
@@ -44,18 +47,22 @@ export const ContextProvider = ({ children }) => {
   }, [page, filters]);
 
   const loadCatalogs = useCallback(async () => {
-    const [b, cc, ct, c, sku] = await Promise.all([
+    const [b, cc, ct, c, sku, admAreas] = await Promise.all([
       getData('inventario/bodegas/?page_size=200'),
       getData('mantenimiento/centros-costo/?page_size=200'),
       getData('mantenimiento/cuentas-contables/?page_size=200'),
       getData('inventario/categorias/?page_size=200'),
       getData('inventario/skus/?page_size=200'),
+      getData('admisiones/admisiones-por-area/'),
     ]);
     setBodegas(b.data.results || []);
     setCentrosCosto(cc.data.results || []);
     setCuentasContables(ct.data.results || []);
     setCategorias(c.data.results || []);
     setSkus(sku.data.results || []);
+    const mapa = admAreas?.data || {};
+    setAdmisionesPorArea(mapa);
+    setAreas(Object.keys(mapa));
   }, []);
 
   const getSubcategoriasByCategoria = useCallback(async (categoriaId) => {
@@ -85,6 +92,8 @@ export const ContextProvider = ({ children }) => {
       selectedSalida, setSelectedSalida,
       bodegas, centrosCosto, cuentasContables, categorias, subcategorias, skus,
       getSubcategoriasByCategoria,
+      areas,
+      admisionesPorArea,
       crearSalida,
     }}>
       {children}

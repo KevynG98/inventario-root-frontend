@@ -20,6 +20,8 @@ export const ContextProvider = ({ children }) => {
   const [categorias, setCategorias] = useState([]);
   const [subcategorias, setSubcategorias] = useState([]);
   const [skus, setSkus] = useState([]);
+  const [departamentos, setDepartamentos] = useState([]);
+  const [usuarios, setUsuarios] = useState([]);
 
   const loadTraslados = useCallback(async () => {
     try {
@@ -42,18 +44,22 @@ export const ContextProvider = ({ children }) => {
 
   const loadCatalogs = useCallback(async () => {
     try {
-      const [b, c, sku] = await Promise.all([
+      const [b, c, sku, deps, users] = await Promise.all([
         getData('inventario/bodegas/?page_size=200'),
         getData('inventario/categorias/?page_size=200'),
         getData('inventario/skus/?page_size=200'),
+        getData('mantenimiento/departamentos/?page_size=200'),
+        getData('user/filter-users/'),
       ]);
       setBodegas(b.data.results || []);
       setCategorias(c.data.results || []);
       setSkus(sku.data.results || []);
+      setDepartamentos(deps?.data?.results ?? deps?.data ?? []);
+      setUsuarios(users?.data?.results ?? users?.data ?? []);
     } catch (err) {
       console.error('Error cargando catálogos:', err?.response?.data || err?.message || err);
       NotificationManager.error('No se pudieron cargar catálogos', 'Error', 4000);
-      setBodegas([]); setCategorias([]); setSkus([]);
+      setBodegas([]); setCategorias([]); setSkus([]); setDepartamentos([]); setUsuarios([]);
     }
   }, []);
 
@@ -113,6 +119,7 @@ export const ContextProvider = ({ children }) => {
       showDetail, setShowDetail,
       selectedTraslado, setSelectedTraslado,
       bodegas, categorias, subcategorias, skus,
+      departamentos, usuarios,
       getSubcategoriasByCategoria,
       crearTraslado,
       recibirTraslado,
