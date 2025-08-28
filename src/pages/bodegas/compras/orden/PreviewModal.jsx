@@ -14,7 +14,6 @@ const PreviewModal = (props) => {
     if (!selectedReq?.id) return;
     try {
       setLoading(true);
-      // Cargamos requisiciones aprobadas y tomamos la que coincide
       const { getData } = await import('../../../../apiService');
       const res = await getData('requisisiones/?estado=aprobada');
       const req = (res.data || []).find(r => String(r.id) === String(selectedReq.id));
@@ -45,9 +44,7 @@ const PreviewModal = (props) => {
       const ocId = oc?.id;
       closePreview();
       if (ocId) props.history.push(`/dashboard/bodegas/compras/orden/${ocId}`);
-    } catch (e) {
-      // noop
-    }
+    } catch (e) { /* noop */ }
   };
 
   const onClickImprimir = async () => {
@@ -70,11 +67,19 @@ const PreviewModal = (props) => {
   };
 
   return (
-    <Modal show={!!showPreview} onHide={closePreview} centered>
+    <Modal
+      show={!!showPreview}
+      onHide={closePreview}
+      centered
+      size="xl"     // más ancho
+      scrollable    // scroll interno si el contenido crece
+    >
       <Modal.Header closeButton>
         <Modal.Title>Requisición Autorizada #{selectedReq?.id || '-'}</Modal.Title>
       </Modal.Header>
-      <Modal.Body>
+
+      {/* Altura limitada y scroll solo con inline style (sin CSS externo) */}
+      <Modal.Body style={{ maxHeight: 'calc(100vh - 220px)', overflowY: 'auto' }}>
         <div className="mb-2"><strong>No. orden de compra:</strong> {selectedReq?.numero_orden_compra || '-'}</div>
         <div className="mb-2"><strong>Fecha:</strong> {selectedReq?.fecha || '-'}</div>
         <div className="mb-2"><strong>Proveedor:</strong> {selectedReq?.proveedor_nombre || '-'}</div>
@@ -85,62 +90,68 @@ const PreviewModal = (props) => {
 
         <hr />
         <h6>Ítems</h6>
+
         {loading ? (
           <Spinner animation="border" size="sm" />
         ) : (
-          <Table bordered size="sm">
-            <thead>
-              <tr>
-                <th>SKU</th>
-                <th>Descripción</th>
-                <th>UM</th>
-                <th className="text-right">Cantidad</th>
-                <th className="text-right">Precio</th>
-                <th className="text-right">Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              {items.map((it, idx) => (
-                <tr key={idx}>
-                  <td>{it.sku}</td>
-                  <td>{it.descripcion}</td>
-                  <td>{it.unidad || ''}</td>
-                  <td className="text-right">{it.cantidad}</td>
-                  <td className="text-right">{Number(it.precio).toFixed(2)}</td>
-                  <td className="text-right">{Number(it.total).toFixed(2)}</td>
-                </tr>
-              ))}
-              {items.length === 0 && (
+          // Contenedor responsivo: agrega scroll horizontal si la tabla es muy ancha
+          <div className="table-responsive">
+            <Table bordered size="sm" className="mb-0" style={{ tableLayout: 'fixed' }}>
+              <thead>
                 <tr>
-                  <td colSpan={6} className="text-center text-muted">Sin items</td>
+                  <th style={{ width: '110px' }}>SKU</th>
+                  <th>Descripción</th>
+                  <th style={{ width: '90px' }}>UM</th>
+                  <th className="text-right" style={{ width: '120px' }}>Cantidad</th>
+                  <th className="text-right" style={{ width: '120px' }}>Precio</th>
+                  <th className="text-right" style={{ width: '140px' }}>Total</th>
                 </tr>
-              )}
-            </tbody>
-            <tfoot>
-              <tr>
-                <td colSpan={4}></td>
-                <th className="text-right">Subtotal</th>
-                <td className="text-right">{totales.subtotal.toFixed(2)}</td>
-              </tr>
-              <tr>
-                <td colSpan={4}></td>
-                <th className="text-right">IVA</th>
-                <td className="text-right">{totales.iva.toFixed(2)}</td>
-              </tr>
-              <tr>
-                <td colSpan={4}></td>
-                <th className="text-right">Total</th>
-                <td className="text-right">{totales.total.toFixed(2)}</td>
-              </tr>
-            </tfoot>
-          </Table>
+              </thead>
+              <tbody>
+                {items.map((it, idx) => (
+                  <tr key={idx}>
+                    <td className="text-break">{it.sku}</td>
+                    <td className="text-break">{it.descripcion}</td>
+                    <td className="text-break">{it.unidad || ''}</td>
+                    <td className="text-right">{it.cantidad}</td>
+                    <td className="text-right">{Number(it.precio).toFixed(2)}</td>
+                    <td className="text-right">{Number(it.total).toFixed(2)}</td>
+                  </tr>
+                ))}
+                {items.length === 0 && (
+                  <tr>
+                    <td colSpan={6} className="text-center text-muted">Sin items</td>
+                  </tr>
+                )}
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td colSpan={4}></td>
+                  <th className="text-right">Subtotal</th>
+                  <td className="text-right">{totales.subtotal.toFixed(2)}</td>
+                </tr>
+                <tr>
+                  <td colSpan={4}></td>
+                  <th className="text-right">IVA</th>
+                  <td className="text-right">{totales.iva.toFixed(2)}</td>
+                </tr>
+                <tr>
+                  <td colSpan={4}></td>
+                  <th className="text-right">Total</th>
+                  <td className="text-right">{totales.total.toFixed(2)}</td>
+                </tr>
+              </tfoot>
+            </Table>
+          </div>
         )}
+
         {selectedReq?.oc_estatus === 'GENERADA' && selectedReq?.oc_id && (
           <Alert variant="info" className="mt-2 p-2">
             Nota: Las órdenes en estado GENERADA no permiten edición.
           </Alert>
         )}
       </Modal.Body>
+
       <Modal.Footer>
         <Button variant="secondary" onClick={closePreview}>Cerrar</Button>
         {selectedReq?.oc_estatus === 'GENERADA' && selectedReq?.oc_id && (

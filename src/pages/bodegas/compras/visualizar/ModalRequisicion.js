@@ -82,7 +82,7 @@ const ModalRequisicion = () => {
                 cancelButtonText: 'Cancelar',
             }).then((result) => {
                 if (result.isConfirmed) {
-                    actualizarEstado(requisicionSeleccionada.id, nuevoEstado);
+                    actualizarEstado(requisicionSeleccionada.id, nuevoEstado, observacion);
                 } else {
                     setTimeout(() => abrirModal(requisicionSeleccionada), 100);
                 }
@@ -109,10 +109,17 @@ const ModalRequisicion = () => {
         }
     };
 
-    const handleNoRequiereVB = () => lanzarSweetAlertEstado('Marcada como "No requiere visto bueno"', 'aprobada');
-    const handlePendienteVB = () => lanzarSweetAlertEstado('Marcada como "Pendiente de visto bueno"', 'pendiente');
-    const handleDarVB = () => lanzarSweetAlertEstado('Visto bueno otorgado', 'aprobada');
-    const handleAnular = () => lanzarSweetAlertEstado('Requisición rechazada', 'rechazada');
+    const requireObs = () => {
+        if (!observacion || !observacion.trim()) {
+            Swal.fire('Observación requerida', 'El campo Observación es obligatorio.', 'warning');
+            return true;
+        }
+        return false;
+    };
+    const handleNoRequiereVB = () => { if (requireObs()) return; lanzarSweetAlertEstado('Marcada como "No requiere visto bueno"', 'aprobada'); };
+    const handlePendienteVB = () => { if (requireObs()) return; lanzarSweetAlertEstado('Marcada como "Pendiente de visto bueno"', 'pendiente'); };
+    const handleDarVB = () => { if (requireObs()) return; lanzarSweetAlertEstado('Visto bueno otorgado', 'aprobada'); };
+    const handleAnular = () => { if (requireObs()) return; lanzarSweetAlertEstado('Requisición rechazada', 'rechazada'); };
 
     const skuTexto = (skuCodeOrId) => {
         // Some records might store ID; others store codigo_sku
@@ -247,6 +254,12 @@ const ModalRequisicion = () => {
                                 <Form.Control type="text" value={requisicionSeleccionada.area_solicitante || ''} readOnly />
                             </Form.Group>
                         </Col>
+                        <Col md={6}>
+                            <Form.Group>
+                                <Form.Label>Proveedor</Form.Label>
+                                <Form.Control type="text" value={requisicionSeleccionada.proveedor_nombre || requisicionSeleccionada.proveedor || ''} readOnly />
+                            </Form.Group>
+                        </Col>
                     </Row>
 
                     <Form.Group className="mb-3">
@@ -320,6 +333,7 @@ const ModalRequisicion = () => {
                                 </tr>
                             </tbody>
                         </Table>
+                        <div className="text-end fw-bold">Total General: {productos.reduce((s, it) => s + (parseFloat(it.total)||0), 0).toFixed(2)}</div>
                     </div>
                 ) : (
                     <div className="mt-4">
@@ -377,6 +391,7 @@ const ModalRequisicion = () => {
                                 </tr>
                             </tbody>
                         </Table>
+                        <div className="text-end fw-bold">Total General: {servicios.reduce((s, it) => s + (parseFloat(it.total)||0), 0).toFixed(2)}</div>
                     </div>
                 )}
             </Modal.Body>

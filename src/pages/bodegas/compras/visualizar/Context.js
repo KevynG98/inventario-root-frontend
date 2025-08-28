@@ -10,15 +10,18 @@ export const ContextProvider = ({ children }) => {
   const [showModal, setShowModal] = useState(false);
   const [bodegas, setBodegas] = useState([]);
   const [skus, setSkus] = useState([]);
+  const [proveedores, setProveedores] = useState([]);
 
   const cargarCatalogos = async () => {
     try {
-      const [resBodegas, resSkus] = await Promise.all([
+      const [resBodegas, resSkus, resProvs] = await Promise.all([
         getData('inventario/bodegas/?page_size=200'),
         getData('inventario/skus/?page_size=200'),
+        getData('inventario/proveedores/?page_size=200'),
       ]);
       setBodegas(resBodegas?.data?.results ?? resBodegas?.data ?? []);
       setSkus(resSkus?.data?.results ?? resSkus?.data ?? []);
+      setProveedores(resProvs?.data?.results ?? resProvs?.data ?? []);
     } catch (e) {
       console.error('❌ Error cargando catálogos:', e.response?.data || e.message);
     }
@@ -35,12 +38,18 @@ export const ContextProvider = ({ children }) => {
       }
 
       const bodegasMap = new Map((bodegas || []).map((b) => [String(b.id), b.nombre]));
+      const provIdToName = new Map((proveedores || []).map((p) => [String(p.id), p.nombre]));
       const mapeadas = data.data.map((r) => {
         const bodegaRaw = r.bodega ?? '';
         const bodegaNombre = bodegasMap.get(String(bodegaRaw)) || bodegaRaw;
+        let proveedorNombre = r.proveedor || '';
+        if (proveedorNombre && /^\d+$/.test(String(proveedorNombre))) {
+          proveedorNombre = provIdToName.get(String(proveedorNombre)) || proveedorNombre;
+        }
         return {
           ...r,
           bodega_nombre: bodegaNombre,
+          proveedor_nombre: proveedorNombre,
           usuario: r.usuario || r.creado_por || '',
           fecha: r.created_at ? new Date(r.created_at).toISOString().split('T')[0] : '',
         };
@@ -67,12 +76,12 @@ export const ContextProvider = ({ children }) => {
     setShowModal(false);
   };
 
-  const actualizarEstado = async (id, nuevoEstado) => {
+  const actualizarEstado = async (id, nuevoEstado, descripcion) => {
     try {
-      await patchData(`requisisiones/estado/${id}/`, { estado: nuevoEstado });
+      await patchData(`requisisiones/estado/${id}/`, { estado: nuevoEstado, descripcion });
 
       setRequisiciones((prev) =>
-        prev.map((r) => (r.id === id ? { ...r, estado: nuevoEstado } : r))
+        prev.map((r) => (r.id === id ? { ...r, estado: nuevoEstado, descripcion } : r))
       );
     } catch (error) {
       console.error('❌ Error actualizando estado:', error.response?.data || error.message);
@@ -106,6 +115,7 @@ export const ContextProvider = ({ children }) => {
         actualizarRequisicion,
         bodegas,
         skus,
+        proveedores,
       }}
     >
       {children}

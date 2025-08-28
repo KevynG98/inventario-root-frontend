@@ -16,7 +16,8 @@ const List = () => {
       (r.estado || '').toLowerCase().includes(texto) ||
       (r.usuario || '').toLowerCase().includes(texto) ||
       (r.centro_costo || '').toLowerCase().includes(texto) ||
-      (r.area_solicitante || '').toLowerCase().includes(texto)
+      (r.area_solicitante || '').toLowerCase().includes(texto) ||
+      (r.proveedor_nombre || r.proveedor || '').toLowerCase().includes(texto)
     );
   });
 
@@ -55,6 +56,7 @@ const List = () => {
               <th className="text-center">Bodega</th>
               <th className="text-center">Descripcion</th>
               <th className="text-center">Tipo de Requisicion</th>
+              <th className="text-center">Proveedor</th>
               <th className="text-center">Prioridad</th>
               <th className="text-center">Estatus</th>
               <th className="text-center">Acciones</th>
@@ -76,6 +78,7 @@ const List = () => {
                   <td className="text-center">{req.bodega_nombre || req.bodega}</td>
                   <td className="text-center">{req.descripcion}</td>
                   <td className="text-center">{req.tipo_requisicion}</td>
+                  <td className="text-center">{req.proveedor_nombre || req.proveedor || '-'}</td>
                   <td>{req.prioridad}</td>
                   <td className="text-center">{req.estado}</td>
                   <td className="text-center">

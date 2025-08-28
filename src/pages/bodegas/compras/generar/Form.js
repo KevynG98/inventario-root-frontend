@@ -1,5 +1,5 @@
 // Form.js
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { AppContext } from './Context';
 import { Form, Button, Row, Col, Card, Table } from 'react-bootstrap';
@@ -30,6 +30,7 @@ const FormularioRequisicion = () => {
 
   const tipoRequisicion = watch('tipo_requisicion');
   const categoriaSeleccionada = watch('categoria'); // id de categoría
+  const subcategoriaSeleccionada = watch('subcategoria'); // id de subcategoría
 
   const [productos, setProductos] = useState([]);
   const [servicios, setServicios] = useState([]);
@@ -45,6 +46,24 @@ const FormularioRequisicion = () => {
       setSubcategorias([]);
     }
   }, [categoriaSeleccionada, getSubcategoriasByCategoria, setSubcategorias]);
+
+  const filteredSkus = useMemo(() => {
+    const catNombre = categorias.find((c) => String(c.id) === String(categoriaSeleccionada))?.nombre;
+    const subcatNombre = subcategorias.find((s) => String(s.id) === String(subcategoriaSeleccionada))?.nombre;
+    return skus.filter((sku) => {
+      const matchCat = !catNombre || sku.categoria === catNombre;
+      const matchSub = !subcatNombre || (sku.subcategoria || '') === subcatNombre;
+      return matchCat && matchSub;
+    });
+  }, [skus, categorias, subcategorias, categoriaSeleccionada, subcategoriaSeleccionada]);
+
+  const totalGeneral = useMemo(() => {
+    const arr = tipoRequisicion === 'servicio' ? servicios : productos;
+    return arr.reduce((sum, it) => sum + (parseFloat(it.total) || 0), 0);
+  }, [tipoRequisicion, productos, servicios]);
+
+  const handleEliminarProducto = (id) => setProductos((prev) => prev.filter((p) => p.id !== id));
+  const handleEliminarServicio = (id) => setServicios((prev) => prev.filter((s) => s.id !== id));
 
   const handleAgregarProducto = () => {
     const values = getValues();
@@ -184,24 +203,27 @@ const FormularioRequisicion = () => {
           </Form.Control>
         </Form.Group>
 
+        {/* Proveedor (requerido para ambos tipos) */}
+        <Row>
+          <Col md={6}>
+            <Form.Group className="mb-3">
+              <Form.Label>Proveedor</Form.Label>
+              <Form.Control as="select" size="sm" {...register('proveedor')}>
+                <option value="">Selecciona un proveedor</option>
+                {proveedores.map((prov) => (
+                  <option key={prov.id} value={prov.nombre}>
+                    {prov.nombre}
+                  </option>
+                ))}
+              </Form.Control>
+            </Form.Group>
+          </Col>
+        </Row>
+
         {tipoRequisicion === 'bien' && (
           <>
             <Card className="p-3 mb-3" style={{ backgroundColor: '#f7f9fc' }}>
               <Row className="align-items-end">
-                <Col md={3} className="mb-3">
-                  <Form.Group>
-                    <Form.Label><strong>Proveedor</strong></Form.Label>
-                    <Form.Control as="select" size="sm" {...register('proveedor')}>
-                      <option value="">Selecciona un proveedor</option>
-                      {proveedores.map((prov) => (
-                        <option key={prov.id} value={prov.id}>
-                          {prov.nombre}
-                        </option>
-                      ))}
-                    </Form.Control>
-                  </Form.Group>
-                </Col>
-
                 <Col md={3} className="mb-3">
                   <Form.Group>
                     <Form.Label><strong>Categoría</strong></Form.Label>
@@ -242,7 +264,7 @@ const FormularioRequisicion = () => {
                     <Form.Label><strong>Seleccionar SKU</strong></Form.Label>
                     <Form.Control as="select" size="sm" {...register('SKU')}>
                       <option value="">Selecciona un SKU</option>
-                      {skus.map((sku) => (
+                      {filteredSkus.map((sku) => (
                         <option key={sku.id} value={sku.id}>
                           {sku.codigo_sku} - {sku.descripcion ?? sku.nombre}
                         </option>
@@ -295,12 +317,13 @@ const FormularioRequisicion = () => {
                   <th>Cantidad Solicitada</th>
                   <th>Precio</th>
                   <th>Total</th>
+                  <th></th>
                 </tr>
               </thead>
               <tbody>
                 {productos.length === 0 ? (
                   <tr>
-                    <td colSpan="6" className="text-center text-muted">
+                    <td colSpan="7" className="text-center text-muted">
                       No hay productos agregados
                     </td>
                   </tr>
@@ -313,11 +336,18 @@ const FormularioRequisicion = () => {
                       <td>{item.cantidad}</td>
                       <td>{item.precio.toFixed(2)}</td>
                       <td>{item.total.toFixed(2)}</td>
+                      <td>
+                        <Button variant="outline-danger" size="sm" onClick={() => handleEliminarProducto(item.id)}>
+                          Quitar
+                        </Button>
+                      </td>
                     </tr>
                   ))
                 )}
               </tbody>
             </Table>
+
+            <div className="text-end fw-bold">Total General: {totalGeneral.toFixed(2)}</div>
           </>
         )}
 
@@ -380,12 +410,13 @@ const FormularioRequisicion = () => {
                   <th>Cantidad</th>
                   <th>Precio</th>
                   <th>Total</th>
+                  <th></th>
                 </tr>
               </thead>
               <tbody>
                 {servicios.length === 0 ? (
                   <tr>
-                    <td colSpan="4" className="text-center text-muted">
+                    <td colSpan="5" className="text-center text-muted">
                       No hay servicios agregados
                     </td>
                   </tr>
@@ -396,11 +427,18 @@ const FormularioRequisicion = () => {
                       <td>{item.cantidad}</td>
                       <td>{item.precio.toFixed(2)}</td>
                       <td>{item.total.toFixed(2)}</td>
+                      <td>
+                        <Button variant="outline-danger" size="sm" onClick={() => handleEliminarServicio(item.id)}>
+                          Quitar
+                        </Button>
+                      </td>
                     </tr>
                   ))
                 )}
               </tbody>
             </Table>
+
+            <div className="text-end fw-bold">Total General: {totalGeneral.toFixed(2)}</div>
           </>
         )}
 
