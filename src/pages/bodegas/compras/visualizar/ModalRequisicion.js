@@ -91,38 +91,67 @@ const ModalRequisicion = () => {
                       if (nuevoEstado === 'aprobada') {
                         const oc = await crearOCDesdeRequisicion(requisicionSeleccionada.id);
                         if (oc && oc.id) {
-                          // Generar automáticamente con condiciones de pago por defecto (CONTADO)
-                          try {
-                            await postData(`compras/ordenes-compra/${oc.id}/generar/`, { condiciones_pago: 'CONTADO' });
-                            Swal.fire({
-                              icon: 'success',
-                              title: 'Requisición aprobada',
-                              text: 'Orden de Compra generada correctamente.',
-                              confirmButtonText: 'Ver Orden',
-                              showCancelButton: true,
-                              cancelButtonText: 'Cerrar',
-                            }).then((go) => {
-                              if (go.isConfirmed) {
-                                const url = `#/dashboard/bodegas/compras/orden/${oc.id}`;
-                                window.location.hash = url;
+                          // Preguntar condiciones de pago antes de generar
+                          const html = `
+                            <div style="text-align:left">
+                              <label for="condiciones_pago" style="display:block;margin-bottom:6px">Condiciones de pago</label>
+                              <select id="condiciones_pago" class="swal2-select" style="width:100%">
+                                <option value="CONTADO" selected>Contado</option>
+                                <option value="CREDITO">Crédito</option>
+                              </select>
+                              <div id="dias_credito_wrap" style="margin-top:10px; display:none">
+                                <label for="dias_credito" style="display:block;margin-bottom:6px">Días de crédito</label>
+                                <select id="dias_credito" class="swal2-select" style="width:100%">
+                                  <option value="7">7</option>
+                                  <option value="15">15</option>
+                                  <option value="21">21</option>
+                                  <option value="30">30</option>
+                                  <option value="45">45</option>
+                                  <option value="60">60</option>
+                                  <option value="75">75</option>
+                                  <option value="90">90</option>
+                                </select>
+                              </div>
+                            </div>`;
+
+                          await Swal.fire({
+                            title: 'Generar Orden de Compra',
+                            html,
+                            focusConfirm: false,
+                            showCancelButton: true,
+                            confirmButtonText: 'Generar',
+                            cancelButtonText: 'Solo crear',
+                            didOpen: () => {
+                              const sel = document.getElementById('condiciones_pago');
+                              const wrap = document.getElementById('dias_credito_wrap');
+                              sel.addEventListener('change', () => {
+                                wrap.style.display = sel.value === 'CREDITO' ? 'block' : 'none';
+                              });
+                            },
+                            preConfirm: () => {
+                              const condiciones_pago = (document.getElementById('condiciones_pago') || {}).value || 'CONTADO';
+                              let dias_credito = null;
+                              if (condiciones_pago === 'CREDITO') {
+                                const v = (document.getElementById('dias_credito') || {}).value;
+                                dias_credito = v ? parseInt(v, 10) : null;
                               }
-                            });
-                          } catch (e) {
-                            // Si falla la generación, al menos quedó en BORRADOR
-                            Swal.fire({
-                              icon: 'warning',
-                              title: 'OC creada en borrador',
-                              text: 'Complete condiciones de pago para generar la orden.',
-                              confirmButtonText: 'Abrir Orden',
-                              showCancelButton: true,
-                              cancelButtonText: 'Cerrar',
-                            }).then((go) => {
-                              if (go.isConfirmed) {
-                                const url = `#/dashboard/bodegas/compras/orden/${oc.id}`;
-                                window.location.hash = url;
+                              return { condiciones_pago, dias_credito };
+                            },
+                          }).then(async (res) => {
+                            if (res.isConfirmed) {
+                              try {
+                                const payload = {
+                                  condiciones_pago: res.value?.condiciones_pago || 'CONTADO',
+                                  dias_credito: res.value?.condiciones_pago === 'CREDITO' ? (res.value?.dias_credito || null) : null,
+                                };
+                                await postData(`compras/ordenes-compra/${oc.id}/generar/`, payload);
+                              } catch (e) {
+                                Swal.fire('Aviso', 'No se pudo generar automáticamente. Revise la orden.', 'warning');
                               }
-                            });
-                          }
+                            }
+                            // Ir al detalle (quede en NUEVO si se generó; en BORRADOR si canceló)
+                            window.location.hash = `#/dashboard/bodegas/compras/orden/${oc.id}`;
+                          });
                         }
                       }
                     })();
