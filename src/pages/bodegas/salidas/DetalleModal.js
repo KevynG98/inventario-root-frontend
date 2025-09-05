@@ -6,15 +6,12 @@ import { getData } from '../../../apiService';
 const DetalleModal = () => {
   const { showDetail, setShowDetail, selectedSalida } = useContext(AppContext);
   const [pacienteNombre, setPacienteNombre] = useState('');
-  if (!showDetail || !selectedSalida) return null;
-
-  const items = selectedSalida.items || [];
 
   // Cargar nombre del paciente cuando sea tipo paciente
   useEffect(() => {
     const loadPaciente = async () => {
       try {
-        if (selectedSalida?.tipo_salida !== 'paciente' || !selectedSalida?.admision) {
+        if (!showDetail || !selectedSalida || selectedSalida?.tipo_salida !== 'paciente' || !selectedSalida?.admision) {
           setPacienteNombre('');
           return;
         }
@@ -27,7 +24,11 @@ const DetalleModal = () => {
       }
     };
     loadPaciente();
-  }, [selectedSalida]);
+  }, [showDetail, selectedSalida]);
+
+  if (!showDetail || !selectedSalida) return null;
+
+  const items = selectedSalida.items || [];
 
   return (
     <Modal show={showDetail} onHide={() => setShowDetail(false)} size="lg" centered>
