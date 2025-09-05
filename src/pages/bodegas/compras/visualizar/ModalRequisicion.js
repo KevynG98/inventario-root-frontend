@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { Modal, Button, Form, Row, Col, Table } from 'react-bootstrap';
 import Swal from 'sweetalert2';
 import { AppContext } from './Context';
+import { postData } from '../../../../apiService';
 
 const ModalRequisicion = () => {
     const {
@@ -11,6 +12,7 @@ const ModalRequisicion = () => {
         actualizarEstado,
         abrirModal,
         actualizarRequisicion,
+        crearOCDesdeRequisicion,
         bodegas,
         skus,
         modalModo,
@@ -84,7 +86,46 @@ const ModalRequisicion = () => {
                 cancelButtonText: 'Cancelar',
             }).then((result) => {
                 if (result.isConfirmed) {
-                    actualizarEstado(requisicionSeleccionada.id, nuevoEstado, observacion);
+                    (async () => {
+                      await actualizarEstado(requisicionSeleccionada.id, nuevoEstado, observacion);
+                      if (nuevoEstado === 'aprobada') {
+                        const oc = await crearOCDesdeRequisicion(requisicionSeleccionada.id);
+                        if (oc && oc.id) {
+                          // Generar automáticamente con condiciones de pago por defecto (CONTADO)
+                          try {
+                            await postData(`compras/ordenes-compra/${oc.id}/generar/`, { condiciones_pago: 'CONTADO' });
+                            Swal.fire({
+                              icon: 'success',
+                              title: 'Requisición aprobada',
+                              text: 'Orden de Compra generada correctamente.',
+                              confirmButtonText: 'Ver Orden',
+                              showCancelButton: true,
+                              cancelButtonText: 'Cerrar',
+                            }).then((go) => {
+                              if (go.isConfirmed) {
+                                const url = `#/dashboard/bodegas/compras/orden/${oc.id}`;
+                                window.location.hash = url;
+                              }
+                            });
+                          } catch (e) {
+                            // Si falla la generación, al menos quedó en BORRADOR
+                            Swal.fire({
+                              icon: 'warning',
+                              title: 'OC creada en borrador',
+                              text: 'Complete condiciones de pago para generar la orden.',
+                              confirmButtonText: 'Abrir Orden',
+                              showCancelButton: true,
+                              cancelButtonText: 'Cerrar',
+                            }).then((go) => {
+                              if (go.isConfirmed) {
+                                const url = `#/dashboard/bodegas/compras/orden/${oc.id}`;
+                                window.location.hash = url;
+                              }
+                            });
+                          }
+                        }
+                      }
+                    })();
                 } else {
                     setTimeout(() => abrirModal(requisicionSeleccionada), 100);
                 }

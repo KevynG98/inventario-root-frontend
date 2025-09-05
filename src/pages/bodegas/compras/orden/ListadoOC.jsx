@@ -4,10 +4,9 @@ import { getData } from '../../../../apiService';
 import { withRouter } from 'react-router-dom';
 
 const estatusOpts = [
-  { value: 'AUTORIZADA', label: 'Nuevo' },
+  { value: 'AUTORIZADA', label: 'Nuevo' }, // GENERADA
   { value: 'EDICION', label: 'Edición' },
   { value: 'ANULADA', label: 'Anulada' },
-  // UI: mostrar "Nuevo" en lugar de "Autorizada"
 ];
 
 const ListadoOC = ({ history }) => {

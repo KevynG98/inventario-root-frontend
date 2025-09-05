@@ -1,6 +1,6 @@
 // Context.js
 import React, { createContext, useState, useEffect } from 'react';
-import { getData, patchData, putData } from '../../../../apiService';
+import { getData, patchData, putData, postData } from '../../../../apiService';
 
 export const AppContext = createContext();
 
@@ -91,6 +91,16 @@ export const ContextProvider = ({ children }) => {
     cargarRequisiciones();
   };
 
+  const crearOCDesdeRequisicion = async (requisicionId) => {
+    try {
+      const res = await postData(`compras/ordenes-compra/crear-desde-requisicion/${requisicionId}/`, {});
+      return res?.data;
+    } catch (e) {
+      console.error('❌ Error creando OC desde requisición:', e.response?.data || e.message);
+      return null;
+    }
+  };
+
   const actualizarRequisicion = async (id, payload) => {
     try {
       const res = await putData(`requisisiones/actualizar/${id}/`, payload);
@@ -116,6 +126,7 @@ export const ContextProvider = ({ children }) => {
         requisiciones,
         actualizarEstado,
         actualizarRequisicion,
+        crearOCDesdeRequisicion,
         bodegas,
         skus,
         proveedores,
