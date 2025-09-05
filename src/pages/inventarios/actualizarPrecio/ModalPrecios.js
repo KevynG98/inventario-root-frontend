@@ -90,6 +90,14 @@ const ModalPrecios = () => {
         </div>
       </Modal.Header>
       <Modal.Body>
+        <div className="d-flex justify-content-between align-items-center mb-2">
+          <div><strong>Actualizar precios</strong></div>
+          <div>
+            <Button size="sm" variant="primary" onClick={()=>{ /* anchor action area for layout consistency */ }}>
+              Actualizar precios
+            </Button>
+          </div>
+        </div>
         <Table bordered responsive size="sm">
           <thead className="table-primary">
             <tr>

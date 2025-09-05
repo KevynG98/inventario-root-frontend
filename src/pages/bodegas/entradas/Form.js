@@ -274,7 +274,9 @@ const EntradaForm = () => {
           </tbody>
         </Table>
 
-        <div className="text-end fw-bold mt-2">Total General: {totalGeneral.toFixed(2)}</div>
+        <div className="text-end fw-bold mt-2" style={{ fontSize: '1.1rem' }}>
+          Total General: {new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(totalGeneral)}
+        </div>
 
         <div className="d-flex gap-2 mt-3">
           <Button type="submit">Guardar</Button>

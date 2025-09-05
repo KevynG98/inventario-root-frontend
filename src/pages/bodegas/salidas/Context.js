@@ -78,6 +78,9 @@ export const ContextProvider = ({ children }) => {
   const crearSalida = async (payload) => {
     const res = await postData('bodegas/salidas/crear/', payload);
     await loadSalidas();
+    if (res?.status === 201) {
+      NotificationManager.success('Salida creada y aplicada', 'Éxito', 3000);
+    }
     return res;
   };
 

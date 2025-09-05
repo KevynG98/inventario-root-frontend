@@ -66,7 +66,8 @@ const Movimientos = () => {
         </div>
         <div className="col-md-3">
           <label>SKU</label>
-          <select className="form-control" value={skuFiltro} onChange={(e) => { setSkuFiltro(e.target.value); setPage(1); }}>
+          <select className="form-control" value={skuFiltro ?? '__none__'} onChange={(e) => { const val = e.target.value === '__none__' ? null : e.target.value; setSkuFiltro(val); setPage(1); }}>
+            <option value="__none__" disabled>Seleccione un SKU…</option>
             <option value="">Todos</option>
             {filteredSkus.map(s => (
               <option key={s.id} value={s.codigo_sku}>{s.codigo_sku} - {s.nombre}</option>
@@ -99,7 +100,9 @@ const Movimientos = () => {
             </tr>
           </thead>
           <tbody>
-            {(!data || data.length === 0) ? (
+            {skuFiltro === null ? (
+              <tr><td colSpan={6} className="text-center text-muted">Seleccione un SKU para visualizar movimientos</td></tr>
+            ) : (!data || data.length === 0) ? (
               <tr><td colSpan={6} className="text-center text-muted">Sin resultados</td></tr>
             ) : data.map((m, idx) => (
               <tr key={idx}>
@@ -107,8 +110,8 @@ const Movimientos = () => {
                 <td>{m.sku}</td>
                 <td>{m.nombre}</td>
                 <td>{m.movimiento}</td>
-                <td className="text-end">{Number(m.cantidad).toFixed(2)}</td>
-                <td className="text-end">{Number(m.inventario).toFixed(2)}</td>
+                <td className="text-end">{parseInt(Number(m.cantidad))}</td>
+                <td className="text-end">{parseInt(Number(m.inventario))}</td>
               </tr>
             ))}
           </tbody>

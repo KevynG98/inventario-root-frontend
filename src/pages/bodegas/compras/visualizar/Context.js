@@ -8,6 +8,7 @@ export const ContextProvider = ({ children }) => {
   const [requisiciones, setRequisiciones] = useState([]);
   const [requisicionSeleccionada, setRequisicionSeleccionada] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [modalModo, setModalModo] = useState('ver'); // 'ver' | 'editar'
   const [bodegas, setBodegas] = useState([]);
   const [skus, setSkus] = useState([]);
   const [proveedores, setProveedores] = useState([]);
@@ -66,8 +67,9 @@ export const ContextProvider = ({ children }) => {
     cargarCatalogos().then(() => cargarRequisiciones());
   }, []);
 
-  const abrirModal = (requisicion) => {
+  const abrirModal = (requisicion, modo = 'ver') => {
     setRequisicionSeleccionada(requisicion);
+    setModalModo(modo);
     setShowModal(true);
   };
 
@@ -110,6 +112,7 @@ export const ContextProvider = ({ children }) => {
         abrirModal,
         cerrarModal,
         requisicionSeleccionada,
+        modalModo,
         requisiciones,
         actualizarEstado,
         actualizarRequisicion,

@@ -1,15 +1,8 @@
 import React from 'react';
-import { ContextProvider } from './Context';
-import FormularioOrdenCompra from './Form';
-import PreviewModal from './PreviewModal';
+import ListadoOC from './ListadoOC.jsx';
 
 const Index = () => {
-  return (
-    <ContextProvider>
-      <FormularioOrdenCompra />
-      <PreviewModal />
-    </ContextProvider>
-  );
+  return <ListadoOC />;
 };
 
 export default Index;

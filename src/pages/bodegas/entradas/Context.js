@@ -1,5 +1,6 @@
 import React, { createContext, useEffect, useState, useCallback } from 'react';
 import { getData, postData, putData, deleteData } from '../../../apiService';
+import { NotificationManager } from 'react-notifications';
 
 export const AppContext = createContext();
 
@@ -72,6 +73,9 @@ export const ContextProvider = ({ children }) => {
   const aplicarEntrada = async (id) => {
     const res = await postData(`bodegas/entradas/aplicar/${id}/`, {});
     await loadEntradas();
+    if (res?.status === 200) {
+      NotificationManager.success('Entrada aplicada correctamente', 'Éxito', 3000);
+    }
     return res;
   }
 

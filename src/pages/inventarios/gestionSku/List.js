@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import { OverlayTrigger, Tooltip, Button } from 'react-bootstrap';
 import { FiEye, FiEdit, FiChevronLeft, FiChevronRight, FiTrash2, FiTruck } from 'react-icons/fi';
 import { useMyContext } from './Context';
@@ -16,6 +16,21 @@ const Medidas = () => {
     eliminarProveedor,
     abrirModalMovimiento
   } = useMyContext();
+
+  const [fCodigo, setFCodigo] = useState('');
+  const [fNombre, setFNombre] = useState('');
+  const [fBarcode, setFBarcode] = useState('');
+
+  const filtered = useMemo(() => {
+    const t = (s) => (String(s || '')).toLowerCase();
+    const rows = Array.isArray(data) ? data : [];
+    const f = rows.filter((r) => (
+      (!fCodigo || t(r.codigo_sku).includes(t(fCodigo))) &&
+      (!fNombre || t(r.nombre).includes(t(fNombre))) &&
+      (!fBarcode || t(r.barcode).includes(t(fBarcode)))
+    ));
+    return [...f].sort((a, b) => String(a.codigo_sku || '').localeCompare(String(b.codigo_sku || '')));
+  }, [data, fCodigo, fNombre, fBarcode]);
 
   const handleVer = (prov) => abrirModalVer(prov);
   const handleEditar = (prov) => abrirModalEditar(prov);
@@ -42,6 +57,17 @@ const Medidas = () => {
       </div>
 
       <div className="table-responsive">
+        <div className="row g-2 mb-2">
+          <div className="col-md-3">
+            <input className="form-control" placeholder="Filtrar Código" value={fCodigo} onChange={(e)=>setFCodigo(e.target.value)} />
+          </div>
+          <div className="col-md-3">
+            <input className="form-control" placeholder="Filtrar Nombre" value={fNombre} onChange={(e)=>setFNombre(e.target.value)} />
+          </div>
+          <div className="col-md-3">
+            <input className="form-control" placeholder="Filtrar Código de barras" value={fBarcode} onChange={(e)=>setFBarcode(e.target.value)} />
+          </div>
+        </div>
         <table className="table table-bordered table-sm mt-2">
           <thead className="table-primary text-dark fw-semibold text-center">
             <tr>
@@ -57,7 +83,7 @@ const Medidas = () => {
             </tr>
           </thead>
           <tbody>
-            {data.map((sku, idx) => (
+            {filtered.map((sku, idx) => (
               <tr key={idx}>
                 <td>{sku.id}</td>
                 <td>{sku.codigo_sku}</td>

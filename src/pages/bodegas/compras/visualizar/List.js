@@ -1,45 +1,49 @@
 // List.js
-import React, { useContext, useState } from 'react';
+import React, { useContext, useMemo, useState } from 'react';
 import { Button, OverlayTrigger, Tooltip } from 'react-bootstrap';
-import { FiEye, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
+import { FiEye, FiEdit, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import { AppContext } from './Context';
 
 const List = () => {
-  const { abrirModal, requisiciones } = useContext(AppContext);
-  const [busqueda, setBusqueda] = useState('');
+  const { abrirModal, requisiciones, bodegas } = useContext(AppContext);
+  const [bodega, setBodega] = useState('');
+  const [estatus, setEstatus] = useState('pendiente');
 
-  const filteredData = requisiciones.filter((r) => {
-    const texto = busqueda.toLowerCase();
-    return (
-      (r.descripcion || '').toLowerCase().includes(texto) ||
-      (r.tipo_requisicion || '').toLowerCase().includes(texto) ||
-      (r.estado || '').toLowerCase().includes(texto) ||
-      (r.usuario || '').toLowerCase().includes(texto) ||
-      (r.centro_costo || '').toLowerCase().includes(texto) ||
-      (r.area_solicitante || '').toLowerCase().includes(texto) ||
-      (r.proveedor_nombre || r.proveedor || '').toLowerCase().includes(texto)
-    );
-  });
+  const filteredData = useMemo(() => {
+    const rows = Array.isArray(requisiciones) ? requisiciones : [];
+    return rows.filter((r) => {
+      const okB = !bodega || (String(r.bodega_nombre || r.bodega || '').toLowerCase() === String(bodega).toLowerCase());
+      const okE = !estatus || String(r.estado || '').toLowerCase() === String(estatus).toLowerCase();
+      return okB && okE;
+    });
+  }, [requisiciones, bodega, estatus]);
 
   return (
     <div className="mb-4">
       <h5 className="mb-3">Listado de Requisiciones</h5>
 
       <div className="mb-3">
-        <div className="row g-2">
-          <div className="col-12 col-md-10">
-            <input
-              type="text"
-              placeholder="Buscar..."
-              className="form-control shadow-sm w-100"
-              value={busqueda}
-              onChange={(e) => setBusqueda(e.target.value)}
-            />
+        <div className="row g-2 align-items-end">
+          <div className="col-md-5">
+            <label>Bodega</label>
+            <select className="form-control" value={bodega} onChange={(e)=>setBodega(e.target.value)}>
+              <option value="">Todas</option>
+              {(bodegas || []).map((b) => (
+                <option key={b.id} value={b.nombre}>{b.nombre}</option>
+              ))}
+            </select>
           </div>
-          <div className="col-12 col-md-2">
-            <Button className="w-100" onClick={() => setBusqueda('')}>
-              Limpiar
-            </Button>
+          <div className="col-md-5">
+            <label>Estatus</label>
+            <select className="form-control" value={estatus} onChange={(e)=>setEstatus(e.target.value)}>
+              <option value="pendiente">Pendiente</option>
+              <option value="aprobada">Aprobada</option>
+              <option value="rechazada">Rechazada</option>
+              <option value="cerrada">Cerrada</option>
+            </select>
+          </div>
+          <div className="col-md-2">
+            <Button className="w-100" onClick={()=>{ setBodega(''); setEstatus('pendiente'); }}>Limpiar</Button>
           </div>
         </div>
       </div>
@@ -77,14 +81,19 @@ const List = () => {
                   <td className="text-center">{req.area_solicitante || '-'}</td>
                   <td className="text-center">{req.bodega_nombre || req.bodega}</td>
                   <td className="text-center">{req.descripcion}</td>
-                  <td className="text-center">{req.tipo_requisicion}</td>
+                  <td className="text-center">{String(req.tipo_requisicion || '').replace(/^./, c=>c.toUpperCase())}</td>
                   <td className="text-center">{req.proveedor_nombre || req.proveedor || '-'}</td>
-                  <td>{req.prioridad}</td>
-                  <td className="text-center">{req.estado}</td>
+                  <td>{String(req.prioridad || '').replace(/^./, c=>c.toUpperCase())}</td>
+                  <td className="text-center">{String(req.estado || '').replace(/^./, c=>c.toUpperCase())}</td>
                   <td className="text-center">
                     <OverlayTrigger overlay={<Tooltip>Ver Detalle</Tooltip>}>
-                      <Button className="btn btn-outline-secondary btn-sm" onClick={() => abrirModal(req)}>
+                      <Button className="btn btn-outline-secondary btn-sm" onClick={() => abrirModal(req, 'ver')}>
                         <FiEye />
+                      </Button>
+                    </OverlayTrigger>
+                    <OverlayTrigger overlay={<Tooltip>Editar</Tooltip>}>
+                      <Button className="btn btn-outline-secondary btn-sm ms-1" onClick={() => abrirModal(req, 'editar')}>
+                        <FiEdit />
                       </Button>
                     </OverlayTrigger>
                   </td>

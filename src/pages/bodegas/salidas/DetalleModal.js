@@ -1,12 +1,33 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Modal, Table, Button } from 'react-bootstrap';
 import { AppContext } from './Context';
+import { getData } from '../../../apiService';
 
 const DetalleModal = () => {
   const { showDetail, setShowDetail, selectedSalida } = useContext(AppContext);
+  const [pacienteNombre, setPacienteNombre] = useState('');
   if (!showDetail || !selectedSalida) return null;
 
   const items = selectedSalida.items || [];
+
+  // Cargar nombre del paciente cuando sea tipo paciente
+  useEffect(() => {
+    const loadPaciente = async () => {
+      try {
+        if (selectedSalida?.tipo_salida !== 'paciente' || !selectedSalida?.admision) {
+          setPacienteNombre('');
+          return;
+        }
+        const res = await getData(`admisiones/${selectedSalida.admision}/`);
+        const p = res?.data?.paciente || {};
+        const nombre = [p.primer_nombre, p.segundo_nombre, p.primer_apellido, p.segundo_apellido, p.apellido_casada].filter(Boolean).join(' ');
+        setPacienteNombre(nombre || '');
+      } catch (_) {
+        setPacienteNombre('');
+      }
+    };
+    loadPaciente();
+  }, [selectedSalida]);
 
   return (
     <Modal show={showDetail} onHide={() => setShowDetail(false)} size="lg" centered>
@@ -23,7 +44,7 @@ const DetalleModal = () => {
         {selectedSalida.tipo_salida === 'paciente' && (
           <>
             <p><strong>Área:</strong> {selectedSalida.area || '-'}</p>
-            <p><strong>Admisión:</strong> {selectedSalida.admision || '-'}</p>
+            <p><strong>Admisión:</strong> {selectedSalida.admision || '-'}{pacienteNombre ? ` – Nombre: ${pacienteNombre}` : ''}</p>
           </>
         )}
         <p><strong>Observaciones:</strong> {selectedSalida.observaciones ?? '-'}</p>
@@ -36,23 +57,26 @@ const DetalleModal = () => {
               <th>SKU</th>
               <th>Descripción</th>
               <th className="text-end">Cantidad</th>
-              <th className="text-end">Costo</th>
-              <th className="text-end">Total</th>
+              {selectedSalida.tipo_salida !== 'paciente' && <th className="text-end">Costo</th>}
+              {selectedSalida.tipo_salida !== 'paciente' && <th className="text-end">Total</th>}
             </tr>
           </thead>
           <tbody>
-            {items.map((it, idx) => (
-              <tr key={`${it.sku ?? idx}`}>
-                <td>{it.sku ?? '-'}</td>
-                <td>{it.descripcion ?? '-'}</td>
-                <td className="text-end">{it.cantidad ?? '-'}</td>
-                <td className="text-end">{Number(it.costo ?? 0).toFixed(2)}</td>
-                <td className="text-end">{Number(it.total ?? 0).toFixed(2)}</td>
-              </tr>
-            ))}
+            {items.map((it, idx) => {
+              const nf = new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+              return (
+                <tr key={`${it.sku ?? idx}`}>
+                  <td>{it.sku ?? '-'}</td>
+                  <td>{it.descripcion ?? '-'}</td>
+                  <td className="text-end">{it.cantidad ?? '-'}</td>
+                  {selectedSalida.tipo_salida !== 'paciente' && <td className="text-end">{nf.format(Number(it.costo ?? 0))}</td>}
+                  {selectedSalida.tipo_salida !== 'paciente' && <td className="text-end">{nf.format(Number(it.total ?? 0))}</td>}
+                </tr>
+              );
+            })}
             {items.length === 0 && (
               <tr>
-                <td colSpan={5} className="text-center">Sin items</td>
+                <td colSpan={selectedSalida.tipo_salida === 'paciente' ? 3 : 5} className="text-center">Sin items</td>
               </tr>
             )}
           </tbody>

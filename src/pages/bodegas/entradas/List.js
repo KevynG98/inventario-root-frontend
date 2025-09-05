@@ -111,9 +111,13 @@ const ListEntradas = () => {
               <td>{e?.proveedor ?? '-'}</td>
               <td>{e?.numero_referencia ?? '-'}</td>
               <td className="text-end">
-                {typeof e?.total === 'number' ? e.total.toFixed(2) : e?.total ?? '-'}
+                {(() => {
+                  const nf = new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                  const v = typeof e?.total === 'number' ? e.total : (parseFloat(e?.total) || 0);
+                  return nf.format(v);
+                })()}
               </td>
-              <td>{e?.estado || 'no_aplicada'}</td>
+              <td>{e?.estado === 'aplicada' ? 'Aplicada' : 'No Aplicada'}</td>
               <td className="d-flex gap-2">
                 <Button
                   size="sm"

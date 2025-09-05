@@ -28,6 +28,7 @@ const ModalMedidas = () => {
 
   const readOnly = modoFormulario === 'ver';
   const categoriaSeleccionada = watch('categoria');
+  const subcategoriaSeleccionada = watch('subcategoria');
 
   // Reset / Prefill
   useEffect(() => {
@@ -67,6 +68,15 @@ const ModalMedidas = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [modoFormulario, proveedorSeleccionado?.categoria]);
+
+  // Reintentar precarga cuando catálogos estén listos o al abrir modal
+  useEffect(() => {
+    if (!show) return;
+    if ((modoFormulario === 'editar' || modoFormulario === 'ver') && proveedorSeleccionado?.categoria && (!subcategorias || subcategorias.length === 0)) {
+      cargarSubcategoriasPorCategoria(proveedorSeleccionado.categoria);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [show, categorias]);
 
   // Al cambiar categoría en el formulario -> cargar sus subcategorías y limpiar subcategoria actual
   useEffect(() => {
@@ -221,6 +231,13 @@ const ModalMedidas = () => {
                       {sc.nombre}
                     </option>
                   ))}
+                  {/* Fallback: si la subcategoría almacenada no está en la lista cargada, mostrarla para Ver/Editar */}
+                  {((modoFormulario === 'ver' || modoFormulario === 'editar') && (proveedorSeleccionado?.subcategoria || subcategoriaSeleccionada)) &&
+                   !subcategorias?.some((sc) => sc?.nombre === (proveedorSeleccionado?.subcategoria || subcategoriaSeleccionada)) && (
+                    <option value={proveedorSeleccionado?.subcategoria || subcategoriaSeleccionada}>
+                      {proveedorSeleccionado?.subcategoria || subcategoriaSeleccionada}
+                    </option>
+                  )}
                 </Form.Control>
               </Form.Group>
             </Col>

@@ -262,7 +262,7 @@ const FormularioRequisicion = () => {
                 <Col md={3} className="mb-3">
                   <Form.Group>
                     <Form.Label><strong>Seleccionar SKU</strong></Form.Label>
-                    <Form.Control as="select" size="sm" {...register('SKU')}>
+                    <Form.Control as="select" size="sm" style={{ minWidth: '220px' }} {...register('SKU')}>
                       <option value="">Selecciona un SKU</option>
                       {filteredSkus.map((sku) => (
                         <option key={sku.id} value={sku.id}>
@@ -280,6 +280,7 @@ const FormularioRequisicion = () => {
                       type="number"
                       size="sm"
                       min="1"
+                      style={{ minWidth: '220px' }}
                       {...register('cantidadSku')}
                     />
                   </Form.Group>
@@ -293,6 +294,7 @@ const FormularioRequisicion = () => {
                       size="sm"
                       step="0.01"
                       min="0"
+                      style={{ minWidth: '220px' }}
                       {...register('precioSku')}
                     />
                   </Form.Group>
@@ -347,7 +349,7 @@ const FormularioRequisicion = () => {
               </tbody>
             </Table>
 
-            <div className="text-end fw-bold">Total General: {totalGeneral.toFixed(2)}</div>
+            <div className="text-end fw-bold" style={{ fontSize: '1.1rem' }}>Total General: {totalGeneral.toFixed(2)}</div>
           </>
         )}
 
@@ -438,7 +440,7 @@ const FormularioRequisicion = () => {
               </tbody>
             </Table>
 
-            <div className="text-end fw-bold">Total General: {totalGeneral.toFixed(2)}</div>
+            <div className="text-end fw-bold" style={{ fontSize: '1.1rem' }}>Total General: {totalGeneral.toFixed(2)}</div>
           </>
         )}
 

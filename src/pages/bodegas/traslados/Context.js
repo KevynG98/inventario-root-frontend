@@ -77,6 +77,9 @@ export const ContextProvider = ({ children }) => {
     try {
       const res = await postData('bodegas/traslados/crear/', payload);
       await loadTraslados();
+      if (res?.status === 201) {
+        NotificationManager.success('Traslado enviado, pendiente de recibir/aplicar', 'Éxito', 3000);
+      }
       return res;
     } catch (err) {
       const msg = err?.response?.data?.error || 'No se pudo crear el traslado';
@@ -89,6 +92,9 @@ export const ContextProvider = ({ children }) => {
     try {
       const res = await postData(`bodegas/traslados/${id}/recibir/`, {});
       await loadTraslados();
+      if (res?.status === 200) {
+        NotificationManager.success('Traslado recibido', 'Éxito', 3000);
+      }
       return res;
     } catch (err) {
       const msg = err?.response?.data?.error || 'No se pudo marcar como recibido';
@@ -101,6 +107,9 @@ export const ContextProvider = ({ children }) => {
     try {
       const res = await postData(`bodegas/traslados/${id}/anular/`, {});
       await loadTraslados();
+      if (res?.status === 200) {
+        NotificationManager.success('Traslado anulado', 'Éxito', 3000);
+      }
       return res;
     } catch (err) {
       const msg = err?.response?.data?.error || 'No se pudo anular el traslado';

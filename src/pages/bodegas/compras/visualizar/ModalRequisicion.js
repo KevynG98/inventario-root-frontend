@@ -13,6 +13,7 @@ const ModalRequisicion = () => {
         actualizarRequisicion,
         bodegas,
         skus,
+        modalModo,
     } = useContext(AppContext);
 
     const [observacion, setObservacion] = useState('');
@@ -33,7 +34,8 @@ const ModalRequisicion = () => {
 
     useEffect(() => {
         if (requisicionSeleccionada) {
-            setObservacion(requisicionSeleccionada.descripcion || '');
+            // Observaciones de acción no deben pre-poblarse con la de alta
+            setObservacion('');
             setFormData({
                 fecha: requisicionSeleccionada.fecha || '',
             });
@@ -205,6 +207,8 @@ const ModalRequisicion = () => {
         setNuevoPrecioServicio('');
     };
 
+    const readOnlyView = modalModo === 'ver';
+
     return (
         <Modal show={showModal} onHide={cerrarModal} size="lg" centered>
             <Modal.Header closeButton className="bg-primary text-white">
@@ -232,6 +236,24 @@ const ModalRequisicion = () => {
                             </Form.Group>
                         </Col>
                     </Row>
+
+                    {/* Auditoría adicional en modo Ver */}
+                    {readOnlyView && (
+                      <Row className="mb-3">
+                        <Col md={6}>
+                          <Form.Group>
+                            <Form.Label>Estatus actual</Form.Label>
+                            <Form.Control type="text" value={String(requisicionSeleccionada.estado || '').replace(/^./, c=>c.toUpperCase())} readOnly />
+                          </Form.Group>
+                        </Col>
+                        <Col md={6}>
+                          <Form.Group>
+                            <Form.Label>Actualizado por</Form.Label>
+                            <Form.Control type="text" value={requisicionSeleccionada.estado_actualizado_por || ''} readOnly />
+                          </Form.Group>
+                        </Col>
+                      </Row>
+                    )}
 
                     <Row className="mb-3">
                         <Col md={6}>
@@ -270,6 +292,7 @@ const ModalRequisicion = () => {
                             value={observacion}
                             onChange={(e) => setObservacion(e.target.value)}
                             required
+                        readOnly={readOnlyView}
                         />
                     </Form.Group>
                 </Form>
@@ -298,27 +321,37 @@ const ModalRequisicion = () => {
                                         <td>{idx + 1}</td>
                                         <td>{skuTexto(item.sku)}</td>
                                         <td style={{ width: 120 }}>
-                                            <Form.Control type="number" step="0.01" value={item.cantidad}
-                                                onChange={(e) => updateProducto(idx, 'cantidad', e.target.value)} />
+                                        <Form.Control type="number" step="0.01" value={item.cantidad}
+                                                onChange={(e) => updateProducto(idx, 'cantidad', e.target.value)} readOnly={readOnlyView} />
                                         </td>
                                         <td style={{ width: 120 }}>
                                             <Form.Control type="number" step="0.01" value={item.precio}
-                                                onChange={(e) => updateProducto(idx, 'precio', e.target.value)} />
+                                                onChange={(e) => updateProducto(idx, 'precio', e.target.value)} readOnly={readOnlyView} />
                                         </td>
                                         <td>{Number(item.total || 0).toFixed(2)}</td>
-                                        <td>
+                                        {!readOnlyView && (
+                                          <td>
                                             <Button variant="outline-danger" size="sm" onClick={() => deleteProducto(idx)}>Quitar</Button>
-                                        </td>
+                                          </td>
+                                        )}
                                     </tr>
                                 ))}
-                                <tr>
+                                {!readOnlyView && (
+                                  <tr>
                                     <td>+</td>
                                     <td>
                                         <Form.Control as="select" value={nuevoSkuId} onChange={(e) => setNuevoSkuId(e.target.value)}>
                                             <option value="">Selecciona SKU</option>
-                                            {(skus || []).map((s) => (
+                                            {(skus || [])
+                                              .filter((s) => {
+                                                const prov = requisicionSeleccionada?.proveedor_nombre || requisicionSeleccionada?.proveedor || '';
+                                                if (!prov) return true;
+                                                const provSku = (s.proveedor || '').toString().toLowerCase();
+                                                return provSku === prov.toString().toLowerCase();
+                                              })
+                                              .map((s) => (
                                                 <option key={s.id} value={s.id}>{s.codigo_sku} - {s.descripcion ?? s.nombre}</option>
-                                            ))}
+                                              ))}
                                         </Form.Control>
                                     </td>
                                     <td>
@@ -330,7 +363,8 @@ const ModalRequisicion = () => {
                                     <td colSpan={2}>
                                         <Button variant="outline-primary" size="sm" onClick={addProducto}>Agregar</Button>
                                     </td>
-                                </tr>
+                                  </tr>
+                                )}
                             </tbody>
                         </Table>
                         <div className="text-end fw-bold">Total General: {productos.reduce((s, it) => s + (parseFloat(it.total)||0), 0).toFixed(2)}</div>
@@ -358,23 +392,26 @@ const ModalRequisicion = () => {
                                         <td>{idx + 1}</td>
                                         <td>
                                             <Form.Control type="text" value={item.descripcion || ''}
-                                                onChange={(e) => updateServicio(idx, 'descripcion', e.target.value)} />
+                                                onChange={(e) => updateServicio(idx, 'descripcion', e.target.value)} readOnly={readOnlyView} />
                                         </td>
                                         <td style={{ width: 120 }}>
                                             <Form.Control type="number" step="0.01" value={item.cantidad}
-                                                onChange={(e) => updateServicio(idx, 'cantidad', e.target.value)} />
+                                                onChange={(e) => updateServicio(idx, 'cantidad', e.target.value)} readOnly={readOnlyView} />
                                         </td>
                                         <td style={{ width: 120 }}>
                                             <Form.Control type="number" step="0.01" value={item.precio}
-                                                onChange={(e) => updateServicio(idx, 'precio', e.target.value)} />
+                                                onChange={(e) => updateServicio(idx, 'precio', e.target.value)} readOnly={readOnlyView} />
                                         </td>
                                         <td>{Number(item.total || 0).toFixed(2)}</td>
-                                        <td>
+                                        {!readOnlyView && (
+                                          <td>
                                             <Button variant="outline-danger" size="sm" onClick={() => deleteServicio(idx)}>Quitar</Button>
-                                        </td>
+                                          </td>
+                                        )}
                                     </tr>
                                 ))}
-                                <tr>
+                                {!readOnlyView && (
+                                  <tr>
                                     <td>+</td>
                                     <td>
                                         <Form.Control type="text" value={nuevaDescServicio} placeholder="Descripción" onChange={(e) => setNuevaDescServicio(e.target.value)} />
@@ -388,7 +425,8 @@ const ModalRequisicion = () => {
                                     <td colSpan={2}>
                                         <Button variant="outline-primary" size="sm" onClick={addServicio}>Agregar</Button>
                                     </td>
-                                </tr>
+                                  </tr>
+                                )}
                             </tbody>
                         </Table>
                         <div className="text-end fw-bold">Total General: {servicios.reduce((s, it) => s + (parseFloat(it.total)||0), 0).toFixed(2)}</div>
@@ -397,21 +435,25 @@ const ModalRequisicion = () => {
             </Modal.Body>
 
             <Modal.Footer className="justify-content-between flex-wrap gap-2">
-                <Button variant="success" className="btn-sm flex-fill" onClick={handleGuardar}>
-                    Guardar
-                </Button>
-                <Button variant="warning" className="btn-sm flex-fill" onClick={handleNoRequiereVB}>
-                    No requiere VB
-                </Button>
-                <Button variant="info" className="btn-sm flex-fill" onClick={handlePendienteVB}>
-                    Pendiente VB
-                </Button>
-                <Button variant="primary" className="btn-sm flex-fill" onClick={handleDarVB}>
-                    Dar VB
-                </Button>
-                <Button variant="danger" className="btn-sm flex-fill" onClick={handleAnular}>
-                    Anular
-                </Button>
+                {!readOnlyView && (
+                  <>
+                    <Button variant="success" className="btn-sm flex-fill" onClick={handleGuardar}>
+                        Guardar
+                    </Button>
+                    <Button variant="warning" className="btn-sm flex-fill" onClick={handleNoRequiereVB}>
+                        No requiere VB
+                    </Button>
+                    <Button variant="info" className="btn-sm flex-fill" onClick={handlePendienteVB}>
+                        Pendiente VB
+                    </Button>
+                    <Button variant="primary" className="btn-sm flex-fill" onClick={handleDarVB}>
+                        Dar VB
+                    </Button>
+                    <Button variant="danger" className="btn-sm flex-fill" onClick={handleAnular}>
+                        Anular
+                    </Button>
+                  </>
+                )}
                 <Button variant="secondary" className="btn-sm flex-fill" onClick={cerrarModal}>
                     Cerrar
                 </Button>

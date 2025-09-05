@@ -31,6 +31,9 @@ const OrdenCompraDetail = (props) => {
   const [loading, setLoading] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showAnularModal, setShowAnularModal] = useState(false);
+  // Catálogos
+  const [skus, setSkus] = useState([]);
+  const [loadingSkus, setLoadingSkus] = useState(false);
 
   const editable = useMemo(() => ['BORRADOR', 'EDICION'].includes(oc?.estatus), [oc]);
 
@@ -46,6 +49,23 @@ const OrdenCompraDetail = (props) => {
 
   useEffect(() => { load(); }, [id]);
 
+  // Cargar SKUs para filtrar por proveedor de la OC
+  useEffect(() => {
+    const cargarSkus = async () => {
+      try {
+        setLoadingSkus(true);
+        const res = await getData('inventario/skus/?page_size=200');
+        const list = res?.data?.results ?? res?.data ?? [];
+        setSkus(Array.isArray(list) ? list : []);
+      } catch (_) {
+        setSkus([]);
+      } finally {
+        setLoadingSkus(false);
+      }
+    };
+    cargarSkus();
+  }, []);
+
   const onChangeField = (k) => (e) => {
     const v = e?.target?.value ?? e;
     setOc((prev) => ({ ...prev, [k]: v }));
@@ -54,7 +74,14 @@ const OrdenCompraDetail = (props) => {
   const recalcItem = (it) => {
     const cantidad = parseFloat(it.cantidad || 0);
     const precio = parseFloat(it.precio_sin_iva || 0);
-    const iva = parseFloat(it.iva || 0);
+    let iva = parseFloat(it.iva || 0);
+    // Regla: servicios (codigo 'SERV') IVA 0, productos afectos 12% automáticamente si no se sobreescribe
+    if (String(it.codigo_sku || '').toUpperCase() === 'SERV') {
+      iva = 0;
+    } else if (!Number.isFinite(it._iva_manual)) {
+      // Si el usuario no ha tocado el campo IVA manualmente, autocalcular 12%
+      iva = Math.round((precio * 0.12) * 100) / 100;
+    }
     const total = (precio + iva) * cantidad;
     return { ...it, cantidad, precio_sin_iva: precio, iva, total: Math.round(total * 100) / 100 };
   };
@@ -68,9 +95,32 @@ const OrdenCompraDetail = (props) => {
   const removeItem = (idx) => setOc((prev) => ({ ...prev, items: prev.items.filter((_, i) => i !== idx) }));
   const changeItem = (idx, k, v) => setOc((prev) => {
     const items = [...(prev.items || [])];
-    items[idx] = recalcItem({ ...items[idx], [k]: v });
+    const next = { ...items[idx], [k]: v };
+    if (k === 'iva') next._iva_manual = true; // marca override manual
+    if (k === 'codigo_sku') {
+      // Si el usuario elige un SKU del catálogo, precargar descripción/unidad
+      const skuSel = (skus || []).find((s) => String(s.codigo_sku) === String(v));
+      if (skuSel) {
+        next.descripcion = skuSel.nombre || skuSel.descripcion || next.descripcion || '';
+        next.unidad_medida = skuSel.unidad_despacho || skuSel.unidad_compra || next.unidad_medida || '';
+      }
+    }
+    items[idx] = recalcItem(next);
     return { ...prev, items };
   });
+
+  // SKUs filtrados por proveedor de la OC (solo activos si aplica)
+  const skusProveedor = useMemo(() => {
+    if (!oc) return [];
+    const prov = String(oc.proveedor_nombre || oc.requisicion?.proveedor || '').toLowerCase();
+    const base = Array.isArray(skus) ? skus : [];
+    const filtered = base.filter((s) => {
+      const sp = String(s.proveedor || '').toLowerCase();
+      const estadoOk = !s.estado || String(s.estado).toLowerCase() === 'alta';
+      return prov && sp === prov && estadoOk;
+    });
+    return filtered.sort((a, b) => String(a.codigo_sku || '').localeCompare(String(b.codigo_sku || '')));
+  }, [skus, oc]);
 
   const doPatchEditar = async (observaciones) => {
     const payload = {
@@ -165,7 +215,37 @@ const OrdenCompraDetail = (props) => {
 
   return (
     <div className="container mt-3">
-      <h4 className="mb-3">Orden de Compra #{oc.numero || oc.id}</h4>
+      <h4 className="mb-1">Orden de Compra #{oc.numero || oc.id}</h4>
+      <div className="text-muted mb-3">Proveedor: <strong>{oc.proveedor_nombre || oc.requisicion?.proveedor || '-'}</strong></div>
+      {/* Bloque de visualización con campos de auditoría básicos */}
+      <Card className="p-3 mb-3">
+        <Row className="g-2">
+          <Col md={3}>
+            <small className="text-muted">Fecha y Hora</small>
+            <div>
+              {(oc.fecha || oc.fecha_creacion) &&
+                new Date(oc.fecha || oc.fecha_creacion).toLocaleString('es-GT', {
+                  timeZone: 'America/Guatemala',
+                  year: 'numeric',
+                  month: '2-digit',
+                  day: '2-digit',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  second: '2-digit',
+                })}
+            </div>
+          </Col>
+          <Col md={3}><small className="text-muted">Solicitante – Bodega</small><div>{oc.solicitante_bodega || '-'}</div></Col>
+          <Col md={3}><small className="text-muted">Tipo de requisición</small><div>{oc.tipo_requisicion || oc.requisicion_info?.tipo_requisicion || '-'}</div></Col>
+          <Col md={3}><small className="text-muted">Estatus</small><div>{oc.estatus}</div></Col>
+        </Row>
+        <Row className="g-2 mt-2">
+          <Col md={3}><small className="text-muted">Alta por</small><div>{oc.requisicion_info?.alta_por || '-'}</div></Col>
+          <Col md={3}><small className="text-muted">Observaciones de Alta</small><div>{oc.requisicion_info?.observaciones_alta || '-'}</div></Col>
+          <Col md={3}><small className="text-muted">Generada por</small><div>{oc.generada_por || '-'}</div></Col>
+          <Col md={3}><small className="text-muted">Total OC</small><div>{Number(oc.total || 0).toFixed(2)}</div></Col>
+        </Row>
+      </Card>
       {oc.estatus === 'GENERADA' && (
         <Alert variant="info">Esta orden está GENERADA y no permite edición. Puede imprimir el PDF.</Alert>
       )}
@@ -209,11 +289,11 @@ const OrdenCompraDetail = (props) => {
               <th>SKU</th>
               <th>Descripción</th>
               <th>UM</th>
-              <th style={{width: 90}}>Cantidad</th>
-              <th style={{width: 110}}>Precio s/IVA</th>
-              <th style={{width: 90}}>IVA</th>
-              <th style={{width: 120}}>Total</th>
-              {editable && <th style={{width: 70}}>Acciones</th>}
+              <th style={{ width: 90 }}>Cantidad</th>
+              <th style={{ width: 110 }}>Precio s/IVA</th>
+              <th style={{ width: 90 }}>IVA</th>
+              <th style={{ width: 120 }}>Total</th>
+              {editable && <th style={{ width: 70 }}>Acciones</th>}
             </tr>
           </thead>
           <tbody>
@@ -221,16 +301,30 @@ const OrdenCompraDetail = (props) => {
               <tr><td colSpan={editable ? 8 : 7} className="text-center text-muted">Sin ítems</td></tr>
             ) : (oc.items || []).map((it, idx) => (
               <tr key={idx}>
-                <td>{editable ? (<Form.Control value={it.codigo_sku} onChange={(e)=>changeItem(idx,'codigo_sku',e.target.value)} />) : it.codigo_sku}</td>
-                <td>{editable ? (<Form.Control value={it.descripcion} onChange={(e)=>changeItem(idx,'descripcion',e.target.value)} />) : it.descripcion}</td>
-                <td>{editable ? (<Form.Control value={it.unidad_medida} onChange={(e)=>changeItem(idx,'unidad_medida',e.target.value)} />) : it.unidad_medida}</td>
-                <td>{editable ? (<Form.Control type="number" step="0.01" value={it.cantidad} onChange={(e)=>changeItem(idx,'cantidad',e.target.value)} />) : it.cantidad}</td>
-                <td>{editable ? (<Form.Control type="number" step="0.01" value={it.precio_sin_iva} onChange={(e)=>changeItem(idx,'precio_sin_iva',e.target.value)} />) : Number(it.precio_sin_iva).toFixed(2)}</td>
-                <td>{editable ? (<Form.Control type="number" step="0.01" value={it.iva} onChange={(e)=>changeItem(idx,'iva',e.target.value)} />) : Number(it.iva).toFixed(2)}</td>
+                <td>
+                  {editable ? (
+                    <Form.Control
+                      as="select"
+                      value={String(it.codigo_sku || '')}
+                      onChange={(e) => changeItem(idx, 'codigo_sku', e.target.value)}
+                    >
+                      <option value="">Seleccione</option>
+                      <option value="SERV">SERV - Servicio</option>
+                      {skusProveedor.map((s) => (
+                        <option key={s.id} value={s.codigo_sku}>{s.codigo_sku} - {(s.nombre || s.descripcion)}</option>
+                      ))}
+                    </Form.Control>
+                  ) : it.codigo_sku}
+                </td>
+                <td>{editable ? (<Form.Control value={it.descripcion} onChange={(e) => changeItem(idx, 'descripcion', e.target.value)} />) : it.descripcion}</td>
+                <td>{editable ? (<Form.Control value={it.unidad_medida} onChange={(e) => changeItem(idx, 'unidad_medida', e.target.value)} />) : it.unidad_medida}</td>
+                <td>{editable ? (<Form.Control type="number" step="0.01" value={it.cantidad} onChange={(e) => changeItem(idx, 'cantidad', e.target.value)} />) : it.cantidad}</td>
+                <td>{editable ? (<Form.Control type="number" step="0.01" value={it.precio_sin_iva} onChange={(e) => changeItem(idx, 'precio_sin_iva', e.target.value)} />) : Number(it.precio_sin_iva).toFixed(2)}</td>
+                <td>{editable ? (<Form.Control type="number" step="0.01" value={it.iva} onChange={(e) => changeItem(idx, 'iva', e.target.value)} />) : Number(it.iva).toFixed(2)}</td>
                 <td>{Number(it.total).toFixed(2)}</td>
                 {editable && (
                   <td>
-                    <Button variant="outline-danger" size="sm" onClick={()=>removeItem(idx)}>Quitar</Button>
+                    <Button variant="outline-danger" size="sm" onClick={() => removeItem(idx)}>Quitar</Button>
                   </td>
                 )}
               </tr>
@@ -239,9 +333,10 @@ const OrdenCompraDetail = (props) => {
         </Table>
       </Card>
 
-      <div className="d-flex gap-2 mt-3">
-        {editable && <Button variant="primary" onClick={()=>setShowEditModal(true)}>Editar</Button>}
-        {oc.estatus !== 'ANULADA' && <Button variant="danger" onClick={()=>setShowAnularModal(true)}>Anular</Button>}
+      <div className="d-flex gap-2 mt-3 flex-wrap">
+        <Button variant="secondary" onClick={() => props.history.push('/dashboard/bodegas/compras/orden')}>Regresar al listado</Button>
+        {editable && <Button variant="primary" onClick={() => setShowEditModal(true)}>Editar</Button>}
+        {oc.estatus !== 'ANULADA' && <Button variant="danger" onClick={() => setShowAnularModal(true)}>Anular</Button>}
         {editable && <Button variant="success" onClick={doGenerar}>Generar</Button>}
         {oc.estatus === 'GENERADA' && (
           <>
@@ -253,13 +348,13 @@ const OrdenCompraDetail = (props) => {
 
       <ObservacionesModal
         show={showEditModal}
-        onClose={()=>setShowEditModal(false)}
+        onClose={() => setShowEditModal(false)}
         onSubmit={doPatchEditar}
         title="Editar Orden de Compra"
       />
       <ObservacionesModal
         show={showAnularModal}
-        onClose={()=>setShowAnularModal(false)}
+        onClose={() => setShowAnularModal(false)}
         onSubmit={doAnular}
         title="Anular Orden de Compra"
       />

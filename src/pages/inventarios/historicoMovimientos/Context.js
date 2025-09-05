@@ -23,7 +23,8 @@ export const ContextProvider = ({ children }) => {
   const [bodegaSel, setBodegaSel] = useState('');
   const [categoriaSel, setCategoriaSel] = useState('');
   const [subcategoriaSel, setSubcategoriaSel] = useState('');
-  const [skuFiltro, setSkuFiltro] = useState('');
+  // skuFiltro: null = no seleccionado aún; '' = Todos; 'ABC123' = SKU específico
+  const [skuFiltro, setSkuFiltro] = useState(null);
 
   const [page, setPage] = useState(1);
   const [nullNextPage, setNullNextPage] = useState(null);
@@ -42,7 +43,8 @@ export const ContextProvider = ({ children }) => {
       ]);
       setBodegas(b?.data?.results ?? b?.data ?? []);
       setCategorias(c?.data?.results ?? c?.data ?? []);
-      setSkus(sku?.data?.results ?? sku?.data ?? []);
+      const list = sku?.data?.results ?? sku?.data ?? [];
+      setSkus(list);
     } catch (e) {
       setBodegas([]); setCategorias([]); setSkus([]);
     }
@@ -58,6 +60,8 @@ export const ContextProvider = ({ children }) => {
   }, []);
 
   const cargarDatos = useCallback(async () => {
+    // No cargar hasta que el usuario seleccione explícitamente un SKU (o "Todos")
+    if (skuFiltro === null) return;
     const loading = Swal.fire({ title: 'Cargando movimientos...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
     try {
       let url = `inventario/movimientos-detalle/?page=${page}&page_size=${pageSize}`;
@@ -70,9 +74,13 @@ export const ContextProvider = ({ children }) => {
         const sc = subcategorias.find(s => String(s.id) === String(subcategoriaSel));
         if (sc?.nombre) url += `&subcategoria=${encodeURIComponent(sc.nombre)}`;
       }
-      if (skuFiltro) url += `&sku=${encodeURIComponent(skuFiltro)}`;
-      if (fechaInicio) url += `&inicio=${fechaInicio}`;
-      if (fechaFin) url += `&fin=${fechaFin}`;
+      // Si skuFiltro está vacío (''), el backend interpretará "Todos"
+      url += `&sku=${encodeURIComponent(skuFiltro || '')}`;
+      // Para SKU específico, aplicar filtros de fecha
+      if (skuFiltro) {
+        if (fechaInicio) url += `&inicio=${fechaInicio}`;
+        if (fechaFin) url += `&fin=${fechaFin}`;
+      }
       const res = await getData(url);
       setData(res?.data?.results ?? []);
       setNullNextPage(res?.data?.next ?? null);
@@ -82,7 +90,7 @@ export const ContextProvider = ({ children }) => {
   }, [page, pageSize, bodegaSel, categoriaSel, subcategoriaSel, skuFiltro, fechaInicio, fechaFin, categorias, subcategorias]);
 
   useEffect(() => { cargarCatalogos(); }, [cargarCatalogos]);
-  useEffect(() => { cargarSubcategorias(categoriaSel); setSubcategoriaSel(''); setSkuFiltro(''); }, [categoriaSel, cargarSubcategorias]);
+  useEffect(() => { cargarSubcategorias(categoriaSel); setSubcategoriaSel(''); setSkuFiltro(null); }, [categoriaSel, cargarSubcategorias]);
   useEffect(() => { cargarDatos(); }, [cargarDatos]);
 
   const values = {

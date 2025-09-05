@@ -20,7 +20,7 @@ const DetalleModal = () => {
         </p>
         <p><strong>Creado por:</strong> {selectedEntrada.usuario || '-'}</p>
         <p><strong>Aplicado por:</strong> {selectedEntrada.aplicado_por || '-'}</p>
-        <p><strong>Estado:</strong> {selectedEntrada.estado || '-'}</p>
+        <p><strong>Estado:</strong> {selectedEntrada.estado === 'aplicada' ? 'Aplicada' : 'No Aplicada'}</p>
         <p><strong>Bodega:</strong> {selectedEntrada.bodega ?? '-'}</p>
         <p><strong>Tipo:</strong> {selectedEntrada.tipo_entrada ?? '-'}</p>
         <p><strong>Proveedor:</strong> {selectedEntrada.proveedor ?? '-'}</p>
@@ -36,15 +36,18 @@ const DetalleModal = () => {
             </tr>
           </thead>
           <tbody>
-            {items.map((it, idx) => (
-              <tr key={`${it.sku ?? idx}`}>
-                <td>{it.sku ?? '-'}</td>
-                <td>{it.descripcion ?? '-'}</td>
-                <td className="text-end">{it.cantidad ?? '-'}</td>
-                <td className="text-end">{Number(it.costo ?? 0).toFixed(2)}</td>
-                <td className="text-end">{Number(it.total ?? 0).toFixed(2)}</td>
-              </tr>
-            ))}
+            {items.map((it, idx) => {
+              const nf = new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+              return (
+                <tr key={`${it.sku ?? idx}`}>
+                  <td>{it.sku ?? '-'}</td>
+                  <td>{it.descripcion ?? '-'}</td>
+                  <td className="text-end">{it.cantidad ?? '-'}</td>
+                  <td className="text-end">{nf.format(Number(it.costo ?? 0))}</td>
+                  <td className="text-end">{nf.format(Number(it.total ?? 0))}</td>
+                </tr>
+              );
+            })}
             {items.length === 0 && (
               <tr>
                 <td colSpan={5} className="text-center">Sin items</td>
