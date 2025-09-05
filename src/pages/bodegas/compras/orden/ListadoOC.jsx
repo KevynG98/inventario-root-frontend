@@ -12,7 +12,7 @@ const estatusOpts = [
 
 const ListadoOC = ({ history }) => {
   const [rows, setRows] = useState([]);
-  const [estatus, setEstatus] = useState('NUEVA');
+  const [estatus, setEstatus] = useState('AUTORIZADA');
   const [page, setPage] = useState(1);
   const [nextUrl, setNextUrl] = useState(null);
   const [prevUrl, setPrevUrl] = useState(null);

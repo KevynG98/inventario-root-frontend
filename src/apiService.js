@@ -1,5 +1,6 @@
 // apiService.js
 import axios from 'axios';
+import Swal from 'sweetalert2';
 
 // Configuración general
 const DEV = true; // Cambia a false para producción
@@ -38,14 +39,14 @@ const getUsername = () => {
 
 
 // GET
-const getData = async (endpoint) => {
+const getData = async (endpoint, options = {}) => {
   try {
     const authToken = getAuthToken();
     const headers = {
       ...(authToken && { 'Authorization': `Token ${authToken}` }),
       ...(getUsername() && { 'X-User': getUsername() }),
     };
-    const response = await apiClient.get(endpoint, { headers });
+    const response = await apiClient.get(endpoint, { headers, ...options });
     return response;
   } catch (error) {
     console.error(`Error al obtener datos de ${endpoint}:`, error);
@@ -54,14 +55,14 @@ const getData = async (endpoint) => {
 };
 
 // GET binary (e.g., PDF) with auth
-const getBinary = async (endpoint) => {
+const getBinary = async (endpoint, options = {}) => {
   try {
     const authToken = getAuthToken();
     const headers = {
       ...(authToken && { 'Authorization': `Token ${authToken}` }),
       ...(getUsername() && { 'X-User': getUsername() }),
     };
-    const response = await apiClient.get(endpoint, { headers, responseType: 'blob' });
+    const response = await apiClient.get(endpoint, { headers, responseType: 'blob', ...options });
     return response;
   } catch (error) {
     console.error(`Error al descargar binario de ${endpoint}:`, error.response ? error.response.data : error);
@@ -70,7 +71,7 @@ const getBinary = async (endpoint) => {
 };
 
 // POST
-const postData = async (endpoint, data) => {
+const postData = async (endpoint, data, options = {}) => {
   try {
     const authToken = getAuthToken();
     const headers = {
@@ -78,7 +79,7 @@ const postData = async (endpoint, data) => {
       ...(authToken && { 'Authorization': `Token ${authToken}` }),
       ...(getUsername() && { 'X-User': getUsername() }),
     };
-    const response = await apiClient.post(endpoint, data, { headers });
+    const response = await apiClient.post(endpoint, data, { headers, ...options });
     return response;
   } catch (error) {
     console.error('Error al enviar datos:', error.response ? error.response.data : error);
@@ -87,8 +88,12 @@ const postData = async (endpoint, data) => {
 };
 
 // PUT
-const putData = async (url, data) => {
+const putData = async (url, data, options = {}) => {
   try {
+    if (!options.__skipLoader) {
+      __loaderCount += 1;
+      if (__loaderCount === 1) showGlobalLoader(options.__loaderTitle || 'Cargando...');
+    }
     const authToken = getAuthToken();
     const headers = {
       'Content-Type': 'application/json',
@@ -105,11 +110,16 @@ const putData = async (url, data) => {
   } catch (error) {
     console.error(`Error al actualizar en ${url}:`, error);
     throw error;
+  } finally {
+    if (!options.__skipLoader) {
+      __loaderCount = Math.max(0, __loaderCount - 1);
+      if (__loaderCount === 0) hideGlobalLoader();
+    }
   }
 };
 
 // PATCH
-const patchData = async (endpoint, data) => {
+const patchData = async (endpoint, data, options = {}) => {
   try {
     const authToken = getAuthToken();
     const headers = {
@@ -117,7 +127,7 @@ const patchData = async (endpoint, data) => {
       ...(authToken && { 'Authorization': `Token ${authToken}` }),
       ...(getUsername() && { 'X-User': getUsername() }),
     };
-    const response = await apiClient.patch(endpoint, data, { headers });
+    const response = await apiClient.patch(endpoint, data, { headers, ...options });
     return response;
   } catch (error) {
     console.error(`Error al hacer PATCH en ${endpoint}:`, error.response ? error.response.data : error);
@@ -126,14 +136,14 @@ const patchData = async (endpoint, data) => {
 };
 
 // DELETE
-const deleteData = async (endpoint) => {
+const deleteData = async (endpoint, options = {}) => {
   try {
     const authToken = getAuthToken();
     const headers = {
       ...(authToken && { 'Authorization': `Token ${authToken}` }),
       ...(getUsername() && { 'X-User': getUsername() }),
     };
-    const response = await apiClient.delete(endpoint, { headers });
+    const response = await apiClient.delete(endpoint, { headers, ...options });
     return response;
   } catch (error) {
     console.error(`Error al eliminar datos en ${endpoint}:`, error);
@@ -161,3 +171,68 @@ const logout = async () => {
 // Exportar funciones
 export default apiClient;
 export { getData, getBinary, postData, putData, patchData, deleteData, logout, API_URL };
+
+// --------------
+// Global SweetAlert2 loader (aplica a todas las solicitudes Axios)
+// --------------
+
+let __loaderCount = 0;
+let __loaderActive = false;
+
+const showGlobalLoader = (title) => {
+  try {
+    if (!__loaderActive && !Swal.isVisible()) {
+      __loaderActive = true;
+      Swal.fire({
+        title: title || 'Cargando... ',
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        showConfirmButton: false,
+        customClass: { popup: 'global-loader-popup' },
+        didOpen: () => Swal.showLoading(),
+      });
+    }
+  } catch (_) {
+    // noop
+  }
+};
+
+const hideGlobalLoader = () => {
+  try {
+    if (__loaderActive) {
+      const popup = document.querySelector('.swal2-popup.global-loader-popup');
+      if (popup) {
+        Swal.close();
+      }
+    }
+  } catch (_) {
+    // noop
+  } finally {
+    __loaderActive = false;
+  }
+};
+
+apiClient.interceptors.request.use((config) => {
+  // Permite omitir el loader por petición: config.__skipLoader = true
+  if (!config.__skipLoader) {
+    __loaderCount += 1;
+    if (__loaderCount === 1) showGlobalLoader(config.__loaderTitle || 'Cargando...');
+  }
+  return config;
+}, (error) => {
+  return Promise.reject(error);
+});
+
+const finalizeLoader = (config) => {
+  if (!config || config.__skipLoader) return;
+  __loaderCount = Math.max(0, __loaderCount - 1);
+  if (__loaderCount === 0) hideGlobalLoader();
+};
+
+apiClient.interceptors.response.use((response) => {
+  finalizeLoader(response?.config);
+  return response;
+}, (error) => {
+  finalizeLoader(error?.config);
+  return Promise.reject(error);
+});
