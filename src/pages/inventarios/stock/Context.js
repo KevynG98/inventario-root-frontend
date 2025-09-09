@@ -78,13 +78,8 @@ export const ContextProvider = ({ children }) => {
 
     setBuscando(true);
     try {
-      // Usar endpoint backend de búsqueda
-      const params = new URLSearchParams({ page_size: '50' });
-      params.set('q', q);
-      params.set('nombre', q);
-      params.set('sku_codigo', q);
-      params.set('codigo_barras', q);
-
+      // Usar búsqueda libre con ?q= para evitar intersección AND de filtros
+      const params = new URLSearchParams({ page_size: '50', q });
       const res = await getData(`inventario/skus-con-bodegas/buscar/?${params.toString()}`);
       const resultados = Array.isArray(res.data) ? res.data : (res.data.results || []);
 

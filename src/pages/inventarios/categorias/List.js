@@ -75,7 +75,7 @@ const Marcas = () => {
                     </Button>
                   </OverlayTrigger>
                   <OverlayTrigger overlay={<Tooltip>Editar Categoría</Tooltip>}>
-                    <Button className="btn btn-outline-secondary btn-sm me-1" onClick={() => handleEditar(prov)} disabled={role === 8}>
+                    <Button className="btn btn-outline-secondary btn-sm me-1" onClick={() => handleEditar(prov)}>
                       <FiEdit />
                     </Button>
                   </OverlayTrigger>

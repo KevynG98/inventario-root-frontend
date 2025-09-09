@@ -23,8 +23,9 @@ export const ContextProvider = ({ children }) => {
   const [bodegaSel, setBodegaSel] = useState('');
   const [categoriaSel, setCategoriaSel] = useState('');
   const [subcategoriaSel, setSubcategoriaSel] = useState('');
-  // skuFiltro: '' = Todos (auto-carga); 'ABC123' = SKU específico
-  const [skuFiltro, setSkuFiltro] = useState('');
+  // skuFiltro: null = sin selección (no cargar);
+  //            '' = Todos; 'ABC123' = SKU específico
+  const [skuFiltro, setSkuFiltro] = useState(null);
 
   const [page, setPage] = useState(1);
   const [nullNextPage, setNullNextPage] = useState(null);
@@ -91,7 +92,7 @@ export const ContextProvider = ({ children }) => {
   }, [page, pageSize, bodegaSel, categoriaSel, subcategoriaSel, skuFiltro, fechaInicio, fechaFin, categorias, subcategorias]);
 
   useEffect(() => { cargarCatalogos(); }, [cargarCatalogos]);
-  useEffect(() => { cargarSubcategorias(categoriaSel); setSubcategoriaSel(''); setSkuFiltro(''); }, [categoriaSel, cargarSubcategorias]);
+  useEffect(() => { cargarSubcategorias(categoriaSel); setSubcategoriaSel(''); setSkuFiltro(null); }, [categoriaSel, cargarSubcategorias]);
   useEffect(() => { cargarDatos(); }, [cargarDatos]);
   useEffect(() => {
     const getRole = () => {

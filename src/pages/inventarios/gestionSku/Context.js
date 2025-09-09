@@ -90,10 +90,8 @@ export const ContextProvider = ({ children }) => {
     try {
       const params = new URLSearchParams({ page_size: '50' });
       params.set('page', String(pageArg || 1));
+      // Usar búsqueda OR del backend con ?q= para nombre/código/barcode
       params.set('q', q);
-      params.set('nombre', q);
-      params.set('sku_codigo', q);
-      params.set('codigo_barras', q);
       const res = await getData(`inventario/skus/buscar/?${params.toString()}`);
       const resultados = Array.isArray(res.data) ? res.data : (res.data.results || []);
       setSkusFiltrados(resultados);
