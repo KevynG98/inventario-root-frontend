@@ -87,6 +87,7 @@ const ModalUserForm = () => {
     if (isCreatingUser) {
       reset({});
       setIsMedico(false);
+      setActive(true);
     } else if (userData) {
       reset({
         username: userData.username,
@@ -98,6 +99,7 @@ const ModalUserForm = () => {
         vencimiento_colegiado: dateToInput(userData.perfil?.vencimiento_colegiado),
       });
       setIsMedico(userData.perfil?.es_medico || false);
+      setActive(Boolean(userData.is_active));
     }
   }, [isCreatingUser, isViewingUser, userData, reset]);
 
@@ -151,6 +153,9 @@ const ModalUserForm = () => {
     };
 
     try {
+      // Username a usar: si es edición tomar del detalle; si creación, del formulario
+      const usernameToUse = isCreatingUser ? formData.username : (userData?.username || username);
+
       if (isCreatingUser) {
         await sendData(payload);
       } else {
@@ -159,7 +164,7 @@ const ModalUserForm = () => {
       }
 
       for (const roleName of assignedGroups) {
-        await assignRol({ username: formData.username, role: roleName });
+        await assignRol({ username: usernameToUse, role: roleName });
       }
 
       reset();
@@ -241,7 +246,7 @@ const ModalUserForm = () => {
               <Row className="mb-3">
                 <Col md={6}>
                   <Form.Label>Departamento</Form.Label>
-                  <Form.Control as="select" {...register("departamento_laboral", { required: true })}>
+                  <Form.Control as="select" {...register("departamento_laboral", { required: isCreatingUser })}>
                     <option value="">Seleccione</option>
                     {(departamentos || []).map((d) => (
                       <option key={d.id} value={d.nombre}>{d.nombre}</option>
@@ -324,19 +329,31 @@ const ModalUserForm = () => {
             <Form.Label>Grupos</Form.Label>
             <Row>
               <Col md={5}>
-                <select id="groupLeft" multiple size={5} className="form-control" onDoubleClick={() => {
+                <select id="groupLeft" multiple size={5} className="form-control" onDoubleClick={async () => {
                   const selected = [...document.getElementById('groupLeft').selectedOptions].map(opt => opt.value);
                   setAssignedGroups(prev => [...prev, ...selected]);
                   setAvailableGroups(prev => prev.filter(r => !selected.includes(r)));
+                  // Asignar inmediatamente al hacer doble clic (solo en edición)
+                  if (!isCreatingUser && userData?.username) {
+                    for (const role of selected) {
+                      await assignRol({ username: userData.username, role });
+                    }
+                  }
                 }}>
                   {availableGroups.map(role => <option key={role} value={role}>{role}</option>)}
                 </select>
               </Col>
               <Col md={2} className="d-flex flex-column justify-content-center align-items-center">
-                <button type="button" onClick={() => {
+                <button type="button" onClick={async () => {
                   const selected = [...document.getElementById('groupLeft').selectedOptions].map(opt => opt.value);
                   setAssignedGroups(prev => [...prev, ...selected]);
                   setAvailableGroups(prev => prev.filter(r => !selected.includes(r)));
+                  // Asignar inmediatamente (solo en edición)
+                  if (!isCreatingUser && userData?.username) {
+                    for (const role of selected) {
+                      await assignRol({ username: userData.username, role });
+                    }
+                  }
                 }} className="btn btn-outline-secondary mb-2">&gt;</button>
                 <button type="button" onClick={async () => {
                   const selected = [...document.getElementById('groupRight').selectedOptions].map(opt => opt.value);

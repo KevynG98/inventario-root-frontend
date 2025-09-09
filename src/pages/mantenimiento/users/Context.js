@@ -169,6 +169,7 @@ export const ContextProvider = ({ children }) => {
       const response = await postData("rol/assign/", data);
       if (response?.status === 200) {
         console.log(`Rol ${data.role} asignado a ${data.username}`);
+        NotificationManager.success("Rol asignado", "Éxito", 2500);
       } else {
         NotificationManager.error("Error al asignar rol", "Error", 5000);
       }
@@ -212,6 +213,7 @@ export const ContextProvider = ({ children }) => {
       const response = await postData("rol/unassign/", data);
       if (response?.status === 200) {
         console.log(`Rol ${data.role} desasignado de ${data.username}`);
+        NotificationManager.success("Rol desasignado", "Éxito", 2500);
       } else {
         NotificationManager.error("Error al desasignar rol", "Error", 5000);
       }

@@ -18,18 +18,82 @@ class NavLeft extends Component {
 
     hasAccess = (roles) => {
         const user = JSON.parse(localStorage.getItem("user") || "{}");
-        const userRoles = user?.roles?.map(r => r.id) || [];
-        return !roles || roles.some(role => userRoles.includes(role));
+        const raw = (user?.roles || []).map(r => r.id);
+        const isAdmin = raw.includes(1);
+        let effective = raw;
+        if (!isAdmin) {
+            if (raw.includes(6)) effective = [6];
+            else if (raw.includes(7)) effective = [7];
+            else if (raw.includes(8)) effective = [8];
+        }
+        return !roles || roles.some(role => effective.includes(role));
     };
 
     renderMenuItems = () => {
         const user = JSON.parse(localStorage.getItem("user") || "{}");
-        const userRoles = user?.roles?.map(r => r.id) || [];
+        const raw = (user?.roles || []).map(r => r.id);
+        const isAdmin = raw.includes(1);
+        let effective = raw;
+        if (!isAdmin) {
+            if (raw.includes(6)) effective = [6];
+            else if (raw.includes(7)) effective = [7];
+            else if (raw.includes(8)) effective = [8];
+        }
 
-        const hasAccess = (roles) => !roles || roles.some(role => userRoles.includes(role));
+        const can = (roles) => !roles || roles.some(role => effective.includes(role));
 
-        const dashboardItem = staticRoutes.find(r => r.title === 'Dashboard' && !r.children && hasAccess(r.roles));
-        const sections = staticRoutes.filter(r => r.children && hasAccess(r.roles));
+        // Whitelist adicional por perfil (no admin)
+        const whitelist = new Set(['/dashboard/default']);
+        if (!isAdmin) {
+            if (effective.includes(6)) {
+                ['/dashboard/inventario/ver-precios'].forEach(u => whitelist.add(u));
+            } else if (effective.includes(7)) {
+                ['/dashboard/inventario/stock', '/dashboard/inventario/movimientos'].forEach(u => whitelist.add(u));
+            } else if (effective.includes(8)) {
+                [
+                    '/dashboard/inventario/proveedores',
+                    '/dashboard/inventario/marcas',
+                    '/dashboard/inventario/unidades-medida',
+                    '/dashboard/inventario/principiosActivos',
+                    '/dashboard/inventario/categorias',
+                    '/dashboard/inventario/sku',
+                    '/dashboard/inventario/stock',
+                    '/dashboard/inventario/movimientos',
+                    '/dashboard/inventario/consignacion',
+                    '/dashboard/inventario/controlados',
+                    '/dashboard/inventario/ver-precios',
+                ].forEach(u => whitelist.add(u));
+            } else if (effective.includes(9)) {
+                [
+                    '/dashboard/inventario/precios',
+                    '/dashboard/futuro',
+                ].forEach(u => whitelist.add(u));
+            }
+        }
+
+        const applyWhitelist = (items) => {
+            if (isAdmin) return items;
+            return (items || []).reduce((acc, item) => {
+                const children = item.children ? applyWhitelist(item.children) : undefined;
+                const hasChildren = children && children.length > 0;
+                const keep = item.url ? whitelist.has(item.url) : false;
+                if (hasChildren || keep) acc.push({ ...item, children });
+                return acc;
+            }, []);
+        };
+
+        const filtered = staticRoutes.filter(r => !r.children && can(r.roles) || r.children);
+        const whitelisted = applyWhitelist(filtered);
+
+        const dashboardItem = whitelisted.find(r => r.title === 'Dashboard' && !r.children && can(r.roles));
+        // Solo secciones con al menos un hijo visible, luego de whitelist
+        const sections = whitelisted
+            .filter(r => r.children && can(r.roles))
+            .map(section => ({
+                ...section,
+                children: (section.children || []).filter(child => can(child.roles))
+            }))
+            .filter(section => section.children.length > 0);
 
         return (
             <>
@@ -64,7 +128,7 @@ class NavLeft extends Component {
                             {section.title}
                         </div>
                         {section.children.map((item, i) => {
-                            if (!hasAccess(item.roles)) return null;
+                            if (!can(item.roles)) return null;
                             return (
                                 <div
                                     key={i}

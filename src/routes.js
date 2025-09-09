@@ -85,7 +85,15 @@ const OtherDocs = React.lazy(() => import('./Demo/Other/Docs'));
 /* ====== PERMISOS ====== */
 const user = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : null;
 const userPermissions = user?.roles?.map((role) => role.id) || [];
-console.log('PERMISIONS: ', userPermissions); // Ej: [1]
+// Exclusividad por perfil de Inventario: si es 6,7 u 8 y no es admin, se limita a ese perfil
+const hasAdmin = userPermissions.includes(1);
+let effectivePermissions = [...userPermissions];
+if (!hasAdmin) {
+  if (userPermissions.includes(6)) effectivePermissions = [6];
+  else if (userPermissions.includes(7)) effectivePermissions = [7];
+  else if (userPermissions.includes(8)) effectivePermissions = [8];
+}
+console.log('PERMISSIONS raw/effective: ', userPermissions, effectivePermissions);
 
 /**
  * Mapa de roles por módulo (IDs según tu hoja/screenshot)
@@ -109,8 +117,18 @@ const R = {
   DOCTOR: [26],
 };
 const ALL = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26];
+// Inventario sin el perfil estándar (6)
+const INVENTARIO_NO_STD = [1, 7, 8, 9];
+// Roles para gestión de inventario (admin y operador 8; excluye 6,7,9)
+const INVENTARIO_GESTION = [1, 8];
+// Roles para consulta de inventario (stock y movimientos): admin, 7, 8 (excluye 9)
+const INVENTARIO_CONSULTA = [1, 7, 8];
+// Ver precios: admin, 6, 8 (excluye 9)
+const INVENTARIO_VER_PRECIOS = [1, 6, 8];
+// Todos excepto 6,7,8,9 (excluye perfiles de inventario de Reportes)
+const ALL_EXCEPT_6_7_8 = ALL.filter((rid) => rid !== 6 && rid !== 7 && rid !== 8 && rid !== 9);
 
-const allow = (allowed) => userPermissions.some((r) => allowed.includes(r));
+const allow = (allowed) => effectivePermissions.some((r) => allowed.includes(r));
 
 /* ====== RUTAS ====== */
 const routes = [
@@ -175,79 +193,79 @@ const routes = [
     path: '/dashboard/inventario/proveedores',
     exact: true,
     name: 'Inventario Proveedores',
-    component: allow(R.INVENTARIO) ? InventarioProveedores : Error404,
+    component: allow(INVENTARIO_GESTION) ? InventarioProveedores : Error404,
   },
   {
     path: '/dashboard/inventario/marcas',
     exact: true,
     name: 'Inventario Marcas',
-    component: allow(R.INVENTARIO) ? inventarioMarca : Error404,
+    component: allow(INVENTARIO_GESTION) ? inventarioMarca : Error404,
   },
   {
     path: '/dashboard/inventario/unidades-medida',
     exact: true,
     name: 'Inventario Unidades de Medida',
-    component: allow(R.INVENTARIO) ? InventarioUnidadesMedida : Error404,
+    component: allow(INVENTARIO_GESTION) ? InventarioUnidadesMedida : Error404,
   },
   {
     path: '/dashboard/inventario/categorias',
     exact: true,
     name: 'Inventario Categorias',
-    component: allow(R.INVENTARIO) ? InventarioCategorias : Error404,
+    component: allow(INVENTARIO_GESTION) ? InventarioCategorias : Error404,
   },
   {
     path: '/dashboard/inventario/movimientos',
     exact: true,
     name: 'Inventario Movimientos',
-    component: allow(R.INVENTARIO) ? InventarioMovimiento : Error404,
+    component: allow(INVENTARIO_CONSULTA) ? InventarioMovimiento : Error404,
   },
   {
     path: '/dashboard/inventario/bodegas',
     exact: true,
     name: 'Inventario Bodega',
-    component: allow(R.INVENTARIO) ? InventarioBodega : Error404,
+    component: allow([1]) ? InventarioBodega : Error404,
   },
   {
     path: '/dashboard/inventario/sku',
     exact: true,
     name: 'Gestión SKU',
-    component: allow(R.INVENTARIO) ? InventarioSku : Error404,
+    component: allow(INVENTARIO_GESTION) ? InventarioSku : Error404,
   },
   {
     path: '/dashboard/inventario/stock',
     exact: true,
     name: 'Stock',
-    component: allow(R.INVENTARIO) ? InventarioStock : Error404,
+    component: allow(INVENTARIO_CONSULTA) ? InventarioStock : Error404,
   },
   {
     path: '/dashboard/inventario/precios',
     exact: true,
     name: 'Precios',
-    component: allow(R.INVENTARIO) ? InventarioPrecios : Error404,
+    component: allow([1, 9]) ? InventarioPrecios : Error404,
   },
   {
     path: '/dashboard/inventario/consignacion',
     exact: true,
     name: 'Consignación',
-    component: allow(R.INVENTARIO) ? InventarioConsignacion : Error404,
+    component: allow(INVENTARIO_GESTION) ? InventarioConsignacion : Error404,
   },
   {
     path: '/dashboard/inventario/controlados',
     exact: true,
     name: 'Controlados',
-    component: allow(R.INVENTARIO) ? InventarioControlados : Error404,
+    component: allow(INVENTARIO_GESTION) ? InventarioControlados : Error404,
   },
   {
     path: '/dashboard/inventario/principiosActivos',
     exact: true,
     name: 'Principios Activos',
-    component: allow(R.INVENTARIO) ? InventarioPrincipiosActivos : Error404,
+    component: allow(INVENTARIO_GESTION) ? InventarioPrincipiosActivos : Error404,
   },
   {
     path: '/dashboard/inventario/ver-precios',
     exact: true,
-    name: 'Principios Activos',
-    component: allow(R.INVENTARIO) ? InventarioVerPrecios : Error404,
+    name: 'Ver Precios',
+    component: allow(INVENTARIO_VER_PRECIOS) ? InventarioVerPrecios : Error404,
   },
   /* Bodegas */
   {
@@ -343,24 +361,24 @@ const routes = [
     component: allow(R.MANTENIMIENTO) ? cuentasContables : Error404,
   },
 
-  /* Reportes (abierto a todos los roles del sistema) */
+  /* Reportes (excluye inventario estándar 6, auxiliar 7 y operador 8) */
   {
     path: '/dashboard/reportes/historial-general',
     exact: true,
     name: 'Historial General',
-    component: allow(ALL) ? HIstorialGeneral : Error404,
+    component: allow(ALL_EXCEPT_6_7_8) ? HIstorialGeneral : Error404,
   },
   {
     path: '/dashboard/reportes/users',
     exact: true,
     name: 'Usuarios',
-    component: allow(ALL) ? UsersReporte : Error404,
+    component: allow(ALL_EXCEPT_6_7_8) ? UsersReporte : Error404,
   },
   {
     path: '/dashboard/reportes/inventarios',
     exact: true,
     name: 'Inventarios',
-    component: allow(ALL) ? InventarioReporte : Error404,
+    component: allow(ALL_EXCEPT_6_7_8) ? InventarioReporte : Error404,
   },
 
   // -------------------------------------------------------------------------------------------------------------------------------
