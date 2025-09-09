@@ -21,6 +21,7 @@ const DetalleModal = () => {
         <p><strong>Estatus:</strong> {selectedTraslado.estatus}</p>
         <p><strong>Comentarios:</strong> {selectedTraslado.comentarios || '-'}</p>
         <p><strong>Enviado por:</strong> {selectedTraslado.enviado_por || '-'}</p>
+        <p><strong>Departamento:</strong> {selectedTraslado.departamento || '-'}</p>
         <p><strong>Entregamos a:</strong> {selectedTraslado.entregamos_a || '-'}</p>
         <p><strong>Recibido por:</strong> {selectedTraslado.recibido_por || '-'}</p>
 
@@ -58,4 +59,3 @@ const DetalleModal = () => {
 };
 
 export default DetalleModal;
-

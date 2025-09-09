@@ -17,6 +17,7 @@ const TrasladoForm = () => {
     bodega_origen: '',
     bodega_destino: '',
     comentarios: '',
+    departamento: '',
     entregamos_a: '',
   });
   const [categoriaId, setCategoriaId] = useState('');
@@ -106,7 +107,7 @@ const TrasladoForm = () => {
           </Col>
           <Col md={6}>
             <Form.Label>Departamento</Form.Label>
-            <Form.Control as="select" value={deptoSel} onChange={(e) => { setDeptoSel(e.target.value); setForm(f => ({ ...f, entregamos_a: '' })); }}>
+            <Form.Control as="select" value={deptoSel} onChange={(e) => { const v = e.target.value; setDeptoSel(v); setForm(f => ({ ...f, departamento: v, entregamos_a: '' })); }}>
               <option value="">Seleccione</option>
               {(departamentos || []).map(d => (
                 <option key={d.id} value={d.nombre}>{d.nombre}</option>
