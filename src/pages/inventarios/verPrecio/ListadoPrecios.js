@@ -30,11 +30,11 @@ const ListadoPrecios = () => {
     <div className="mt-4">
       <h5 className="mb-3">Listado de SKUs</h5>
 
-      {/* 🔎 Filtro por código de SKU o código de barras */}
+      {/* 🔎 Filtro por nombre, código SKU o código de barras */}
       <Form onSubmit={handleBuscar} className="mb-3">
         <InputGroup>
           <Form.Control
-            placeholder="Buscar por código de SKU o código de barras..."
+            placeholder="Buscar por nombre, código SKU o código de barras..."
             value={term}
             onChange={(e) => setTerm(e.target.value)}
             onKeyDown={(e) => {

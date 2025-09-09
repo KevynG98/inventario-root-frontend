@@ -7,6 +7,8 @@ const MyContext = createContext();
 
 export const ContextProvider = ({ children }) => {
   const [data, setData] = useState([]);
+  const [dataFiltrada, setDataFiltrada] = useState(null);
+  const [buscando, setBuscando] = useState(false);
   const [show, setShow] = useState(false);
   const [modoFormulario, setModoFormulario] = useState('crear'); // 'crear', 'editar' o 'ver'
   const [proveedorSeleccionado, setProveedorSeleccionado] = useState(null);
@@ -40,6 +42,8 @@ export const ContextProvider = ({ children }) => {
       const resultados = response.data.results;
 
       setData(resultados);
+      // si había un filtro activo, lo limpiamos al recargar página
+      setDataFiltrada(null);
       setNullNextPage(response.data.next);
       setPrevNextPage(response.data.previous);
 
@@ -63,6 +67,49 @@ export const ContextProvider = ({ children }) => {
 
       console.error('Error al cargar admisiones:', error);
     }
+  };
+
+  const buscarSkusStock = async (termino) => {
+    const q = (termino || '').trim();
+    if (!q) {
+      setDataFiltrada(null);
+      return;
+    }
+
+    setBuscando(true);
+    try {
+      // Usar endpoint backend de búsqueda
+      const params = new URLSearchParams({ page_size: '50' });
+      params.set('q', q);
+      params.set('nombre', q);
+      params.set('sku_codigo', q);
+      params.set('codigo_barras', q);
+
+      const res = await getData(`inventario/skus-con-bodegas/buscar/?${params.toString()}`);
+      const resultados = Array.isArray(res.data) ? res.data : (res.data.results || []);
+
+      setDataFiltrada(resultados);
+      if (resultados.length === 0) {
+        Swal.fire({
+          icon: 'info',
+          title: 'Sin resultados',
+          text: 'No se encontraron SKUs que coincidan con el término.',
+        });
+      }
+    } catch (error) {
+      console.error('Error al buscar SKUs (stock):', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error en la búsqueda',
+        text: 'Ocurrió un problema al consultar el backend.',
+      });
+    } finally {
+      setBuscando(false);
+    }
+  };
+
+  const limpiarFiltroSkusStock = () => {
+    setDataFiltrada(null);
   };
 
   const cargarBodega = async () => {
@@ -185,12 +232,16 @@ export const ContextProvider = ({ children }) => {
 
   const values = {
     data,
+    dataFiltrada,
+    buscando,
     show,
     showModal,
     nullNextPage,
     nullPrevPage,
     nextPage,
     prevPage,
+    buscarSkusStock,
+    limpiarFiltroSkusStock,
     enviarDatos,
     modoFormulario,
     setModoFormulario,

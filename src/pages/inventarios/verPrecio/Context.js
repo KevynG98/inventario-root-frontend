@@ -125,6 +125,7 @@ export const PreciosProvider = ({ children }) => {
       params.set('q', q);                 // búsqueda libre
       params.set('sku_codigo', q);        // si el backend lo soporta
       params.set('codigo_barras', q);     // si el backend lo soporta
+      params.set('nombre', q);            // incluir búsqueda por nombre si existe
 
       const res = await getData(`inventario/precios/buscar/?${params.toString()}`);
       const payload = Array.isArray(res.data) ? res.data : (res.data.results || []);
@@ -133,10 +134,12 @@ export const PreciosProvider = ({ children }) => {
       const idsSku = new Set(payload.map(p => p.sku).filter(Boolean));
 
       // Filtramos la lista local de SKUs:
+      const ql = q.toLowerCase();
       const filtrados = (skus || []).filter(s =>
         idsSku.has(s.id) ||
-        (s.codigo_sku && s.codigo_sku.toString().toLowerCase().includes(q.toLowerCase())) ||
-        (s.codigo_barras && s.codigo_barras.toString().toLowerCase().includes(q.toLowerCase()))
+        (s.nombre && s.nombre.toString().toLowerCase().includes(ql)) ||
+        (s.codigo_sku && s.codigo_sku.toString().toLowerCase().includes(ql)) ||
+        (s.codigo_barras && s.codigo_barras.toString().toLowerCase().includes(ql))
       );
 
       setSkusFiltrados(filtrados);

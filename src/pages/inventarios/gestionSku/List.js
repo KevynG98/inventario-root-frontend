@@ -1,11 +1,15 @@
 import React, { useMemo, useState } from 'react';
-import { OverlayTrigger, Tooltip, Button } from 'react-bootstrap';
+import { OverlayTrigger, Tooltip, Button, InputGroup, Form, Spinner } from 'react-bootstrap';
 import { FiEye, FiEdit, FiChevronLeft, FiChevronRight, FiTrash2, FiTruck } from 'react-icons/fi';
 import { useMyContext } from './Context';
 
 const Medidas = () => {
   const {
     data,
+    skusFiltrados,
+    buscando,
+    searchNext,
+    searchPrev,
     abrirModalCrear,
     abrirModalEditar,
     abrirModalVer,
@@ -16,22 +20,38 @@ const Medidas = () => {
     eliminarProveedor,
     abrirModalMovimiento,
     role,
+    buscarSkusGlobal,
+    limpiarFiltroSkus,
+    buscarSkusNextPage,
+    buscarSkusPrevPage,
   } = useMyContext();
 
-  const [fCodigo, setFCodigo] = useState('');
-  const [fNombre, setFNombre] = useState('');
-  const [fBarcode, setFBarcode] = useState('');
+  const [term, setTerm] = useState('');
 
   const filtered = useMemo(() => {
-    const t = (s) => (String(s || '')).toLowerCase();
-    const rows = Array.isArray(data) ? data : [];
-    const f = rows.filter((r) => (
-      (!fCodigo || t(r.codigo_sku).includes(t(fCodigo))) &&
-      (!fNombre || t(r.nombre).includes(t(fNombre))) &&
-      (!fBarcode || t(r.barcode).includes(t(fBarcode)))
-    ));
+    const toL = (s) => String(s || '').toLowerCase();
+    const q = toL(term);
+    const base = skusFiltrados ?? data;
+    const rows = Array.isArray(base) ? base : [];
+    const f = !q
+      ? rows
+      : rows.filter((r) => (
+          toL(r.nombre).includes(q) ||
+          toL(r.codigo_sku).includes(q) ||
+          toL(r.codigo_barras).includes(q)
+        ));
     return [...f].sort((a, b) => String(a.codigo_sku || '').localeCompare(String(b.codigo_sku || '')));
-  }, [data, fCodigo, fNombre, fBarcode]);
+  }, [data, skusFiltrados, term]);
+
+  const handleBuscar = async (e) => {
+    e?.preventDefault?.();
+    await buscarSkusGlobal(term);
+  };
+
+  const handleLimpiar = () => {
+    setTerm('');
+    limpiarFiltroSkus();
+  };
 
   const handleVer = (prov) => abrirModalVer(prov);
   const handleEditar = (prov) => abrirModalEditar(prov);
@@ -43,11 +63,23 @@ const Medidas = () => {
       <div className="mb-3">
         <div className="row g-2">
           <div className="col-12 col-md-10">
-            <input
-              type="text"
-              placeholder="Buscar..."
-              className="form-control shadow-sm w-100"
-            />
+            <Form onSubmit={handleBuscar}>
+              <InputGroup>
+                <Form.Control
+                  placeholder="Buscar por nombre, código SKU o código de barras..."
+                  value={term}
+                  onChange={(e) => setTerm(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleBuscar(e);
+                    if (e.key === 'Escape') handleLimpiar();
+                  }}
+                />
+                <Button type="submit" variant="primary" disabled={buscando}>
+                  {buscando ? (<><Spinner animation="border" size="sm" className="me-2"/>Buscando...</>) : 'Buscar'}
+                </Button>
+                <Button type="button" variant="outline-secondary" onClick={handleLimpiar}>Limpiar</Button>
+              </InputGroup>
+            </Form>
           </div>
           <div className="col-12 col-md-2">
             <Button className="w-100" onClick={abrirModalCrear}>
@@ -58,17 +90,6 @@ const Medidas = () => {
       </div>
 
       <div className="table-responsive">
-        <div className="row g-2 mb-2">
-          <div className="col-md-3">
-            <input className="form-control" placeholder="Filtrar Código" value={fCodigo} onChange={(e)=>setFCodigo(e.target.value)} />
-          </div>
-          <div className="col-md-3">
-            <input className="form-control" placeholder="Filtrar Nombre" value={fNombre} onChange={(e)=>setFNombre(e.target.value)} />
-          </div>
-          <div className="col-md-3">
-            <input className="form-control" placeholder="Filtrar Código de barras" value={fBarcode} onChange={(e)=>setFBarcode(e.target.value)} />
-          </div>
-        </div>
         <table className="table table-bordered table-sm mt-2">
           <thead className="table-primary text-dark fw-semibold text-center">
             <tr>
@@ -123,10 +144,17 @@ const Medidas = () => {
       </div>
 
       <div className="d-flex justify-content-end mt-3">
-        <Button onClick={prevPage} disabled={nullPrevPage === null} className="me-2">
+        <Button
+          onClick={skusFiltrados !== null ? buscarSkusPrevPage : prevPage}
+          disabled={skusFiltrados !== null ? (searchPrev === null) : (nullPrevPage === null)}
+          className="me-2"
+        >
           <FiChevronLeft />
         </Button>
-        <Button onClick={nextPage} disabled={nullNextPage === null}>
+        <Button
+          onClick={skusFiltrados !== null ? buscarSkusNextPage : nextPage}
+          disabled={skusFiltrados !== null ? (searchNext === null) : (nullNextPage === null)}
+        >
           <FiChevronRight />
         </Button>
       </div>

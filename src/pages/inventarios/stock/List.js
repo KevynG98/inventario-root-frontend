@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Button, Form } from 'react-bootstrap';
+import { Button, Form, InputGroup, Spinner } from 'react-bootstrap';
 import { useMyContext } from './Context';
 import { FiChevronLeft, FiChevronRight, FiEye, FiPlus } from 'react-icons/fi';
 import { OverlayTrigger, Tooltip } from 'react-bootstrap';
@@ -7,16 +7,21 @@ import { OverlayTrigger, Tooltip } from 'react-bootstrap';
 const Marcas = () => {
   const {
     data,
+    dataFiltrada,
+    buscando,
     bodega,
     nextPage,
     prevPage,
     nullNextPage,
     nullPrevPage,
+    buscarSkusStock,
+    limpiarFiltroSkusStock,
     actualizarBodegaSKU,
     abrirModalVer
   } = useMyContext();
 
   const [inputs, setInputs] = useState({});
+  const [term, setTerm] = useState('');
   const [mostrarColumnaAgregar, setMostrarColumnaAgregar] = useState(false);
 
   const handleInputChange = (skuId, value) => {
@@ -55,6 +60,18 @@ const Marcas = () => {
     setInputs(prev => ({ ...prev, [sku.id]: '' }));
   };
 
+  const handleBuscar = async (e) => {
+    e.preventDefault();
+    await buscarSkusStock(term);
+  };
+
+  const handleLimpiar = () => {
+    setTerm('');
+    limpiarFiltroSkusStock();
+  };
+
+  const lista = dataFiltrada ?? data;
+
   return (
     <div className="mb-4">
       <div className="d-flex justify-content-between align-items-center mb-3">
@@ -68,6 +85,38 @@ const Marcas = () => {
           {mostrarColumnaAgregar ? 'Ocultar Agregar' : 'Agregar a Principal'}
         </Button> */}
       </div>
+
+      {/* 🔎 Filtro por nombre, código SKU o código de barras */}
+      <Form onSubmit={handleBuscar} className="mb-3">
+        <InputGroup>
+          <Form.Control
+            placeholder="Buscar por nombre, código SKU o código de barras..."
+            value={term}
+            onChange={(e) => setTerm(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                handleBuscar(e);
+              }
+            }}
+          />
+          <Button type="submit" variant="primary" disabled={buscando}>
+            {buscando ? (
+              <>
+                <Spinner animation="border" size="sm" className="me-2" /> Buscando...
+              </>
+            ) : (
+              'Buscar'
+            )}
+          </Button>
+          <Button
+            type="button"
+            variant="outline-secondary"
+            onClick={handleLimpiar}
+          >
+            Limpiar
+          </Button>
+        </InputGroup>
+      </Form>
 
       <div className="table-responsive">
         <table className="table table-bordered table-sm mt-2 mb-0">
@@ -86,7 +135,7 @@ const Marcas = () => {
             </tr>
           </thead>
           <tbody>
-            {data.map((sku, idx) => {
+            {(lista || []).map((sku, idx) => {
               const total = sku.bodegas?.reduce((sum, b) => sum + (b.cantidad || 0), 0);
 
               return (
@@ -162,8 +211,8 @@ const Marcas = () => {
       </div>
 
       <div className="d-flex justify-content-end mt-2">
-        <Button onClick={prevPage} disabled={nullPrevPage === null}><FiChevronLeft /></Button>
-        <Button onClick={nextPage} disabled={nullNextPage === null}><FiChevronRight /></Button>
+        <Button onClick={prevPage} disabled={dataFiltrada !== null || nullPrevPage === null}><FiChevronLeft /></Button>
+        <Button onClick={nextPage} disabled={dataFiltrada !== null || nullNextPage === null}><FiChevronRight /></Button>
       </div>
     </div>
   );

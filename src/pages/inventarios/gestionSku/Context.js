@@ -18,6 +18,13 @@ export const ContextProvider = ({ children }) => {
   const [skuActivo, setSkuActivo] = useState(null);
   const [principiosActivos, setPrincipiosActivos] = useState([]);
   const [showModalMovimiento, setShowModalMovimiento] = useState(false);
+  // búsqueda global
+  const [skusFiltrados, setSkusFiltrados] = useState(null);
+  const [buscando, setBuscando] = useState(false);
+  const [termBusqueda, setTermBusqueda] = useState('');
+  const [searchPage, setSearchPage] = useState(1);
+  const [searchNext, setSearchNext] = useState(null);
+  const [searchPrev, setSearchPrev] = useState(null);
 
   // ⬇️ NEW: proveedores
   const [proveedores, setProveedores] = useState([]);
@@ -52,6 +59,7 @@ export const ContextProvider = ({ children }) => {
       setData(resultados);
       setNullNextPage(response.data.next);
       setPrevNextPage(response.data.previous);
+      setSkusFiltrados(null); // reset filtro al cambiar de página
       Swal.close();
 
       if (resultados.length === 0) {
@@ -66,6 +74,54 @@ export const ContextProvider = ({ children }) => {
       Swal.fire({ icon: 'error', title: 'Error', text: 'Error al cargar admisiones' });
       console.error('Error al cargar admisiones:', error);
     }
+  };
+
+  const buscarSkusGlobal = async (termino, pageArg = 1) => {
+    const q = (termino || '').trim();
+    if (!q) {
+      setSkusFiltrados(null);
+      setTermBusqueda('');
+      setSearchPage(1);
+      setSearchNext(null);
+      setSearchPrev(null);
+      return;
+    }
+    setBuscando(true);
+    try {
+      const params = new URLSearchParams({ page_size: '50' });
+      params.set('page', String(pageArg || 1));
+      params.set('q', q);
+      params.set('nombre', q);
+      params.set('sku_codigo', q);
+      params.set('codigo_barras', q);
+      const res = await getData(`inventario/skus/buscar/?${params.toString()}`);
+      const resultados = Array.isArray(res.data) ? res.data : (res.data.results || []);
+      setSkusFiltrados(resultados);
+      setTermBusqueda(q);
+      setSearchPage(pageArg || 1);
+      setSearchNext(res.data?.next ?? null);
+      setSearchPrev(res.data?.previous ?? null);
+      if (resultados.length === 0) {
+        Swal.fire({ icon: 'info', title: 'Sin resultados', text: 'No se encontraron SKUs que coincidan.' });
+      }
+    } catch (error) {
+      console.error('Error al buscar SKUs:', error);
+      Swal.fire({ icon: 'error', title: 'Error en la búsqueda', text: 'Ocurrió un problema al consultar el backend.' });
+    } finally {
+      setBuscando(false);
+    }
+  };
+
+  const limpiarFiltroSkus = () => setSkusFiltrados(null);
+
+  const buscarSkusNextPage = async () => {
+    if (!termBusqueda || !searchNext) return;
+    await buscarSkusGlobal(termBusqueda, searchPage + 1);
+  };
+
+  const buscarSkusPrevPage = async () => {
+    if (!termBusqueda || !searchPrev) return;
+    await buscarSkusGlobal(termBusqueda, Math.max(1, searchPage - 1));
   };
 
   const cargarCategorias = async () => {
@@ -288,6 +344,16 @@ export const ContextProvider = ({ children }) => {
     nullPrevPage,
     nextPage,
     prevPage,
+    skusFiltrados,
+    buscando,
+    buscarSkusGlobal,
+    limpiarFiltroSkus,
+    termBusqueda,
+    searchPage,
+    searchNext,
+    searchPrev,
+    buscarSkusNextPage,
+    buscarSkusPrevPage,
     enviarDatos,
     modoFormulario,
     setModoFormulario,
