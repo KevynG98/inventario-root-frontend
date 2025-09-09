@@ -10,6 +10,7 @@ export const ContextProvider = ({ children }) => {
   const [show, setShow] = useState(false);
   const [modoFormulario, setModoFormulario] = useState('crear'); // 'crear', 'editar' o 'ver'
   const [proveedorSeleccionado, setProveedorSeleccionado] = useState(null);
+  const [role, setRole] = useState(null);
   const [categorias, setCategorias] = useState([])
   const [marcas, setMarcas] = useState([])
   const [unidadMedida, setUnidadMedida] = useState([]) //unidad de despacho
@@ -239,6 +240,12 @@ export const ContextProvider = ({ children }) => {
     cargarMarcas()
     cargarMedida()
     cargarBodega()
+    const getRole = () => {
+      const u = JSON.parse(localStorage.getItem("user") || "null");
+      const r = u?.roles?.[0];
+      return typeof r === "string" ? r : r?.id || null;
+    };
+    setRole(getRole());
   }, [page]);
 
   const values = {

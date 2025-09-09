@@ -11,6 +11,7 @@ export const ContextProvider = ({ children }) => {
   const [modoFormulario, setModoFormulario] = useState('crear'); // 'crear', 'editar' o 'ver'
   const [proveedorSeleccionado, setProveedorSeleccionado] = useState(null);
   const [bodega, setBodega] = useState([]);
+  const [role, setRole] = useState(null);
 
   //paginacion
   const [page, setPage] = useState(1);
@@ -172,8 +173,14 @@ export const ContextProvider = ({ children }) => {
 
 
   useEffect(() => {
-    cargarDatos()
-    cargarBodega()
+    cargarDatos();
+    cargarBodega();
+    const getRole = () => {
+      const u = JSON.parse(localStorage.getItem("user") || "null");
+      const r = u?.roles?.[0];
+      return typeof r === "string" ? r : r?.id || null;
+    };
+    setRole(getRole());
   }, [page]);
 
   const values = {
@@ -195,7 +202,8 @@ export const ContextProvider = ({ children }) => {
     actualizarProveedor,
     eliminarProveedor,
     bodega,
-    actualizarBodegaSKU
+    actualizarBodegaSKU,
+    role,
   };
 
   return <MyContext.Provider value={values}>{children}</MyContext.Provider>;

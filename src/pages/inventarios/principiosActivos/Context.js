@@ -10,6 +10,7 @@ export const ContextProvider = ({ children }) => {
   const [show, setShow] = useState(false);
   const [modoFormulario, setModoFormulario] = useState('crear'); // 'crear', 'editar', 'ver'
   const [proveedorSeleccionado, setProveedorSeleccionado] = useState(null);
+  const [role, setRole] = useState(null);
 
   // función de reset del formulario expuesta por el modal
   const [resetForm, setResetForm] = useState(null);
@@ -142,6 +143,12 @@ export const ContextProvider = ({ children }) => {
 
   useEffect(() => {
     cargarDatos();
+    const getRole = () => {
+      const u = JSON.parse(localStorage.getItem("user") || "null");
+      const r = u?.roles?.[0];
+      return typeof r === "string" ? r : r?.id || null;
+    };
+    setRole(getRole());
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page]);
 
@@ -164,7 +171,8 @@ export const ContextProvider = ({ children }) => {
     actualizarProveedor,
     eliminarProveedor,
     // para permitir que el modal registre su reset()
-    setResetForm
+    setResetForm,
+    role,
   };
 
   return <MyContext.Provider value={values}>{children}</MyContext.Provider>;

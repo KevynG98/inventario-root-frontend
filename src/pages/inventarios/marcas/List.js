@@ -13,7 +13,8 @@ const Marcas = () => {
     nextPage,
     nullPrevPage,
     nullNextPage,
-    eliminarProveedor
+    eliminarProveedor,
+    role,
   } = useMyContext();
 
   const handleVer = (prov) => abrirModalVer(prov);
@@ -66,12 +67,12 @@ const Marcas = () => {
                     </Button>
                   </OverlayTrigger>
                   <OverlayTrigger overlay={<Tooltip>Editar Marca</Tooltip>}>
-                    <Button className="btn btn-outline-secondary btn-sm me-1" onClick={() => handleEditar(prov)}>
+                    <Button className="btn btn-outline-secondary btn-sm me-1" onClick={() => handleEditar(prov)} disabled={role === 8}>
                       <FiEdit />
                     </Button>
                   </OverlayTrigger>
                   <OverlayTrigger overlay={<Tooltip>Eliminar Marca</Tooltip>}>
-                    <Button className="btn btn-outline-secondary btn-sm" onClick={() => eliminarProveedor(prov.id)}>
+                    <Button className="btn btn-outline-secondary btn-sm" onClick={() => eliminarProveedor(prov.id)} disabled={role === 8}>
                       <FiTrash2 />
                     </Button>
                   </OverlayTrigger>

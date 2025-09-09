@@ -30,6 +30,7 @@ export const ContextProvider = ({ children }) => {
   const [nullNextPage, setNullNextPage] = useState(null);
   const [nullPrevPage, setPrevNextPage] = useState(null);
   const [pageSize] = useState(50);
+  const [role, setRole] = useState(null);
 
   const nextPage = () => setPage((p) => p + 1);
   const prevPage = () => setPage((p) => Math.max(1, p - 1));
@@ -92,6 +93,14 @@ export const ContextProvider = ({ children }) => {
   useEffect(() => { cargarCatalogos(); }, [cargarCatalogos]);
   useEffect(() => { cargarSubcategorias(categoriaSel); setSubcategoriaSel(''); setSkuFiltro(''); }, [categoriaSel, cargarSubcategorias]);
   useEffect(() => { cargarDatos(); }, [cargarDatos]);
+  useEffect(() => {
+    const getRole = () => {
+      const u = JSON.parse(localStorage.getItem("user") || "null");
+      const r = u?.roles?.[0];
+      return typeof r === "string" ? r : r?.id || null;
+    };
+    setRole(getRole());
+  }, []);
 
   const values = {
     data,
@@ -107,6 +116,7 @@ export const ContextProvider = ({ children }) => {
     // paginación
     page, setPage, nextPage, prevPage,
     nullPrevPage, nullNextPage,
+    role,
   };
 
   return <MyContext.Provider value={values}>{children}</MyContext.Provider>;

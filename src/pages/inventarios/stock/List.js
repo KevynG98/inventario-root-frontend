@@ -59,14 +59,14 @@ const Marcas = () => {
     <div className="mb-4">
       <div className="d-flex justify-content-between align-items-center mb-3">
         <h5 className="mb-0">Stock</h5>
-        <Button
+        {/* <Button
           variant="outline-primary"
           size="sm"
           onClick={() => setMostrarColumnaAgregar(prev => !prev)}
         >
           <FiPlus className="me-1" />
           {mostrarColumnaAgregar ? 'Ocultar Agregar' : 'Agregar a Principal'}
-        </Button>
+        </Button> */}
       </div>
 
       <div className="table-responsive">

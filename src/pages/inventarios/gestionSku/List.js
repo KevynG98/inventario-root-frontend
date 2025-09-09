@@ -14,7 +14,8 @@ const Medidas = () => {
     nullPrevPage,
     nullNextPage,
     eliminarProveedor,
-    abrirModalMovimiento
+    abrirModalMovimiento,
+    role,
   } = useMyContext();
 
   const [fCodigo, setFCodigo] = useState('');
@@ -100,7 +101,7 @@ const Medidas = () => {
                     </Button>
                   </OverlayTrigger>
                   <OverlayTrigger overlay={<Tooltip>Editar</Tooltip>}>
-                    <Button className="btn btn-outline-secondary btn-sm me-1" onClick={() => handleEditar(sku)}>
+                    <Button className="btn btn-outline-secondary btn-sm me-1" onClick={() => handleEditar(sku)} disabled={role === 8}>
                       <FiEdit />
                     </Button>
                   </OverlayTrigger>

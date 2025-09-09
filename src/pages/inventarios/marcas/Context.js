@@ -10,6 +10,7 @@ export const ContextProvider = ({ children }) => {
   const [show, setShow] = useState(false);
   const [modoFormulario, setModoFormulario] = useState('crear'); // 'crear', 'editar' o 'ver'
   const [proveedorSeleccionado, setProveedorSeleccionado] = useState(null);
+  const [role, setRole] = useState(null);
 
   //paginacion
   const [page, setPage] = useState(1);
@@ -144,9 +145,15 @@ export const ContextProvider = ({ children }) => {
     showModal();
   };
 
+  const getRole = () => {
+    const u = JSON.parse(localStorage.getItem("user") || "null");
+    const r = u?.roles?.[0];
+    return typeof r === "string" ? r : r?.id || null;
+  };
 
   useEffect(() => {
     cargarDatos()
+    setRole(getRole());
   }, [page]);
 
   const values = {
@@ -166,7 +173,8 @@ export const ContextProvider = ({ children }) => {
     abrirModalCrear,
     abrirModalVer,
     actualizarProveedor,
-    eliminarProveedor
+    eliminarProveedor,
+    role,
   };
 
   return <MyContext.Provider value={values}>{children}</MyContext.Provider>;
