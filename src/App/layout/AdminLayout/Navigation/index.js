@@ -30,16 +30,9 @@ class Navigation extends Component {
   render() {
     const user = localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user")) : null;
 
-    // ✅ Normalizamos roles
+    // Normaliza roles a strings y usa la unión (no exclusividad)
     const rawRoles = (user?.roles || []).map(role => String(role.id ?? role));
-    // ✅ En perfiles de Inventario (6,7,8) sin admin, aplicamos exclusividad por perfil
-    let normalizedRoles = new Set(rawRoles);
-    if (!normalizedRoles.has('1')) {
-      if (normalizedRoles.has('6')) normalizedRoles = new Set(['6']);
-      else if (normalizedRoles.has('7')) normalizedRoles = new Set(['7']);
-      else if (normalizedRoles.has('8')) normalizedRoles = new Set(['8']);
-    }
-    const userRoles = normalizedRoles;
+    const userRoles = new Set(rawRoles);
 
     // ✅ Filtro corregido
     const filterByRoles = (items) => {
@@ -53,54 +46,8 @@ class Navigation extends Component {
         .filter(item => !item.children || item.children.length > 0);
     };
 
-    // Whitelist por perfil de inventario para endurecer el menú
-    const whitelist = new Set([
-      '/dashboard/default',
-    ]);
-    if (!userRoles.has('1')) {
-      if (userRoles.has('6')) {
-        ['/dashboard/inventario/ver-precios'].forEach(u => whitelist.add(u));
-      } else if (userRoles.has('7')) {
-        ['/dashboard/inventario/stock', '/dashboard/inventario/movimientos'].forEach(u => whitelist.add(u));
-      } else if (userRoles.has('8')) {
-        [
-          '/dashboard/inventario/proveedores',
-          '/dashboard/inventario/marcas',
-          '/dashboard/inventario/unidades-medida',
-          '/dashboard/inventario/principiosActivos',
-          '/dashboard/inventario/categorias',
-          '/dashboard/inventario/sku',
-          '/dashboard/inventario/stock',
-          '/dashboard/inventario/movimientos',
-          '/dashboard/inventario/consignacion',
-          '/dashboard/inventario/controlados',
-          '/dashboard/inventario/ver-precios',
-        ].forEach(u => whitelist.add(u));
-      } else if (userRoles.has('9')) {
-        [
-          '/dashboard/inventario/precios',
-          '/dashboard/futuro',
-        ].forEach(u => whitelist.add(u));
-      }
-    }
-
-    const enforceWhitelist = (items) => {
-      // Si es admin, no aplicamos whitelist
-      if (userRoles.has('1')) return items;
-
-      const apply = (list) => (list || [])
-        .map(item => {
-          const children = item.children ? apply(item.children) : undefined;
-          const hasChildren = children && children.length > 0;
-          const keepByUrl = item.url ? whitelist.has(item.url) : false;
-          if (hasChildren || keepByUrl) return { ...item, children };
-          return null;
-        })
-        .filter(Boolean);
-      return apply(items);
-    };
-
-    const filteredRoutes = enforceWhitelist(filterByRoles(staticRoutes));
+    // Eliminamos whitelist global para no limitar módulos; usamos solo roles
+    const filteredRoutes = filterByRoles(staticRoutes);
 
     const navContent = (
       <div

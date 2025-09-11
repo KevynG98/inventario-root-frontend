@@ -5,11 +5,21 @@ import { AppContext } from './Context';
 const ListSalidas = () => {
   const { salidas, filters, setFilters, page, setPage, nextUrl, prevUrl, setShowForm, setSelectedSalida, setShowDetail, bodegas } = useContext(AppContext);
 
+  // Roles: 10 solo ver; 12 puede agregar
+  const roles = (JSON.parse(localStorage.getItem('user') || '{}')?.roles || []).map(r => r.id);
+  const isAdmin = roles.includes(1);
+  const canAdd = isAdmin || roles.includes(12);
+
   return (
     <Card className="p-3">
       <div className="d-flex justify-content-between align-items-center mb-2">
         <h5 className="m-0">Salidas</h5>
-        <Button onClick={() => { setSelectedSalida(null); setShowForm(true); }}>Nueva Salida</Button>
+        <Button
+          disabled={!canAdd}
+          onClick={() => { if (!canAdd) return; setSelectedSalida(null); setShowForm(true); }}
+        >
+          Nueva Salida
+        </Button>
       </div>
 
       <Row className="mb-2">

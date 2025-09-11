@@ -19,13 +19,7 @@ class NavLeft extends Component {
     hasAccess = (roles) => {
         const user = JSON.parse(localStorage.getItem("user") || "{}");
         const raw = (user?.roles || []).map(r => r.id);
-        const isAdmin = raw.includes(1);
-        let effective = raw;
-        if (!isAdmin) {
-            if (raw.includes(6)) effective = [6];
-            else if (raw.includes(7)) effective = [7];
-            else if (raw.includes(8)) effective = [8];
-        }
+        const effective = raw; // usar unión de roles, sin reducir a uno solo
         return !roles || roles.some(role => effective.includes(role));
     };
 
@@ -33,23 +27,20 @@ class NavLeft extends Component {
         const user = JSON.parse(localStorage.getItem("user") || "{}");
         const raw = (user?.roles || []).map(r => r.id);
         const isAdmin = raw.includes(1);
-        let effective = raw;
-        if (!isAdmin) {
-            if (raw.includes(6)) effective = [6];
-            else if (raw.includes(7)) effective = [7];
-            else if (raw.includes(8)) effective = [8];
-        }
+        const effective = raw; // no exclusividad por perfil
 
         const can = (roles) => !roles || roles.some(role => effective.includes(role));
 
         // Whitelist adicional por perfil (no admin)
         const whitelist = new Set(['/dashboard/default']);
         if (!isAdmin) {
-            if (effective.includes(6)) {
+            if (raw.includes(6)) {
                 ['/dashboard/inventario/ver-precios'].forEach(u => whitelist.add(u));
-            } else if (effective.includes(7)) {
+            }
+            if (raw.includes(7)) {
                 ['/dashboard/inventario/stock', '/dashboard/inventario/movimientos'].forEach(u => whitelist.add(u));
-            } else if (effective.includes(8)) {
+            }
+            if (raw.includes(8)) {
                 [
                     '/dashboard/inventario/proveedores',
                     '/dashboard/inventario/marcas',
@@ -63,7 +54,8 @@ class NavLeft extends Component {
                     '/dashboard/inventario/controlados',
                     '/dashboard/inventario/ver-precios',
                 ].forEach(u => whitelist.add(u));
-            } else if (effective.includes(9)) {
+            }
+            if (raw.includes(9)) {
                 [
                     '/dashboard/inventario/precios',
                     '/dashboard/futuro',
@@ -83,7 +75,8 @@ class NavLeft extends Component {
         };
 
         const filtered = staticRoutes.filter(r => !r.children && can(r.roles) || r.children);
-        const whitelisted = applyWhitelist(filtered);
+        // Eliminar whitelist global para respetar unión de roles en todos los módulos
+        const whitelisted = filtered;
 
         const dashboardItem = whitelisted.find(r => r.title === 'Dashboard' && !r.children && can(r.roles));
         // Solo secciones con al menos un hijo visible, luego de whitelist

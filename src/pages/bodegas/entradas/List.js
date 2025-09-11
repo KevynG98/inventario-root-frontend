@@ -18,6 +18,12 @@ const ListEntradas = () => {
     eliminarEntrada
   } = useContext(AppContext);
 
+  // ---- Roles & permisos (10: estándar solo ver; 12: operador puede agregar/editar) ----
+  const roles = (JSON.parse(localStorage.getItem('user') || '{}')?.roles || []).map(r => r.id);
+  const isAdmin = roles.includes(1);
+  const canManage = isAdmin || roles.includes(12); // agregar/editar/eliminar/aplicar
+  const canAdd = canManage; // botón Nueva Entrada
+
   // ---- Normalización segura de bodegas a arreglo ----
   const bodegasList = Array.isArray(bodegas)
     ? bodegas
@@ -36,7 +42,9 @@ const ListEntradas = () => {
       <div className="d-flex justify-content-between align-items-center mb-2">
         <h5 className="m-0">Entradas</h5>
         <Button
+          disabled={!canAdd}
           onClick={() => {
+            if (!canAdd) return;
             setSelectedEntrada(null);
             setShowForm(true);
           }}
@@ -129,31 +137,35 @@ const ListEntradas = () => {
                 >
                   Ver
                 </Button>
-                <Button
-                  size="sm"
-                  variant="outline-secondary"
-                  onClick={() => {
-                    setSelectedEntrada(e);
-                    setShowForm(true);
-                  }}
-                >
-                  Editar
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline-danger"
-                  onClick={() => eliminarEntrada(e.id)}
-                >
-                  Eliminar
-                </Button>
-                {e?.estado !== 'aplicada' && (
-                  <Button
-                    size="sm"
-                    variant="success"
-                    onClick={() => window.applyEntrada ? window.applyEntrada(e.id) : null}
-                  >
-                    Aplicar
-                  </Button>
+                {canManage && (
+                  <>
+                    <Button
+                      size="sm"
+                      variant="outline-secondary"
+                      onClick={() => {
+                        setSelectedEntrada(e);
+                        setShowForm(true);
+                      }}
+                    >
+                      Editar
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline-danger"
+                      onClick={() => eliminarEntrada(e.id)}
+                    >
+                      Eliminar
+                    </Button>
+                    {e?.estado !== 'aplicada' && (
+                      <Button
+                        size="sm"
+                        variant="success"
+                        onClick={() => window.applyEntrada ? window.applyEntrada(e.id) : null}
+                      >
+                        Aplicar
+                      </Button>
+                    )}
+                  </>
                 )}
               </td>
             </tr>

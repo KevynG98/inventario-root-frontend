@@ -19,6 +19,12 @@ const ListTraslados = () => {
     anularTraslado,
   } = useContext(AppContext);
 
+  // Roles: 10 solo ver; 12 puede agregar y acciones (recibir/anular)
+  const roles = (JSON.parse(localStorage.getItem('user') || '{}')?.roles || []).map(r => r.id);
+  const isAdmin = roles.includes(1);
+  const canManage = isAdmin || roles.includes(12);
+  const canAdd = canManage;
+
   const bodegasList = Array.isArray(bodegas) ? bodegas : [];
 
   const onChangeFilter = (key) => (e) => {
@@ -30,7 +36,7 @@ const ListTraslados = () => {
     <Card className="p-3">
       <div className="d-flex justify-content-between align-items-center mb-2">
         <h5 className="m-0">Traslados</h5>
-        <Button onClick={() => { setSelectedTraslado(null); setShowForm(true); }}>Nuevo Traslado</Button>
+        <Button disabled={!canAdd} onClick={() => { if (!canAdd) return; setSelectedTraslado(null); setShowForm(true); }}>Nuevo Traslado</Button>
       </div>
 
       <Row className="mb-2 g-2">
@@ -85,7 +91,7 @@ const ListTraslados = () => {
               <td>{t?.estatus}</td>
               <td className="d-flex gap-2">
                 <Button size="sm" variant="outline-primary" onClick={() => { setSelectedTraslado(t); setShowDetail(true); }}>Ver</Button>
-                {t?.estatus === 'ENVIADO' && (
+                {canManage && t?.estatus === 'ENVIADO' && (
                   <>
                     <Button size="sm" variant="success" onClick={() => recibirTraslado(t.id)}>Marcar Recibido</Button>
                     <Button size="sm" variant="outline-danger" onClick={() => anularTraslado(t.id)}>Anular</Button>

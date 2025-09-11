@@ -85,14 +85,8 @@ const OtherDocs = React.lazy(() => import('./Demo/Other/Docs'));
 /* ====== PERMISOS ====== */
 const user = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : null;
 const userPermissions = user?.roles?.map((role) => role.id) || [];
-// Exclusividad por perfil de Inventario: si es 6,7 u 8 y no es admin, se limita a ese perfil
-const hasAdmin = userPermissions.includes(1);
-let effectivePermissions = [...userPermissions];
-if (!hasAdmin) {
-  if (userPermissions.includes(6)) effectivePermissions = [6];
-  else if (userPermissions.includes(7)) effectivePermissions = [7];
-  else if (userPermissions.includes(8)) effectivePermissions = [8];
-}
+// Usar todos los roles asignados (unión); sin exclusividad por perfil
+const effectivePermissions = [...userPermissions];
 console.log('PERMISSIONS raw/effective: ', userPermissions, effectivePermissions);
 
 /**
@@ -135,7 +129,7 @@ const routes = [
   // Acceso abierto (dashboard / soporte / placeholders)
   { path: '/dashboard/default', exact: true, name: 'Default', component: DashboardDefault },
   // { path: '/dashboard/users', exact: true, name: 'Users', component: userPermissions.some(item => [0, 1].includes(item)) ? Users : Error404 },
-  // { path: '/dashboard/roles', exact: true, name: 'Roles', component: userPermissions.some(item => [0, 1].includes(item)) ? Roles : Error404 },
+  { path: '/dashboard/roles', exact: true, name: 'Roles', component: userPermissions.some(item => [0, 1].includes(item)) ? Roles : Error404 },
   // { path: '/dashboard/products', exact: true, name: 'Roles', component: userPermissions.some(item => [1, 2].includes(item)) ? Products : Error404 },
   // { path: '/dashboard/doctor', exact: true, name: 'Roles', component: userPermissions.some(item => [1, 2].includes(item)) ? Doctor : Error404 },
   // { path: '/dashboard/enfermero', exact: true, name: 'Roles', component: userPermissions.some(item => [1, 3].includes(item)) ? Enfermero : Error404 },

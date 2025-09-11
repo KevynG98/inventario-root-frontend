@@ -81,7 +81,7 @@ const staticRoutes = [
       { title: 'Caja', url: '/dashboard/admisiones/caja', icon: <FiCreditCard /> },
       { title: 'Seguros', url: '/dashboard/admisiones/seguros', icon: <FiShield /> },
       { title: 'Estado de habitaciones', url: '/dashboard/admisiones/estado-habitacion', icon: <FiGrid /> },
-    ].map(item => ({ ...item, roles: R.ADMISIONES })),
+    ].map(item => ({ ...item, roles: item.roles ?? R.ADMISIONES })),
   },
 
   // INVENTORY
@@ -107,7 +107,7 @@ const staticRoutes = [
       { title: 'Consignacion', url: '/dashboard/inventario/consignacion', icon: <FiPackage />, roles: [1, 8] },
       { title: 'Controlados', url: '/dashboard/inventario/controlados', icon: <FiShield />, roles: [1, 8] },
       // Ver Precios permitido para 6 (y admin/operador 8); coordinador 9 NO
-      { title: 'Ver Precios', url: '/dashboard/inventario/ver-precios', icon: <FiPackage />, roles: [1, 6, 8] },
+      { title: 'Ver Precios', url: '/dashboard/inventario/ver-precios', icon: <FiPackage />, roles: [1, 6] },
     ],
   },
 
@@ -124,12 +124,12 @@ const staticRoutes = [
           { title: 'Generar Requsicion', url: '/dashboard/bodegas/compras/generar', icon: <FiFileText />, roles: [1, 11] },
           { title: 'Visualizar Requisiciones', url: '/dashboard/bodegas/compras/visualizar', icon: <FiFileText />, roles: [1, 11] },
           { title: 'Orden de Compra', url: '/dashboard/bodegas/compras/orden', icon: <FiFileText />, roles: [1, 13] },
-        ].map(item => ({ ...item, roles: R.BODEGAS })),
+        ].map(item => ({ ...item, roles: item.roles ?? R.BODEGAS })),
       },
       { title: 'Entradas', url: '/dashboard/bodegas/entradas', icon: <FiLogOut />, roles: [1, 10, 12] },
       { title: 'Salidas', url: '/dashboard/bodegas/salidas', icon: <FiFilePlus />, roles: [1, 10, 12] },
       { title: 'Traslados', url: '/dashboard/bodegas/traslados', icon: <FiTruck />, roles: [1, 10, 12] },
-    ].map(item => ({ ...item, roles: R.BODEGAS })),
+    ].map(item => ({ ...item, roles: item.roles ?? R.BODEGAS })),
   },
 
   // PATIENTS
@@ -143,7 +143,7 @@ const staticRoutes = [
       { title: 'Medicos Tratantes', url: '/dashboard/futuro', icon: <FiUser /> },
       { title: 'Devoluciones a Farmacia', url: '/dashboard/futuro', icon: <FiLogOut /> },
       { title: 'Calendario Operaciones', url: '/dashboard/futuro', icon: <FiCalendar /> },
-    ].map(item => ({ ...item, roles: R.PACIENTES })),
+    ].map(item => ({ ...item, roles: item.roles ?? R.PACIENTES })),
   },
 
   // TESTS/EXAMS
@@ -155,7 +155,7 @@ const staticRoutes = [
       { title: 'Ordenes de Laboratorio', url: '/dashboard/futuro', icon: <FiFileText /> },
       { title: 'Ordenes de Radiologia', url: '/dashboard/futuro', icon: <FiFileMinus /> },
       { title: 'Catalogo Examenes', url: '/dashboard/futuro', icon: <FiList /> },
-    ].map(item => ({ ...item, roles: R.EXAMENES })),
+    ].map(item => ({ ...item, roles: item.roles ?? R.EXAMENES })),
   },
 
   // MAINTENANCE
@@ -174,7 +174,7 @@ const staticRoutes = [
       { title: 'Centros de Costo', url: '/dashboard/mantenimiento/centroCostos', icon: <FiGrid /> },
       { title: 'Departamentos', url: '/dashboard/mantenimiento/departamentos', icon: <FiUsers /> },
       { title: 'Cuentas Contables', url: '/dashboard/mantenimiento/cuentasContables', icon: <FiBookOpen /> },
-    ].map(item => ({ ...item, roles: R.MANTENIMIENTO })),
+    ].map(item => ({ ...item, roles: item.roles ?? R.MANTENIMIENTO })),
   },
 
   // REPORTS – by default open to all module roles (and doctor).
