@@ -129,7 +129,7 @@ const routes = [
   // Acceso abierto (dashboard / soporte / placeholders)
   { path: '/dashboard/default', exact: true, name: 'Default', component: DashboardDefault },
   // { path: '/dashboard/users', exact: true, name: 'Users', component: userPermissions.some(item => [0, 1].includes(item)) ? Users : Error404 },
-  { path: '/dashboard/roles', exact: true, name: 'Roles', component: userPermissions.some(item => [0, 1].includes(item)) ? Roles : Error404 },
+  // { path: '/dashboard/roles', exact: true, name: 'Roles', component: userPermissions.some(item => [0, 1].includes(item)) ? Roles : Error404 },
   // { path: '/dashboard/products', exact: true, name: 'Roles', component: userPermissions.some(item => [1, 2].includes(item)) ? Products : Error404 },
   // { path: '/dashboard/doctor', exact: true, name: 'Roles', component: userPermissions.some(item => [1, 2].includes(item)) ? Doctor : Error404 },
   // { path: '/dashboard/enfermero', exact: true, name: 'Roles', component: userPermissions.some(item => [1, 3].includes(item)) ? Enfermero : Error404 },
