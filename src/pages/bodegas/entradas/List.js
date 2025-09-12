@@ -21,8 +21,10 @@ const ListEntradas = () => {
   // ---- Roles & permisos (10: estándar solo ver; 12: operador puede agregar/editar) ----
   const roles = (JSON.parse(localStorage.getItem('user') || '{}')?.roles || []).map(r => r.id);
   const isAdmin = roles.includes(1);
-  const canManage = isAdmin || roles.includes(12); // agregar/editar/eliminar/aplicar
+  const isOperador = roles.includes(12);
+  const canManage = isAdmin || isOperador; // agregar/editar/aplicar
   const canAdd = canManage; // botón Nueva Entrada
+  const canDelete = isAdmin; // Rol 12 no puede eliminar
 
   // ---- Normalización segura de bodegas a arreglo ----
   const bodegasList = Array.isArray(bodegas)
@@ -152,7 +154,12 @@ const ListEntradas = () => {
                     <Button
                       size="sm"
                       variant="outline-danger"
-                      onClick={() => eliminarEntrada(e.id)}
+                      disabled={!canDelete}
+                      title={!canDelete ? 'No tiene permisos para eliminar' : undefined}
+                      onClick={() => {
+                        if (!canDelete) return;
+                        eliminarEntrada(e.id);
+                      }}
                     >
                       Eliminar
                     </Button>
