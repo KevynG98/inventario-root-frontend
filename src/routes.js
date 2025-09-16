@@ -105,7 +105,8 @@ const R = {
   ADMISIONES: [1, 2, 3, 4, 5],
   INVENTARIO: [1, 6, 7, 8, 9],
   BODEGAS: [1, 10, 11, 12, 13],
-  PACIENTES: [1, 14, 15, 16, 17, 18, 19],
+  // Remover 14 de PACIENTES: rol 14 tendrá acceso únicamente a Compras > Visualizar
+  PACIENTES: [1, 15, 16, 17, 18, 19],
   EXAMENES: [1, 20, 21, 22],
   MANTENIMIENTO: [1, 23, 24, 25],
   DOCTOR: [26],
@@ -272,7 +273,8 @@ const routes = [
     path: '/dashboard/bodegas/compras/visualizar',
     exact: true,
     name: 'Compras - Visualizar Requisiciones',
-    component: allow([1, 11]) ? InventarioComprasVisualizar : Error404,
+    // Incluir rol 14 (Bodega - Autoriza) con acceso exclusivo a esta opción
+    component: allow([1, 11, 14]) ? InventarioComprasVisualizar : Error404,
   },
   {
     path: '/dashboard/bodegas/compras/orden',
