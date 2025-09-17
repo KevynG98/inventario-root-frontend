@@ -54,6 +54,7 @@ const SignUp1 = () => {
         {/* Columna izquierda */}
         <div className="d-flex flex-column justify-content-center align-items-center bg-light w-100 w-md-50 p-4 p-md-5">
           <h3 className="mb-4 fw-bold text-dark text-center">Inicio de Sesión al Sistema</h3>
+          <h5 className="mb-4 text-secondary text-center">(DEV)</h5>
 
           <form onSubmit={handleSubmit(onSubmit)} style={{ width: '100%', maxWidth: '400px' }}>
             <div className="mb-3">
