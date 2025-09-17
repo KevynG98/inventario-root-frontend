@@ -46,11 +46,11 @@ const R = {
   ADMIN: 1,
   ADMISIONES: [1, 2, 3, 4, 5],
   INVENTARIO: [1, 6, 7, 8, 9],
-  BODEGAS: [1, 10, 11, 12, 13],
-  PACIENTES: [1, 14, 15, 16, 17, 18, 19],
-  EXAMENES: [1, 20, 21, 22],
-  MANTENIMIENTO: [1, 23, 24, 25],
-  DOCTOR: [26],
+  BODEGAS: [1, 10, 11, 12, 13, 14],
+  PACIENTES: [1, 15, 16, 17, 18, 19, 20],
+  EXAMENES: [1, 21, 22, 23],
+  MANTENIMIENTO: [1, 24, 25, 26],
+  DOCTOR: [27],
 };
 
 // If you want the dashboard visible for absolutely everyone, include 26 too:
@@ -122,7 +122,7 @@ const staticRoutes = [
         icon: <FiFileText />,
         children: [
           { title: 'Generar Requsicion', url: '/dashboard/bodegas/compras/generar', icon: <FiFileText />, roles: [1, 11] },
-          { title: 'Visualizar Requisiciones', url: '/dashboard/bodegas/compras/visualizar', icon: <FiFileText />, roles: [1, 11] },
+          { title: 'Visualizar Requisiciones', url: '/dashboard/bodegas/compras/visualizar', icon: <FiFileText />, roles: [1, 11, 14] },
           { title: 'Orden de Compra', url: '/dashboard/bodegas/compras/orden', icon: <FiFileText />, roles: [1, 13] },
         ].map(item => ({ ...item, roles: item.roles ?? R.BODEGAS })),
       },

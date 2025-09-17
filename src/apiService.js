@@ -3,7 +3,7 @@ import axios from 'axios';
 import Swal from 'sweetalert2';
 
 // Configuración general
-const DEV = true; // Cambia a false para producción
+const DEV = process.env.REACT_APP_DEVELOPMENT === 'true'; // Cambia a false para producción
 const API_URL = DEV ? process.env.REACT_APP_API_URL_DEV : process.env.REACT_APP_API_URL_PROD;
 
 // Cliente Axios

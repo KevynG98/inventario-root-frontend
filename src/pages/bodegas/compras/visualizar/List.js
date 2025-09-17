@@ -9,6 +9,10 @@ const List = () => {
   const [bodega, setBodega] = useState('');
   const [estatus, setEstatus] = useState('pendiente');
 
+  // Roles desde localStorage para habilitar edición sólo a 1, 11, 14
+  const roles = (JSON.parse(localStorage.getItem('user') || '{}')?.roles || []).map(r => r.id);
+  const canEdit = roles.includes(1) || roles.includes(11) || roles.includes(14);
+
   const filteredData = useMemo(() => {
     const rows = Array.isArray(requisiciones) ? requisiciones : [];
     return rows.filter((r) => {
@@ -91,11 +95,13 @@ const List = () => {
                         <FiEye />
                       </Button>
                     </OverlayTrigger>
-                    <OverlayTrigger overlay={<Tooltip>Editar</Tooltip>}>
-                      <Button className="btn btn-outline-secondary btn-sm ms-1" onClick={() => abrirModal(req, 'editar')}>
-                        <FiEdit />
-                      </Button>
-                    </OverlayTrigger>
+                    {canEdit && (
+                      <OverlayTrigger overlay={<Tooltip>Editar</Tooltip>}>
+                        <Button className="btn btn-outline-secondary btn-sm ms-1" onClick={() => abrirModal(req, 'editar')}>
+                          <FiEdit />
+                        </Button>
+                      </OverlayTrigger>
+                    )}
                   </td>
                 </tr>
               ))

@@ -34,6 +34,11 @@ const ModalRequisicion = () => {
     const [nuevaCantServicio, setNuevaCantServicio] = useState('');
     const [nuevoPrecioServicio, setNuevoPrecioServicio] = useState('');
 
+    // Permisos: solo el rol 14 (Bodega - Autoriza) puede editar, agregar/quitar y ver botones de acción
+    const roles = (JSON.parse(localStorage.getItem('user') || '{}')?.roles || []).map(r => Number(r.id ?? r));
+    // Permisos de edición para Admin (1) y Bodega - Autoriza (14)
+    const canEdit = roles.includes(14) || roles.includes(1);
+
     useEffect(() => {
         if (requisicionSeleccionada) {
             // Observaciones de acción no deben pre-poblarse con la de alta
@@ -277,7 +282,8 @@ const ModalRequisicion = () => {
         setNuevoPrecioServicio('');
     };
 
-    const readOnlyView = modalModo === 'ver';
+    // Forzar solo lectura si el usuario no es rol 14, incluso si se abrió en 'editar'
+    const readOnlyView = !(canEdit && modalModo === 'editar');
 
     return (
         <Modal show={showModal} onHide={cerrarModal} size="lg" centered>
@@ -505,7 +511,7 @@ const ModalRequisicion = () => {
             </Modal.Body>
 
             <Modal.Footer className="justify-content-between flex-wrap gap-2">
-                {!readOnlyView && (
+                {canEdit && !readOnlyView && (
                   <>
                     <Button variant="success" className="btn-sm flex-fill" onClick={handleGuardar}>
                         Guardar
