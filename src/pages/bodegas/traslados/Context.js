@@ -44,18 +44,36 @@ export const ContextProvider = ({ children }) => {
 
   const loadCatalogs = useCallback(async () => {
     try {
-      const [b, c, sku, deps, users] = await Promise.all([
+      // Helper: fetch all pages for a paginated endpoint
+      const fetchAllPaginated = async (url) => {
+        try {
+          let all = [];
+          let next = url;
+          while (next) {
+            const res = await getData(next);
+            const data = res?.data || {};
+            const results = Array.isArray(data) ? data : (data.results || []);
+            all = all.concat(results);
+            next = data.next || null;
+          }
+          return all;
+        } catch (_) {
+          return [];
+        }
+      };
+
+      const [b, c, sku, deps, usersAll] = await Promise.all([
         getData('inventario/bodegas/?page_size=200'),
         getData('inventario/categorias/?page_size=200'),
         getData('inventario/skus/?page_size=200'),
         getData('mantenimiento/departamentos/?page_size=200'),
-        getData('user/filter-users/'),
+        fetchAllPaginated('user/filter-users/'),
       ]);
       setBodegas(b.data.results || []);
       setCategorias(c.data.results || []);
       setSkus(sku.data.results || []);
       setDepartamentos(deps?.data?.results ?? deps?.data ?? []);
-      setUsuarios(users?.data?.results ?? users?.data ?? []);
+      setUsuarios(usersAll || []);
     } catch (err) {
       console.error('Error cargando catálogos:', err?.response?.data || err?.message || err);
       NotificationManager.error('No se pudieron cargar catálogos', 'Error', 4000);

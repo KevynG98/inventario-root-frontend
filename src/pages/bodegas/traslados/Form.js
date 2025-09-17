@@ -53,7 +53,8 @@ const TrasladoForm = () => {
     // Solo activos
     list = list.filter(u => u.is_active !== false);
     if (!deptoSel) return list;
-    return list.filter(u => (u.perfil?.departamento_laboral || '').toLowerCase() === String(deptoSel).toLowerCase());
+    const sel = String(deptoSel).toLowerCase().trim();
+    return list.filter(u => (u.perfil?.departamento_laboral || '').toLowerCase().trim() === sel);
   }, [usuarios, deptoSel]);
 
   const addItem = () => {
