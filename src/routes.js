@@ -57,6 +57,8 @@ const DirectorioExtensiones = React.lazy(() => import('./pages/mantenimiento/dir
 const centroCostos = React.lazy(() => import('./pages/mantenimiento/centroCostos/Index'));
 const departamentos = React.lazy(() => import('./pages/mantenimiento/departamentos/Index')); 
 const cuentasContables = React.lazy(() => import('./pages/mantenimiento/cuentasContables/Index'));
+const CargaMasivaExistencias = React.lazy(() => import('./pages/mantenimiento/cargaMasiva/existencias/Index'));
+const CargaMasivaPrecios = React.lazy(() => import('./pages/mantenimiento/cargaMasiva/precios/Index'));
 
 /* Reportes */
 const HIstorialGeneral = React.lazy(() => import('./pages/reportes/historialGeneral/Index'));
@@ -341,20 +343,32 @@ const routes = [
   {
     path: '/dashboard/mantenimiento/centroCostos',
     exact: true,
-    name: 'Directorio Extensiones',
+    name: 'Centros de Costo',
     component: allow(R.MANTENIMIENTO) ? centroCostos : Error404,
   },
   {
     path: '/dashboard/mantenimiento/departamentos',
     exact: true,
-    name: 'Directorio Extensiones',
+    name: 'Departamentos',
     component: allow(R.MANTENIMIENTO) ? departamentos : Error404,
   },
   {
     path: '/dashboard/mantenimiento/cuentasContables',
     exact: true,
-    name: 'Directorio Extensiones',
+    name: 'Cuentas Contables',
     component: allow(R.MANTENIMIENTO) ? cuentasContables : Error404,
+  },
+  {
+    path: '/dashboard/mantenimiento/carga-masiva/existencias',
+    exact: true,
+    name: 'Carga Masiva Existencias',
+    component: allow(R.MANTENIMIENTO) ? CargaMasivaExistencias : Error404,
+  },
+  {
+    path: '/dashboard/mantenimiento/carga-masiva/precios',
+    exact: true,
+    name: 'Carga Masiva Precios',
+    component: allow(R.MANTENIMIENTO) ? CargaMasivaPrecios : Error404,
   },
 
   /* Reportes (excluye inventario estándar 6, auxiliar 7 y operador 8) */

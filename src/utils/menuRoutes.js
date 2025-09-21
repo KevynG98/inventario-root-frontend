@@ -2,7 +2,8 @@ import {
   FiHome, FiUsers, FiSettings, FiShield, FiPackage, FiBox, FiUserPlus,
   FiList, FiFileText, FiEdit3, FiLogOut, FiUserCheck, FiCreditCard, FiGrid, FiTruck,
   FiClipboard, FiHeart, FiFilePlus, FiArchive, FiUser, FiCalendar, FiFileMinus,
-  FiDollarSign, FiBookOpen, FiBarChart2, FiMonitor, FiDatabase
+  FiDollarSign, FiBookOpen, FiBarChart2, FiMonitor, FiDatabase, FiUploadCloud,
+  FiPlusSquare, FiTag
 } from 'react-icons/fi';
 
 /**
@@ -164,6 +165,14 @@ const staticRoutes = [
     icon: <FiSettings />,
     roles: R.MANTENIMIENTO,
     children: [
+      {
+        title: 'Carga Masiva',
+        icon: <FiUploadCloud />,
+        children: [
+          { title: 'Existencias', url: '/dashboard/mantenimiento/carga-masiva/existencias', icon: <FiPlusSquare /> },
+          { title: 'Precios', url: '/dashboard/mantenimiento/carga-masiva/precios', icon: <FiTag /> },
+        ].map(item => ({ ...item, roles: item.roles ?? R.MANTENIMIENTO })),
+      },
       { title: 'Admisiones', url: '/dashboard/futuro', icon: <FiUserPlus /> },
       { title: 'Facturacion', url: '/dashboard/futuro', icon: <FiDollarSign /> },
       { title: 'Habitaciones', url: '/dashboard/mantenimiento/habitaciones', icon: <FiGrid /> },
