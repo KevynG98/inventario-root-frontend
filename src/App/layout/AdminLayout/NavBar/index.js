@@ -4,8 +4,6 @@ import {connect} from 'react-redux';
 import NavLeft from "./NavLeft";
 import NavRight from "./NavRight";
 import Aux from "../../../../hoc/_Aux";
-import DEMO from "../../../../store/constant";
-import * as actionTypes from "../../../../store/actions";
 
 class NavBar extends Component {
     render() {
@@ -14,24 +12,18 @@ class NavBar extends Component {
             headerClass = [...headerClass, 'headerpos-fixed'];
         }
 
-        let toggleClass = ['mobile-menu'];
-        if (this.props.collapseMenu) {
-            toggleClass = [...toggleClass, 'on'];
-        }
-
         return (
             <Aux>
                 <header className={headerClass.join(' ')}>
                     <div className="m-header">
-                        {/* <a className={toggleClass.join(' ')} id="mobile-collapse1" href={DEMO.BLANK_LINK} onClick={this.props.onToggleNavigation}><span/></a> */}
-                        <a className="b-brand">
+                        <div className="b-brand">
                             <div className="b-bg">
                                 <i className="feather icon-trending-up"/>
                             </div>
                             <span className="b-title">Hospital Naranjo</span>
-                        </a>
+                        </div>
                     </div>
-                    <a className="mobile-menu" id="mobile-header"><i className="feather icon-more-horizontal"/></a>
+                    <div className="mobile-menu" id="mobile-header"><i className="feather icon-more-horizontal"/></div>
                     <div className="collapse navbar-collapse">
                         <NavLeft/>
                         <NavRight rtlLayout={this.props.rtlLayout} />
@@ -46,15 +38,8 @@ const mapStateToProps = state => {
     return {
         rtlLayout: state.rtlLayout,
         headerBackColor: state.headerBackColor,
-        headerFixedLayout: state.headerFixedLayout,
-        collapseMenu: state.collapseMenu
+        headerFixedLayout: state.headerFixedLayout
     }
 };
 
-const mapDispatchToProps = dispatch => {
-    return {
-        onToggleNavigation: () => dispatch({type: actionTypes.COLLAPSE_MENU}),
-    }
-};
-
-export default connect(mapStateToProps, mapDispatchToProps) (NavBar);
+export default connect(mapStateToProps) (NavBar);

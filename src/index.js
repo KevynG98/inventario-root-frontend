@@ -9,7 +9,7 @@ import * as serviceWorker from './serviceWorker';
 import reducer from './store/reducer';
 
 import 'react-notifications/lib/notifications.css';
-import 'bootstrap/dist/css/bootstrap.min.css';
+import './assets/vendor/bootstrap.min.css';
 
 //Programador Kevyn Giron
 

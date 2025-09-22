@@ -1,5 +1,4 @@
 import React, { createContext, useState } from 'react';
-import { postData } from '../../../apiService'
 
 export const AppContext = createContext();
 
@@ -13,6 +12,7 @@ export const AppProvider = ({ children }) => {
         state,
         setState,
         loading,
+        setLoading
     };
 
     return (

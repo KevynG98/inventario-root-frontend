@@ -8,7 +8,7 @@ import Swal from 'sweetalert2';
 
 const SignUp1 = () => {
   const { register, handleSubmit, formState: { errors } } = useForm();
-  const { data1, isLoading, error, sendData, modalAction, show } = useComponentContext();
+  const { isLoading, error, sendData } = useComponentContext();
 
   useEffect(() => {
     if (isLoading) {
@@ -45,7 +45,6 @@ const SignUp1 = () => {
 
   const onSubmit = (data) => {
     sendData(data);
-    modalAction();
   };
 
   return (

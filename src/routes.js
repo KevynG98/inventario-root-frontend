@@ -1,16 +1,8 @@
 import React from 'react';
-import $ from 'jquery';
-
-window.jQuery = $;
-window.$ = $;
-global.jQuery = $;
 
 const DashboardDefault = React.lazy(() => import('./Demo/Dashboard/Default'));
-
 const Roles = React.lazy(() => import('./pages/roles/Index'));
-const Products = React.lazy(() => import('./pages/products/Index'));
-const Doctor = React.lazy(() => import('./pages/doctor/Index'));
-const Enfermero = React.lazy(() => import('./pages/enfermero/Index'));
+
 const Error404 = React.lazy(() => import('./pages/404/Index'));
 const Construccion = React.lazy(() => import('./pages/construccion/Index'));
 const Futuro = React.lazy(() => import('./pages/futuro/Index'));
@@ -65,31 +57,12 @@ const HIstorialGeneral = React.lazy(() => import('./pages/reportes/historialGene
 const UsersReporte = React.lazy(() => import('./pages/reportes/usuarios/Index'));
 const InventarioReporte = React.lazy(() => import('./pages/reportes/inventarios/Index'));
 
-const UIBasicButton = React.lazy(() => import('./Demo/UIElements/Basic/Button'));
-const UIBasicBadges = React.lazy(() => import('./Demo/UIElements/Basic/Badges'));
-const UIBasicBreadcrumbPagination = React.lazy(() => import('./Demo/UIElements/Basic/BreadcrumbPagination'));
-
-const UIBasicCollapse = React.lazy(() => import('./Demo/UIElements/Basic/Collapse'));
-const UIBasicTabsPills = React.lazy(() => import('./Demo/UIElements/Basic/TabsPills'));
-const UIBasicBasicTypography = React.lazy(() => import('./Demo/UIElements/Basic/Typography'));
-
-const FormsElements = React.lazy(() => import('./Demo/Forms/FormsElements'));
-
-const BootstrapTable = React.lazy(() => import('./Demo/Tables/BootstrapTable'));
-
-const Nvd3Chart = React.lazy(() => import('./Demo/Charts/Nvd3Chart/index'));
-
-const GoogleMap = React.lazy(() => import('./Demo/Maps/GoogleMap/index'));
-
-const OtherSamplePage = React.lazy(() => import('./Demo/Other/SamplePage'));
-const OtherDocs = React.lazy(() => import('./Demo/Other/Docs'));
 
 /* ====== PERMISOS ====== */
 const user = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : null;
 const userPermissions = user?.roles?.map((role) => role.id) || [];
 // Usar todos los roles asignados (unión); sin exclusividad por perfil
 const effectivePermissions = [...userPermissions];
-console.log('PERMISSIONS raw/effective: ', userPermissions, effectivePermissions);
 
 /**
  * Mapa de roles por módulo (IDs según tu hoja/screenshot)
@@ -114,8 +87,6 @@ const R = {
   DOCTOR: [26],
 };
 const ALL = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26];
-// Inventario sin el perfil estándar (6)
-const INVENTARIO_NO_STD = [1, 7, 8, 9];
 // Roles para gestión de inventario (admin y operador 8; excluye 6,7,9)
 const INVENTARIO_GESTION = [1, 8];
 // Roles para consulta de inventario (stock y movimientos): admin, 7, 8 (excluye 9)
@@ -131,11 +102,8 @@ const allow = (allowed) => effectivePermissions.some((r) => allowed.includes(r))
 const routes = [
   // Acceso abierto (dashboard / soporte / placeholders)
   { path: '/dashboard/default', exact: true, name: 'Default', component: DashboardDefault },
-  // { path: '/dashboard/users', exact: true, name: 'Users', component: userPermissions.some(item => [0, 1].includes(item)) ? Users : Error404 },
-  // { path: '/dashboard/roles', exact: true, name: 'Roles', component: userPermissions.some(item => [0, 1].includes(item)) ? Roles : Error404 },
-  // { path: '/dashboard/products', exact: true, name: 'Roles', component: userPermissions.some(item => [1, 2].includes(item)) ? Products : Error404 },
-  // { path: '/dashboard/doctor', exact: true, name: 'Roles', component: userPermissions.some(item => [1, 2].includes(item)) ? Doctor : Error404 },
-  // { path: '/dashboard/enfermero', exact: true, name: 'Roles', component: userPermissions.some(item => [1, 3].includes(item)) ? Enfermero : Error404 },
+  { path: '/dashboard/roles', exact: true, name: 'Roles', component: allow([R.ADMIN]) ? Roles : Error404 },
+  { path: '/dashboard/users', exact: true, name: 'Users', component: allow(R.MANTENIMIENTO) ? Users : Error404 },
   { path: '/dashboard/404', exact: true, name: '404', component: Error404 },
   { path: '/dashboard/construccion', exact: true, name: '404', component: Construccion },
   { path: '/dashboard/futuro', exact: true, name: '404', component: Futuro },
@@ -392,18 +360,6 @@ const routes = [
   },
 
   // -------------------------------------------------------------------------------------------------------------------------------
-  { path: '/basic/button', exact: true, name: 'Basic Button', component: UIBasicButton },
-  { path: '/basic/badges', exact: true, name: 'Basic Badges', component: UIBasicBadges },
-  { path: '/basic/breadcrumb-paging', exact: true, name: 'Basic Breadcrumb Pagination', component: UIBasicBreadcrumbPagination },
-  { path: '/basic/collapse', exact: true, name: 'Basic Collapse', component: UIBasicCollapse },
-  { path: '/basic/tabs-pills', exact: true, name: 'Basic Tabs & Pills', component: UIBasicTabsPills },
-  { path: '/basic/typography', exact: true, name: 'Basic Typography', component: UIBasicBasicTypography },
-  { path: '/forms/form-basic', exact: true, name: 'Forms Elements', component: FormsElements },
-  { path: '/tables/bootstrap', exact: true, name: 'Bootstrap Table', component: BootstrapTable },
-  { path: '/charts/nvd3', exact: true, name: 'Nvd3 Chart', component: Nvd3Chart },
-  { path: '/maps/google-map', exact: true, name: 'Google Map', component: GoogleMap },
-  { path: '/sample-page', exact: true, name: 'Sample Page', component: OtherSamplePage },
-  { path: '/docs', exact: true, name: 'Documentation', component: OtherDocs },
 ];
 
 export default routes;

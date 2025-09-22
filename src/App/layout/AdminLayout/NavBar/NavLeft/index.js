@@ -63,24 +63,11 @@ class NavLeft extends Component {
             }
         }
 
-        const applyWhitelist = (items) => {
-            if (isAdmin) return items;
-            return (items || []).reduce((acc, item) => {
-                const children = item.children ? applyWhitelist(item.children) : undefined;
-                const hasChildren = children && children.length > 0;
-                const keep = item.url ? whitelist.has(item.url) : false;
-                if (hasChildren || keep) acc.push({ ...item, children });
-                return acc;
-            }, []);
-        };
+        const visibleRoutes = staticRoutes.filter((r) => (!r.children && can(r.roles)) || r.children);
 
-        const filtered = staticRoutes.filter(r => !r.children && can(r.roles) || r.children);
-        // Eliminar whitelist global para respetar unión de roles en todos los módulos
-        const whitelisted = filtered;
-
-        const dashboardItem = whitelisted.find(r => r.title === 'Dashboard' && !r.children && can(r.roles));
+        const dashboardItem = visibleRoutes.find(r => r.title === 'Dashboard' && !r.children && can(r.roles));
         // Solo secciones con al menos un hijo visible, luego de whitelist
-        const sections = whitelisted
+        const sections = visibleRoutes
             .filter(r => r.children && can(r.roles))
             .map(section => ({
                 ...section,

@@ -1,32 +1,22 @@
-import React, { useEffect, useState, useContext, useMemo, } from 'react';
+import React, { useEffect, useState, useContext, useMemo } from 'react';
 import {
   Container,
   Row,
   Col,
   Form,
   Button,
-  Nav,
-  Modal,
   Tabs,
-  Tab,
+  Tab
 } from 'react-bootstrap';
-import { BiSearch } from 'react-icons/bi';
-import { convert_fecha_ddmmaa } from '../../../utils/formatUtils';
-import { FiAlignJustify } from "react-icons/fi";
 import { AppContext } from './Context';
 
 const FormularioAdmision = () => {
 
   const { guardarAdmision, loading, listarHabitaciones, seguros, areaHabitacion, setAreaSeleccionada, areaSeleccionada,
-    doctor, register, handleSubmit, watch, setValue, getValues
+    doctor, register, handleSubmit, watch, setValue
   } = useContext(AppContext);
 
-  //const { register, handleSubmit, watch, setValue, getValues } = useForm();
-  const [acompanantesVisibles, setAcompanantesVisibles] = useState([]);
   const [todayDate, setTodayDate] = useState('');
-  const [mostrarModalFamiliar, setMostrarModalFamiliar] = useState(false);
-  const [listaFamiliares, setListaFamiliares] = useState([]);
-  const [seccionActiva, setSeccionActiva] = useState('datos-seguro');
 
   useEffect(() => {
     const subscription = watch((value, { name }) => {
@@ -63,14 +53,6 @@ const FormularioAdmision = () => {
     return () => subscription.unsubscribe();
   }, [watch, setValue]);
 
-  useEffect(() => {
-    if (listaFamiliares.length > 0) {
-      const primero = listaFamiliares[0];
-      setValue('acompananteNombre', primero.nombre);
-      setValue('acompananteTelefono', primero.telefono1);
-    }
-  }, [listaFamiliares, setValue]);
-
   const habitacionesFiltradas = useMemo(() => {
     return listarHabitaciones.filter(
       (hab) => hab.area === areaSeleccionada
@@ -104,12 +86,6 @@ const FormularioAdmision = () => {
     return `${edad} año(s)`;
   };
 
-
-  const agregarFamiliar = (nuevoFamiliar) => {
-    const actualizada = [...listaFamiliares, nuevoFamiliar];
-    setListaFamiliares(actualizada);
-    setValue('familiares', actualizada);
-  };
 
   const transformarCampos = (data) => {
     const output = {
@@ -225,18 +201,12 @@ const FormularioAdmision = () => {
     console.log('Formulario enviado:', data);
     try {
       const datosTransformados = transformarCampos(data);
-      const resultado = await guardarAdmision(datosTransformados);
+      await guardarAdmision(datosTransformados);
       //alert('Guardado con éxito');
     } catch (err) {
       alert('Error al guardar');
     }
   };
-
-  const showPrimaryModal = (e) => {
-    if (e.key === 'Tab' || e.key === 'Enter') {
-      setMostrarModalFamiliar(true)
-    }
-  }
 
   return (
     <Container className="p-4 bg-light rounded shadow-sm">

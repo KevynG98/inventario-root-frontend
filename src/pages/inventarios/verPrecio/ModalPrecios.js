@@ -9,15 +9,10 @@ const ModalPrecios = () => {
     skuActivo,
     seguros,
     cargarSeguros,
-    actualizarPrecio,
-    crearPrecio,
-    eliminarPrecio,
     sku,
     descripcionSku,
   } = usePreciosContext();
 
-  const [precios, setPrecios] = useState([]);
-  const [editando, setEditando] = useState({});
   const [valores, setValores] = useState({});
 
   useEffect(() => {
@@ -32,52 +27,7 @@ const ModalPrecios = () => {
 
   useEffect(() => {
     cargarSeguros();
-  }, []);
-
-  const handleChange = (id, value) => {
-    setValores((prev) => ({ ...prev, [id]: value }));
-  };
-
-  const guardar = async (seguroId) => {
-    const precio = parseFloat(valores[seguroId]);
-    if (isNaN(precio)) return;
-
-    const existente = skuActivo.precios?.find((p) => p.seguro_id === seguroId);
-    const seguroNombre = seguros.find((s) => s.id === seguroId)?.nombre || '';
-
-    if (existente) {
-      await actualizarPrecio({
-        id: existente.id,
-        precio,
-        sku: skuActivo.id,
-        sku_nombre: skuActivo.nombre,
-        seguro_nombre: seguroNombre,
-      });
-    } else {
-      await crearPrecio({
-        sku: skuActivo.id,
-        sku_nombre: skuActivo.nombre,  // asegúrate que `skuActivo.nombre` exista
-        seguro_nombre: seguroNombre,
-        precio,
-      });
-    }
-
-    setEditando((prev) => ({ ...prev, [seguroId]: false }));
-  };
-
-  const cancelar = (id) => {
-    const original = skuActivo.precios?.find((p) => p.seguro_id === id)?.precio || 0;
-    setValores((prev) => ({ ...prev, [id]: original }));
-    setEditando((prev) => ({ ...prev, [id]: false }));
-  };
-
-  const handleEliminar = async (seguroId) => {
-    const existente = skuActivo.precios?.find((p) => p.seguro_id === seguroId);
-    if (existente) {
-      await eliminarPrecio(existente.id);
-      setValores((prev) => ({ ...prev, [seguroId]: 0 }));
-    }
-  };
+  }, [cargarSeguros]);
 
   const handleClose = () => setShowModalPrecios(false);
 

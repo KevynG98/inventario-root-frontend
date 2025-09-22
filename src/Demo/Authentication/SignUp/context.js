@@ -1,12 +1,11 @@
-import { createContext, useState, useContext, useEffect } from "react";
+import { createContext, useState, useContext } from "react";
 import { withRouter } from "react-router-dom";
-import apiClient, { postData } from "../../../apiService";
+import { postData } from "../../../apiService";
 import { NotificationManager } from "react-notifications";
 
 const ComponentContext = createContext(null);
 
 function ComponentProvider({ children, history }) {
-    const [data1, setData1] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
 
@@ -16,10 +15,7 @@ function ComponentProvider({ children, history }) {
         try {
             const response = await postData("user/register/", data);
 
-            console.log("Response completa:", response);
-
             if (response?.status === 201 && response.data) {
-                setData1(response.data);
                 NotificationManager.success("Mensaje", "Título", 3000);
             } else {
                 setError(`Error ${response?.status || "desconocido"}`);
@@ -33,8 +29,6 @@ function ComponentProvider({ children, history }) {
     };
 
     const values = { 
-        data1, 
-        setData1, 
         isLoading, 
         error, 
         sendData 

@@ -1,15 +1,12 @@
 import { createContext, useState, useContext, useEffect } from "react";
 import { withRouter } from "react-router-dom";
-import apiClient, { postData } from "../../../apiService";
+import { postData } from "../../../apiService";
 
 const ComponentContext = createContext(null);
 
 function ComponentProvider({ children, history }) {
-    const [data1, setData1] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
-    const [show, setShow] = useState(false);
-    const modalAction = () => setShow(!show);
 
     const sendData = async (data) => {
         setIsLoading(true);
@@ -21,10 +18,7 @@ function ComponentProvider({ children, history }) {
             if (response?.status === 200 && response.data) {
                 // Guardar token en localStorage
                 localStorage.setItem("token", response.data.token);
-                // console.log("Token guardado:", response.data.token);
-                console.log("RESPUESTA: ", response.data)
                 localStorage.setItem("user", JSON.stringify(response.data.user));
-                setData1(response.data);
                 setIsLoading(false);
                 history.push("/dashboard/default");
 
@@ -49,13 +43,9 @@ function ComponentProvider({ children, history }) {
 
 
     const values = {
-        data1,
-        setData1,
         isLoading,
         error,
-        sendData,
-        modalAction,
-        show
+        sendData
     }
 
     return (
