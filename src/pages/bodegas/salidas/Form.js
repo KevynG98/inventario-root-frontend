@@ -84,6 +84,15 @@ const SalidaForm = () => {
 
   const onSubmit = async (e) => {
     e.preventDefault();
+    if (!items.length) {
+      window?.NotificationManager?.warning?.('Debe agregar al menos un SKU a la salida.', 'Validación', 4000);
+      return;
+    }
+    const hasMissingSku = items.some(it => !String(it?.sku || '').trim());
+    if (hasMissingSku) {
+      window?.NotificationManager?.warning?.('Todos los ítems de la salida deben tener un SKU válido.', 'Validación', 4000);
+      return;
+    }
     try {
       // El backend de salidas no acepta "lote" ni "fecha_vencimiento" en items.
       // Enviar solo las llaves soportadas para evitar 400 (campos desconocidos).
