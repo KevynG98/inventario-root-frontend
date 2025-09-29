@@ -15,7 +15,6 @@ class NavContent extends Component {
     this.state = {
       activeMenus: {}
     };
-    this.submenuRefs = {};
     this.parentMap = {};
     this.childMap = {};
     this.rootMenuIds = new Set();
@@ -27,7 +26,6 @@ class NavContent extends Component {
       this.parentMap = {};
       this.childMap = {};
       this.rootMenuIds = new Set();
-      this.submenuRefs = {};
       this.buildParentMap(this.props.navigation);
     }
   }
@@ -63,6 +61,10 @@ class NavContent extends Component {
 
       const parentId = this.parentMap[key] || null;
       const isOpening = !activeMenus[key];
+
+      if (!isOpening && parentId) {
+        return prevState;
+      }
 
       if (isOpening) {
         const siblings = parentId ? (this.childMap[parentId] || []) : Array.from(this.rootMenuIds);
@@ -144,8 +146,6 @@ class NavContent extends Component {
 
       // Si el ítem tiene hijos, renderiza el botón para desplegar
       if (hasChildren) {
-        const submenuRef = this.submenuRefs[currentKey];
-        const submenuHeight = submenuRef ? submenuRef.scrollHeight : 0;
         return (
           <li key={currentKey} style={containerStyle}>
             <button
@@ -163,12 +163,11 @@ class NavContent extends Component {
               }} />
             </button>
             <ul
-              ref={el => (this.submenuRefs[currentKey] = el)}
               style={{
                 paddingLeft: '20px',
                 margin: 0,
                 overflow: 'hidden',
-                maxHeight: isOpen ? `${submenuHeight}px` : 0,
+                maxHeight: isOpen ? '1000px' : 0,
                 opacity: isOpen ? 1 : 0,
                 pointerEvents: isOpen ? 'auto' : 'none',
                 transition: 'max-height 0.3s ease, opacity 0.3s ease'
