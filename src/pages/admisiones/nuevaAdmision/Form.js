@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext, useMemo } from 'react';
+import React, { useEffect, useState, useContext, useMemo, useRef } from 'react';
 import {
   Container,
   Row,
@@ -13,10 +13,59 @@ import { AppContext } from './Context';
 const FormularioAdmision = () => {
 
   const { guardarAdmision, loading, listarHabitaciones, seguros, areaHabitacion, setAreaSeleccionada, areaSeleccionada,
-    doctor, register, handleSubmit, watch, setValue
+    doctor, register, handleSubmit, watch, setValue, reset
   } = useContext(AppContext);
 
   const [todayDate, setTodayDate] = useState('');
+
+  const primerNombreRef = useRef(null);
+  const segundoNombreRef = useRef(null);
+  const primerApellidoRef = useRef(null);
+  const segundoApellidoRef = useRef(null);
+  const apellidoCasadaRef = useRef(null);
+
+  const sanitizeSingleWord = (rawValue) => {
+    if (!rawValue) return '';
+    return rawValue.trim().split(/\s+/)[0];
+  };
+
+  const moveFocus = (nextRef) => {
+    if (nextRef?.current) {
+      nextRef.current.focus();
+    }
+  };
+
+  const handleNameBlur = (event, fieldName) => {
+    const sanitized = sanitizeSingleWord(event.target.value);
+    if (sanitized !== event.target.value) {
+      setValue(fieldName, sanitized, { shouldDirty: true, shouldValidate: false });
+    }
+  };
+
+  const handleNamePaste = (event, fieldName, nextRef) => {
+    event.preventDefault();
+    const pasted = event.clipboardData.getData('text');
+    const sanitized = sanitizeSingleWord(pasted);
+    setValue(fieldName, sanitized, { shouldDirty: true, shouldValidate: false });
+    moveFocus(nextRef);
+  };
+
+  const handleNameKeyDown = (event, fieldName, nextRef) => {
+    if (event.key === ' ' || event.key === 'Spacebar') {
+      event.preventDefault();
+      const sanitized = sanitizeSingleWord(event.currentTarget.value);
+      setValue(fieldName, sanitized, { shouldDirty: true, shouldValidate: false });
+      moveFocus(nextRef);
+    } else if (event.key === 'Tab' && !event.shiftKey) {
+      const sanitized = sanitizeSingleWord(event.currentTarget.value);
+      setValue(fieldName, sanitized, { shouldDirty: true, shouldValidate: false });
+    }
+  };
+
+  const handleClearForm = () => {
+    reset();
+    setAreaSeleccionada('');
+  };
 
   useEffect(() => {
     const subscription = watch((value, { name }) => {
@@ -111,6 +160,7 @@ const FormularioAdmision = () => {
       observacion: data.observacion,
       religion: data.religion,
       nit: data.nit,
+      tipo_sangre: data.tipoSangre,
 
       // 📌 ACOMPAÑANTE
       acompananteNombre: data.acompananteNombre,
@@ -167,6 +217,7 @@ const FormularioAdmision = () => {
       coaseguro: data.coaseguro,
       valorCopago: data.valorCopago,
       valorDeducible: data.valorDeducible,
+      numero_poliza: data.numero_poliza,
 
       // 📌 GARANTÍA DE PAGO
       tipoGarantia: data.tipoGarantia,
@@ -178,9 +229,32 @@ const FormularioAdmision = () => {
 
     // Familiares (acompañantes múltiples)
     if (data.acompanantes) {
-      output.familiares = data.acompanantes.filter(a => a && a.nombre); // Solo los llenos
-      delete output.acompanantes;
+      output.acompanantes = data.acompanantes.filter((acompanante) => {
+        if (!acompanante) return false;
+
+        return Object.values(acompanante).some((valor) => {
+          if (typeof valor === 'boolean') {
+            return valor === true;
+          }
+
+          if (valor === null || valor === undefined) {
+            return false;
+          }
+
+          if (typeof valor === 'string') {
+            return valor.trim() !== '';
+          }
+
+          if (typeof valor === 'number') {
+            return !Number.isNaN(valor);
+          }
+
+          return true;
+        });
+      });
     }
+
+    delete output.tipoSangre;
 
     // Opcional: eliminá campos que ya fueron reubicados
     delete output.primerNombre;
@@ -222,6 +296,13 @@ const FormularioAdmision = () => {
               <FiAlignJustify /> <span>Listado</span>
             </Button> */}
             <Button
+              variant="outline-secondary"
+              disabled={loading}
+              onClick={handleClearForm}
+            >
+              Limpiar
+            </Button>
+            <Button
               variant="primary"
               disabled={loading}
               onClick={handleSubmit(onSubmit)}
@@ -241,25 +322,89 @@ const FormularioAdmision = () => {
             <Col md={3}>
               <Form.Group>
                 <Form.Label>Primer nombre</Form.Label>
-                <Form.Control type="text" {...register('primerNombre')} />
+                {(() => {
+                  const field = register('primerNombre', {
+                    onBlur: (event) => handleNameBlur(event, 'primerNombre'),
+                  });
+                  return (
+                    <Form.Control
+                      type="text"
+                      {...field}
+                      ref={(el) => {
+                        primerNombreRef.current = el;
+                        field.ref(el);
+                      }}
+                      onKeyDown={(event) => handleNameKeyDown(event, 'primerNombre', segundoNombreRef)}
+                      onPaste={(event) => handleNamePaste(event, 'primerNombre', segundoNombreRef)}
+                    />
+                  );
+                })()}
               </Form.Group>
             </Col>
             <Col md={3}>
               <Form.Group>
                 <Form.Label>Segundo nombre</Form.Label>
-                <Form.Control type="text" {...register('segundoNombre')} />
+                {(() => {
+                  const field = register('segundoNombre', {
+                    onBlur: (event) => handleNameBlur(event, 'segundoNombre'),
+                  });
+                  return (
+                    <Form.Control
+                      type="text"
+                      {...field}
+                      ref={(el) => {
+                        segundoNombreRef.current = el;
+                        field.ref(el);
+                      }}
+                      onKeyDown={(event) => handleNameKeyDown(event, 'segundoNombre', primerApellidoRef)}
+                      onPaste={(event) => handleNamePaste(event, 'segundoNombre', primerApellidoRef)}
+                    />
+                  );
+                })()}
               </Form.Group>
             </Col>
             <Col md={3}>
               <Form.Group>
                 <Form.Label>Primer Apellido</Form.Label>
-                <Form.Control type="text" {...register('primerApellido')} />
+                {(() => {
+                  const field = register('primerApellido', {
+                    onBlur: (event) => handleNameBlur(event, 'primerApellido'),
+                  });
+                  return (
+                    <Form.Control
+                      type="text"
+                      {...field}
+                      ref={(el) => {
+                        primerApellidoRef.current = el;
+                        field.ref(el);
+                      }}
+                      onKeyDown={(event) => handleNameKeyDown(event, 'primerApellido', segundoApellidoRef)}
+                      onPaste={(event) => handleNamePaste(event, 'primerApellido', segundoApellidoRef)}
+                    />
+                  );
+                })()}
               </Form.Group>
             </Col>
             <Col md={3}>
               <Form.Group>
                 <Form.Label>Segundo Apellido</Form.Label>
-                <Form.Control type="text" {...register('segundoApellido')} />
+                {(() => {
+                  const field = register('segundoApellido', {
+                    onBlur: (event) => handleNameBlur(event, 'segundoApellido'),
+                  });
+                  return (
+                    <Form.Control
+                      type="text"
+                      {...field}
+                      ref={(el) => {
+                        segundoApellidoRef.current = el;
+                        field.ref(el);
+                      }}
+                      onKeyDown={(event) => handleNameKeyDown(event, 'segundoApellido', apellidoCasadaRef)}
+                      onPaste={(event) => handleNamePaste(event, 'segundoApellido', apellidoCasadaRef)}
+                    />
+                  );
+                })()}
               </Form.Group>
             </Col>
           </Row>
@@ -268,7 +413,19 @@ const FormularioAdmision = () => {
             <Col md={3}>
               <Form.Group>
                 <Form.Label>Apellido de casada</Form.Label>
-                <Form.Control type="text" {...register('apellidoCasada')} />
+                {(() => {
+                  const field = register('apellidoCasada');
+                  return (
+                    <Form.Control
+                      type="text"
+                      {...field}
+                      ref={(el) => {
+                        apellidoCasadaRef.current = el;
+                        field.ref(el);
+                      }}
+                    />
+                  );
+                })()}
               </Form.Group>
             </Col>
             <Col md={3}>
@@ -340,7 +497,7 @@ const FormularioAdmision = () => {
             <Col md={4}>
               <Form.Group>
                 <Form.Label>Número de Identificación</Form.Label>
-                <Form.Control type="text" {...register('numeroIdentificacion')} />
+                <Form.Control type="number" {...register('numeroIdentificacion')} />
               </Form.Group>
             </Col>
           </Row>
@@ -540,7 +697,7 @@ const FormularioAdmision = () => {
                     <Col xs={12} md={4}>
                       <Form.Group>
                         <Form.Label>Número de Identificación</Form.Label>
-                        <Form.Control type="text" {...register(`acompanantes.${n - 1}.numeroIdentificacion`)} />
+                        <Form.Control type="number" {...register(`acompanantes.${n - 1}.numeroIdentificacion`)} />
                       </Form.Group>
                     </Col>
                   </Row>
@@ -679,13 +836,13 @@ const FormularioAdmision = () => {
             <Col md={4}>
               <Form.Group>
                 <Form.Label>Número de póliza</Form.Label>
-                <Form.Control type="text" {...register('numeroPoliza')} />
+                <Form.Control type="text" {...register('numero_poliza')} />
               </Form.Group>
             </Col>
             <Col md={4}>
               <Form.Group>
                 <Form.Label>Listado de Precios</Form.Label>
-                <Form.Control type="text" {...register('listadoPrecios')} />
+                <Form.Control type="text" {...register('listaPrecios')} />
               </Form.Group>
             </Col>
           </Row>
@@ -721,13 +878,13 @@ const FormularioAdmision = () => {
             <Col md={4}>
               <Form.Group>
                 <Form.Label>Copago</Form.Label>
-                <Form.Control type="number" step="0.01" {...register('copago')} />
+                <Form.Control type="number" step="0.01" {...register('valorCopago')} />
               </Form.Group>
             </Col>
             <Col md={4}>
               <Form.Group>
                 <Form.Label>Deducible</Form.Label>
-                <Form.Control type="number" step="0.01" {...register('deducible')} />
+                <Form.Control type="number" step="0.01" {...register('valorDeducible')} />
               </Form.Group>
             </Col>
           </Row>

@@ -1,7 +1,7 @@
 // Este archivo combina el layout visual del formulario "ficha del paciente"
 // con la estructura funcional del modal existente para conservar su lógica, contexto y tabs
 
-import React, { useMemo, useContext } from 'react';
+import React, { useMemo, useContext, useRef } from 'react';
 import { Modal, Button, Form, Row, Col, Tabs, Tab, Container } from 'react-bootstrap';
 import { AppContext } from './Context';
 import { FiAlignJustify } from 'react-icons/fi';
@@ -17,6 +17,50 @@ const ModalAdmision = () => {
 
     const readOnly = modoFormulario === 'ver';
     const todayDate = new Date().toISOString().split('T')[0];
+
+    const primerNombreRef = useRef(null);
+    const segundoNombreRef = useRef(null);
+    const primerApellidoRef = useRef(null);
+    const segundoApellidoRef = useRef(null);
+    const apellidoCasadaRef = useRef(null);
+
+    const sanitizeSingleWord = (rawValue) => {
+        if (!rawValue) return '';
+        return rawValue.trim().split(/\s+/)[0];
+    };
+
+    const moveFocus = (nextRef) => {
+        if (nextRef?.current) {
+            nextRef.current.focus();
+        }
+    };
+
+    const handleNameBlur = (event, fieldName) => {
+        const sanitized = sanitizeSingleWord(event.target.value);
+        if (sanitized !== event.target.value) {
+            setValue(fieldName, sanitized, { shouldDirty: true, shouldValidate: false });
+        }
+    };
+
+    const handleNamePaste = (event, fieldName, nextRef) => {
+        event.preventDefault();
+        const pasted = event.clipboardData.getData('text');
+        const sanitized = sanitizeSingleWord(pasted);
+        setValue(fieldName, sanitized, { shouldDirty: true, shouldValidate: false });
+        moveFocus(nextRef);
+    };
+
+    const handleNameKeyDown = (event, fieldName, nextRef) => {
+        if (event.key === ' ' || event.key === 'Spacebar') {
+            event.preventDefault();
+            const sanitized = sanitizeSingleWord(event.currentTarget.value);
+            setValue(fieldName, sanitized, { shouldDirty: true, shouldValidate: false });
+            moveFocus(nextRef);
+        } else if (event.key === 'Tab' && !event.shiftKey) {
+            const sanitized = sanitizeSingleWord(event.currentTarget.value);
+            setValue(fieldName, sanitized, { shouldDirty: true, shouldValidate: false });
+        }
+    };
 
     const habitacionesFiltradas = useMemo(() => {
         return listarHabitaciones.filter(
@@ -54,25 +98,93 @@ const ModalAdmision = () => {
                                 <Col md={3}>
                                     <Form.Group>
                                         <Form.Label>Primer nombre</Form.Label>
-                                        <Form.Control type="text" readOnly={readOnly} {...register('primerNombre')} />
+                                        {(() => {
+                                            const field = register('primerNombre', {
+                                                onBlur: (event) => handleNameBlur(event, 'primerNombre'),
+                                            });
+                                            return (
+                                                <Form.Control
+                                                    type="text"
+                                                    readOnly={readOnly}
+                                                    {...field}
+                                                    ref={(el) => {
+                                                        primerNombreRef.current = el;
+                                                        field.ref(el);
+                                                    }}
+                                                    onKeyDown={(event) => handleNameKeyDown(event, 'primerNombre', segundoNombreRef)}
+                                                    onPaste={(event) => handleNamePaste(event, 'primerNombre', segundoNombreRef)}
+                                                />
+                                            );
+                                        })()}
                                     </Form.Group>
                                 </Col>
                                 <Col md={3}>
                                     <Form.Group>
                                         <Form.Label>Segundo nombre</Form.Label>
-                                        <Form.Control type="text" readOnly={readOnly} {...register('segundoNombre')} />
+                                        {(() => {
+                                            const field = register('segundoNombre', {
+                                                onBlur: (event) => handleNameBlur(event, 'segundoNombre'),
+                                            });
+                                            return (
+                                                <Form.Control
+                                                    type="text"
+                                                    readOnly={readOnly}
+                                                    {...field}
+                                                    ref={(el) => {
+                                                        segundoNombreRef.current = el;
+                                                        field.ref(el);
+                                                    }}
+                                                    onKeyDown={(event) => handleNameKeyDown(event, 'segundoNombre', primerApellidoRef)}
+                                                    onPaste={(event) => handleNamePaste(event, 'segundoNombre', primerApellidoRef)}
+                                                />
+                                            );
+                                        })()}
                                     </Form.Group>
                                 </Col>
                                 <Col md={3}>
                                     <Form.Group>
                                         <Form.Label>Primer Apellido</Form.Label>
-                                        <Form.Control type="text" readOnly={readOnly} {...register('primerApellido')} />
+                                        {(() => {
+                                            const field = register('primerApellido', {
+                                                onBlur: (event) => handleNameBlur(event, 'primerApellido'),
+                                            });
+                                            return (
+                                                <Form.Control
+                                                    type="text"
+                                                    readOnly={readOnly}
+                                                    {...field}
+                                                    ref={(el) => {
+                                                        primerApellidoRef.current = el;
+                                                        field.ref(el);
+                                                    }}
+                                                    onKeyDown={(event) => handleNameKeyDown(event, 'primerApellido', segundoApellidoRef)}
+                                                    onPaste={(event) => handleNamePaste(event, 'primerApellido', segundoApellidoRef)}
+                                                />
+                                            );
+                                        })()}
                                     </Form.Group>
                                 </Col>
                                 <Col md={3}>
                                     <Form.Group>
                                         <Form.Label>Segundo Apellido</Form.Label>
-                                        <Form.Control type="text" readOnly={readOnly} {...register('segundoApellido')} />
+                                        {(() => {
+                                            const field = register('segundoApellido', {
+                                                onBlur: (event) => handleNameBlur(event, 'segundoApellido'),
+                                            });
+                                            return (
+                                                <Form.Control
+                                                    type="text"
+                                                    readOnly={readOnly}
+                                                    {...field}
+                                                    ref={(el) => {
+                                                        segundoApellidoRef.current = el;
+                                                        field.ref(el);
+                                                    }}
+                                                    onKeyDown={(event) => handleNameKeyDown(event, 'segundoApellido', apellidoCasadaRef)}
+                                                    onPaste={(event) => handleNamePaste(event, 'segundoApellido', apellidoCasadaRef)}
+                                                />
+                                            );
+                                        })()}
                                     </Form.Group>
                                 </Col>
                             </Row>
@@ -81,7 +193,20 @@ const ModalAdmision = () => {
                                 <Col md={3}>
                                     <Form.Group>
                                         <Form.Label>Apellido de casada</Form.Label>
-                                        <Form.Control type="text" readOnly={readOnly} {...register('apellidoCasada')} />
+                                        {(() => {
+                                            const field = register('apellidoCasada');
+                                            return (
+                                                <Form.Control
+                                                    type="text"
+                                                    readOnly={readOnly}
+                                                    {...field}
+                                                    ref={(el) => {
+                                                        apellidoCasadaRef.current = el;
+                                                        field.ref(el);
+                                                    }}
+                                                />
+                                            );
+                                        })()}
                                     </Form.Group>
                                 </Col>
                                 <Col md={3}>
@@ -109,7 +234,7 @@ const ModalAdmision = () => {
                                 <Col md={3}>
                                     <Form.Group>
                                         <Form.Label>Tipo de Sangre</Form.Label>
-                                        <Form.Control as="select" {...register('tipoSangre')}>
+                                        <Form.Control as="select" disabled={readOnly} {...register('tipoSangre')}>
                                             <option>Seleccione</option>
                                             <option>O+</option>
                                             <option>O-</option>
@@ -213,7 +338,7 @@ const ModalAdmision = () => {
                                 <Col md={4}>
                                     <Form.Group>
                                         <Form.Label>Observación</Form.Label>
-                                        <Form.Control as="textarea" rows={2} {...register('observacion')} />
+                                        <Form.Control as="textarea" readOnly={readOnly} rows={2} {...register('observacion')} />
                                     </Form.Group>
                                 </Col>
                             </Row>

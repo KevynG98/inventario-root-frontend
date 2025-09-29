@@ -178,7 +178,7 @@ export const AppProvider = ({ children }) => {
                 apellidoCasada: data.paciente.apellido_casada,
                 genero: data.paciente.genero,
                 estadoCivil: data.paciente.estado_civil,
-                tipo_sangre: data.paciente.tipo_sangre || '',
+                tipoSangre: data.paciente.tipo_sangre || '',
                 fechaNacimiento: data.paciente.fecha_nacimiento,
                 edadPaciente: calcularEdad(data.paciente.fecha_nacimiento),
                 tipoIdentificacion: data.paciente.tipo_identificacion,
@@ -251,7 +251,7 @@ export const AppProvider = ({ children }) => {
 
                 acompanantes: acompanantesTransformados,
             });
-            setAreaSeleccionada(data.habitacion_fk?.area || '');
+            setAreaSeleccionada(data.habitacion_fk?.area || data.area_admision || '');
         } catch (error) {
             console.error('Error al cargar admisión:', error);
         }
@@ -262,7 +262,14 @@ export const AppProvider = ({ children }) => {
         console.log("DATOS DEL FORMULARIO", data);
 
         try {
-            const { status, data: response } = await putData(`admisiones/editar/${data.idFicha}/`, data);
+            const payload = {
+                ...data,
+                tipo_sangre: data.tipoSangre || null,
+            };
+
+            delete payload.tipoSangre;
+
+            const { status, data: response } = await putData(`admisiones/editar/${data.idFicha}/`, payload);
 
             if (status === 200) {
                 console.log('Actualizado correctamente:', response);
