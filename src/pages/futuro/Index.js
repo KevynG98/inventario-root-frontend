@@ -13,7 +13,7 @@ const Index = () => {
       <p className="text-muted">
         Esta sección aún no está disponible, pero estamos planeando grandes cosas para ti.
       </p>
-      <Button variant="outline-warning" href="/dashboard/default">
+      <Button variant="outline-warning" href="/#/dashboard/default">
         Volver al inicio
       </Button>
     </Container>

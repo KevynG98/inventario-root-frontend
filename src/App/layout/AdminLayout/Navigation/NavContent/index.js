@@ -18,6 +18,7 @@ class NavContent extends Component {
     this.submenuRefs = {};
     this.parentMap = {};
     this.childMap = {};
+    this.rootMenuIds = new Set();
     this.buildParentMap(props.navigation);
   }
 
@@ -25,16 +26,20 @@ class NavContent extends Component {
     if (prevProps.navigation !== this.props.navigation) {
       this.parentMap = {};
       this.childMap = {};
+      this.rootMenuIds = new Set();
       this.buildParentMap(this.props.navigation);
     }
   }
 
-  buildParentMap = (items) => {
+  buildParentMap = (items, parentId = null) => {
     items.forEach(item => {
-      this.parentMap[item.id] = item.parentId || null;
+      this.parentMap[item.id] = parentId;
+      if (!parentId) {
+        this.rootMenuIds.add(item.id);
+      }
       this.childMap[item.id] = item.children ? item.children.map(child => child.id) : [];
       if (item.children) {
-        this.buildParentMap(item.children);
+        this.buildParentMap(item.children, item.id);
       }
     });
   };
@@ -47,24 +52,35 @@ class NavContent extends Component {
 
     this.setState(prevState => {
       const activeMenus = { ...prevState.activeMenus };
-      const isOpen = !activeMenus[key];
-      activeMenus[key] = isOpen;
+      const closeDescendants = (id) => {
+        const children = this.childMap[id] || [];
+        children.forEach(childId => {
+          activeMenus[childId] = false;
+          closeDescendants(childId);
+        });
+      };
 
-      // Si abrimos un submenú, aseguramos que todos sus ancestros estén abiertos
-      if (isOpen) {
-        let parentId = this.parentMap[key];
-        while (parentId) {
-          activeMenus[parentId] = true;
-          parentId = this.parentMap[parentId];
+      const parentId = this.parentMap[key] || null;
+      const isOpening = !activeMenus[key];
+
+      if (isOpening) {
+        const siblings = parentId ? (this.childMap[parentId] || []) : Array.from(this.rootMenuIds);
+        siblings.forEach(siblingId => {
+          if (siblingId !== key) {
+            activeMenus[siblingId] = false;
+            closeDescendants(siblingId);
+          }
+        });
+
+        activeMenus[key] = true;
+
+        let ancestorId = parentId;
+        while (ancestorId) {
+          activeMenus[ancestorId] = true;
+          ancestorId = this.parentMap[ancestorId] || null;
         }
       } else {
-        const closeDescendants = (id) => {
-          const children = this.childMap[id] || [];
-          children.forEach(childId => {
-            activeMenus[childId] = false;
-            closeDescendants(childId);
-          });
-        };
+        activeMenus[key] = false;
         closeDescendants(key);
       }
 
@@ -117,7 +133,8 @@ class NavContent extends Component {
 
       const textSpan = (
         <span style={{
-          fontSize: '14px'
+          fontSize: '14px',
+          marginLeft: '12px'
         }}>
           {item.title}
         </span>
@@ -136,7 +153,7 @@ class NavContent extends Component {
               {textSpan}
               <FiChevronRight style={{
                 fontSize: '16px',
-                marginLeft: '10px',
+                marginLeft: 'auto',
                 transition: 'transform 0.3s',
                 transform: isOpen ? 'rotate(90deg)' : 'rotate(0deg)'
               }} />
