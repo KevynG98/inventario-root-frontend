@@ -27,6 +27,7 @@ class NavContent extends Component {
       this.parentMap = {};
       this.childMap = {};
       this.rootMenuIds = new Set();
+      this.submenuRefs = {};
       this.buildParentMap(this.props.navigation);
     }
   }
@@ -99,7 +100,7 @@ class NavContent extends Component {
         margin: 0,
         backgroundColor: isOpen ? '#384865' : 'transparent',
         borderLeft: isOpen ? '3px solid #00BFFF' : '3px solid transparent',
-        transition: 'all 0.3s ease',
+        transition: 'background-color 0.3s ease, border-left-color 0.3s ease',
         listStyle: 'none',
         boxSizing: 'border-box'
       };
@@ -134,7 +135,8 @@ class NavContent extends Component {
       const textSpan = (
         <span style={{
           fontSize: '14px',
-          marginLeft: '12px'
+          marginLeft: '12px',
+          transition: 'color 0.3s ease'
         }}>
           {item.title}
         </span>
@@ -142,6 +144,8 @@ class NavContent extends Component {
 
       // Si el ítem tiene hijos, renderiza el botón para desplegar
       if (hasChildren) {
+        const submenuRef = this.submenuRefs[currentKey];
+        const submenuHeight = submenuRef ? submenuRef.scrollHeight : 0;
         return (
           <li key={currentKey} style={containerStyle}>
             <button
@@ -163,7 +167,11 @@ class NavContent extends Component {
               style={{
                 paddingLeft: '20px',
                 margin: 0,
-                display: isOpen ? 'block' : 'none'
+                overflow: 'hidden',
+                maxHeight: isOpen ? `${submenuHeight}px` : 0,
+                opacity: isOpen ? 1 : 0,
+                pointerEvents: isOpen ? 'auto' : 'none',
+                transition: 'max-height 0.3s ease, opacity 0.3s ease'
               }}
             >
               {this.renderNavItems(item.children)}
