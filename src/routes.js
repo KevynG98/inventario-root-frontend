@@ -40,6 +40,13 @@ const InventarioEntradas = React.lazy(() => import('./pages/bodegas/entradas/Ind
 const InventarioSalidas = React.lazy(() => import('./pages/bodegas/salidas/Index'));
 const InventarioTraslados = React.lazy(() => import('./pages/bodegas/traslados/Index'));
 
+/* Pacientes */
+const PacientesEnfermeria = React.lazy(() => import('./pages/pacientes/enfermeria/Index'));
+const PacientesMedicosResidentes = React.lazy(() => import('./pages/pacientes/medicosResidentes/Index'));
+const PacientesMedicosTratantes = React.lazy(() => import('./pages/pacientes/medicosTratantes/Index'));
+const PacientesDevoluciones = React.lazy(() => import('./pages/pacientes/devoluciones/Index'));
+const PacientesCalendario = React.lazy(() => import('./pages/pacientes/calendario/Index'));
+
 /* Mantenimiento */
 const MantenimientoHabitacion = React.lazy(() => import('./pages/mantenimiento/estadoHabitacion/Index'));
 const Users = React.lazy(() => import('./pages/mantenimiento/users/Index'));
@@ -96,7 +103,13 @@ const INVENTARIO_VER_PRECIOS = [1, 6, 8];
 // Todos excepto 6,7,8,9 (excluye perfiles de inventario de Reportes)
 const ALL_EXCEPT_6_7_8 = ALL.filter((rid) => rid !== 6 && rid !== 7 && rid !== 8 && rid !== 9);
 
-const allow = (allowed) => effectivePermissions.some((r) => allowed.includes(r));
+const allow = (allowed) => {
+  if (allowed == null) {
+    return false;
+  }
+  const normalized = Array.isArray(allowed) ? allowed : [allowed];
+  return effectivePermissions.some((roleId) => normalized.includes(roleId));
+};
 
 /* ====== RUTAS ====== */
 const routes = [
@@ -276,7 +289,37 @@ const routes = [
     name: 'Traslados',
     component: allow([1, 10, 12]) ? InventarioTraslados : Error404,
   },
-
+  /*Pacientes*/
+  {
+    path: '/dashboard/pacientes/enfermeria',
+    exact: true,
+    name: 'Pacientes',
+    component: allow(R.ADMIN) ? PacientesEnfermeria : Error404,
+  },
+  {
+    path: '/dashboard/pacientes/medicos-residentes',
+    exact: true,
+    name: 'Medicos Residentes',
+    component: allow(R.ADMIN) ? PacientesMedicosResidentes : Error404,
+  },
+  {
+    path: '/dashboard/pacientes/medicos-tratantes',
+    exact: true,
+    name: 'Medicos Tratantes',
+    component: allow(R.ADMIN) ? PacientesMedicosTratantes : Error404,
+  },
+  {
+    path: '/dashboard/pacientes/devoluciones',
+    exact: true,
+    name: 'Devoluciones a Farmacia',
+    component: allow(R.ADMIN) ? PacientesDevoluciones : Error404,
+  },
+  {
+    path: '/dashboard/pacientes/calendario-operaciones',
+    exact: true,
+    name: 'Calentario de Operaciones',
+    component: allow(R.ADMIN) ? PacientesCalendario : Error404,
+  },
   /* Mantenimiento */
   {
     path: '/dashboard/mantenimiento/habitaciones',

@@ -139,11 +139,11 @@ const staticRoutes = [
     icon: <FiUsers />,
     roles: R.PACIENTES,
     children: [
-      { title: 'Enfermeria', url: '/dashboard/futuro', icon: <FiHeart /> },
-      { title: 'Medicos Residentes', url: '/dashboard/futuro', icon: <FiUser /> },
-      { title: 'Medicos Tratantes', url: '/dashboard/futuro', icon: <FiUser /> },
-      { title: 'Devoluciones a Farmacia', url: '/dashboard/futuro', icon: <FiLogOut /> },
-      { title: 'Calendario Operaciones', url: '/dashboard/futuro', icon: <FiCalendar /> },
+      { title: 'Enfermeria', url: '/dashboard/pacientes/enfermeria', icon: <FiHeart /> },
+      { title: 'Medicos Residentes', url: '/dashboard/pacientes/medicos-residentes', icon: <FiUser /> },
+      { title: 'Medicos Tratantes', url: '/dashboard/pacientes/medicos-tratantes', icon: <FiUser /> },
+      { title: 'Devoluciones a Farmacia', url: '/dashboard/pacientes/devoluciones', icon: <FiLogOut /> },
+      { title: 'Calendario Operaciones', url: '/dashboard/pacientes/calendario-operaciones', icon: <FiCalendar /> },
     ].map(item => ({ ...item, roles: item.roles ?? R.PACIENTES })),
   },
 
