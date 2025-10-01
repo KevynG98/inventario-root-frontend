@@ -1,29 +1,37 @@
 import React from 'react';
-import { ContextProvider } from './Context';
+import { ContextProvider, useMyContext } from './Context';
 import HorizontalMenu from '../HorizontalMenu';
+import NursingPatientForm from './Form';
+const NursingPage = () => {
+  const {
+    menuItems,
+    activeMenuKey,
+    iframeSrc,
+    patient,
+    handleMenuSelect,
+    handlePatientFormSubmit
+  } = useMyContext();
 
-const menu = [
-  { label: "Informacion del Paciente", href: "" },
-  { label: "Medico Tratante"},
-  { label: "Historia de la Enfermedad"},
-  { label: "Signos Vitales (Emergencia)"},
-  { label: "Seguimiento Ordenes Medicas"},
-  { label: "Antecedentes"},
-  { label: "Evolucion"},
-  { label: "Control de Medicamento"},
-  { label: "Notas de Enfermeria"},
-  { label: "Laboratorios"},
-  { label: "Imagenes"},
-  { label: "Dietas"},
-  { label: "Ingesta Excreta"},
-  { label: "Signos Vitales (Encamamiento)"},
-  { label: "Solicitud de Medicamentos"},
-];
+  return (
+    <>
+      <NursingPatientForm patient={patient} onSave={handlePatientFormSubmit} />
+      <HorizontalMenu
+        items={menuItems}
+        activeKey={activeMenuKey}
+        onSelect={handleMenuSelect}
+      />
+      <iframe
+        src={iframeSrc || 'about:blank'}
+        title="Enfermeria"
+        style={{ width: '100%', height: '400px', border: 'none' }}
+      />
+    </>
+  );
+};
 
 const Index = () => (
   <ContextProvider>
-    <h1>Enfermeria</h1>
-    <HorizontalMenu items={menu}/>
+    <NursingPage />
   </ContextProvider>
 );
 
