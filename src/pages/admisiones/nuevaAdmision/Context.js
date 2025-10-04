@@ -32,7 +32,7 @@ export const AppProvider = ({ children }) => {
     const getHabitaciones = async () => {
         setLoading(true);
         try {
-            const response = await getData('habitaciones/habitaciones-listar/?page_size=50&solo_disponibles=1');
+            const response = await getData('habitaciones/habitaciones-listar/?page_size=1000&solo_disponibles=1');
             const areasUnicas = [
                 ...new Set(response.data.results.map(habitacion => habitacion.area))
             ];
