@@ -1,12 +1,24 @@
 import React from 'react';
 import { menu } from './pages';
 
-const menuMap = menu.reduce((acc, item) => {
-  if (item?.key) {
-    acc.set(item.key, item);
+const buildMenuMap = (items, acc = new Map()) => {
+  if (!Array.isArray(items)) {
+    return acc;
   }
+
+  items.forEach((item) => {
+    if (item?.key) {
+      acc.set(item.key, item);
+    }
+    if (item?.children && item.children.length > 0) {
+      buildMenuMap(item.children, acc);
+    }
+  });
+
   return acc;
-}, new Map());
+};
+
+const menuMap = buildMenuMap(menu);
 
 const styles = {
   wrapper: {
@@ -55,6 +67,11 @@ const defaultView = {
 const PacientesEnfermeriaFrame = ({ match }) => {
   const viewKey = match?.params?.view;
   const entry = menuMap.get(viewKey) ?? defaultView;
+
+  if (entry.component) {
+    const Component = entry.component;
+    return <Component />;
+  }
 
   return (
     <div style={styles.wrapper}>

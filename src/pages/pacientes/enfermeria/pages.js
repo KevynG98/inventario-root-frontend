@@ -1,10 +1,13 @@
+import InfoPaciente from '../subPages/infoPaciente';
+
 const BASE_IFRAME_PATH = '/#/dashboard/pacientes/enfermeria/iframe';
 
 export const menu = [
   {
     key: 'informacion-paciente',
     label: 'Informacion del Paciente',
-    iframe: `${BASE_IFRAME_PATH}/informacion-paciente`
+    iframe: `${BASE_IFRAME_PATH}/informacion-paciente`,
+    component: InfoPaciente
   },
   {
     key: 'medico-tratante',
