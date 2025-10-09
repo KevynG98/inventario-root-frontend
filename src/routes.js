@@ -42,10 +42,12 @@ const InventarioTraslados = React.lazy(() => import('./pages/bodegas/traslados/I
 
 /* Pacientes */
 const PacientesEnfermeria = React.lazy(() => import('./pages/pacientes/enfermeria/Index'));
+const PacientesEnfermeriaFrame = React.lazy(() => import('./pages/pacientes/enfermeria/Frame'));
 const PacientesMedicosResidentes = React.lazy(() => import('./pages/pacientes/medicosResidentes/Index'));
 const PacientesMedicosTratantes = React.lazy(() => import('./pages/pacientes/medicosTratantes/Index'));
 const PacientesDevoluciones = React.lazy(() => import('./pages/pacientes/devoluciones/Index'));
 const PacientesCalendario = React.lazy(() => import('./pages/pacientes/calendario/Index'));
+const DataPacientes = React.lazy(() => import('./pages/pacientes/subPages/infoPaciente/index'));
 
 /* Mantenimiento */
 const MantenimientoHabitacion = React.lazy(() => import('./pages/mantenimiento/estadoHabitacion/Index'));
@@ -297,6 +299,12 @@ const routes = [
     component: allow(R.ADMIN) ? PacientesEnfermeria : Error404,
   },
   {
+    path: '/dashboard/pacientes/enfermeria/iframe/:view',
+    exact: true,
+    name: 'Pacientes (iframe)',
+    component: allow(R.ADMIN) ? PacientesEnfermeriaFrame : Error404,
+  },
+  {
     path: '/dashboard/pacientes/medicos-residentes',
     exact: true,
     name: 'Medicos Residentes',
@@ -320,6 +328,13 @@ const routes = [
     name: 'Calentario de Operaciones',
     component: allow(R.ADMIN) ? PacientesCalendario : Error404,
   },
+  {
+    path: '/dashboard/pacientes/info-paciente',
+    exact: true,
+    name: 'Calentario de Operaciones',
+    component: DataPacientes,
+  },
+  
   /* Mantenimiento */
   {
     path: '/dashboard/mantenimiento/habitaciones',

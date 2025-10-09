@@ -1,175 +1,134 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
-import { getData, postData, putData, deleteData } from '../../../apiService';
-import { NotificationManager } from "react-notifications";
-import Swal from 'sweetalert2';
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState
+} from 'react';
+import { menu as menuConfig } from './pages';
 
-const MyContext = createContext();
+const NursingContext = createContext(null);
 
-export const ContextProvider = ({ children }) => {
-  const [data, setData] = useState([]);
-  const [show, setShow] = useState(false);
-  const [modoFormulario, setModoFormulario] = useState('crear'); // 'crear', 'editar' o 'ver'
-  const [proveedorSeleccionado, setProveedorSeleccionado] = useState(null);
-
-  //paginacion
-  const [page, setPage] = useState(1);
-  const [nullNextPage, setNullNextPage] = useState(null)
-  const [nullPrevPage, setPrevNextPage] = useState(null)
-
-  const nextPage = () => {
-    setPage(prev => prev + 1);
+const findFirstLeaf = (items) => {
+  if (!Array.isArray(items)) {
+    return null;
   }
 
-  const prevPage = () => {
-    setPage(prev => prev - 1);
+  for (const item of items) {
+    if (item?.children && item.children.length > 0) {
+      const nested = findFirstLeaf(item.children);
+      if (nested) {
+        return nested;
+      }
+    } else if (item) {
+      return item;
+    }
   }
 
-  const cargarDatos = async () => {
-    Swal.fire({
-      title: 'Cargando...',
-      allowOutsideClick: false,
-      didOpen: () => {
-        Swal.showLoading();
-      }
-    });
-
-    try {
-      const response = await getData(`inventario/bodegas/?page=${page}&page_size=50`);
-      const resultados = response.data.results;
-
-      setData(resultados);
-      setNullNextPage(response.data.next);
-      setPrevNextPage(response.data.previous);
-
-      Swal.close();
-
-      if (resultados.length === 0) {
-        Swal.fire({
-          icon: 'info',
-          title: 'Sin resultados',
-          text: 'No se encontraron datos para los filtros aplicados.',
-        });
-      }
-    } catch (error) {
-      Swal.close();
-
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'Error al cargar admisiones',
-      });
-
-      console.error('Error al cargar admisiones:', error);
-    }
-  };
-
-  const enviarDatos = async (data) => {
-    console.log("DATOS", data)
-    try {
-      const response = await postData("inventario/bodegas-crear/", data);
-      if (response?.status === 201 && response.data) {
-        NotificationManager.success("Marca Creada", "Éxito", 3000);
-        showModal()
-      } else {
-        NotificationManager.error("Algo salió mal", "Error", 5000);
-        console.log("Algo salió mal", "Error", 5000)
-      }
-    } catch (err) {
-      console.error('Error al crear usuario:', err);
-    }
-    cargarDatos()
-  }
-
-  const actualizarProveedor = async (datos) => {
-    try {
-      const response = await putData(`inventario/bodegas-actualizar/${datos.id}/`, datos);
-
-      if (response.status === 200 || response.status === 204) {
-        console.log("Proveedor actualizado con éxito:", response.data);
-        NotificationManager.success("Marca Editada con exito", "Éxito", 3000);
-        cargarDatos(); // recarga el listado si tenés esta función
-        setShow(false); // cierra el modal
-      } else {
-        console.warn("Algo salió mal al actualizar:", response);
-      }
-    } catch (error) {
-      console.error("Error al actualizar proveedor:", error);
-    }
-  };
-
-  const eliminarProveedor = async (id) => {
-    const confirmed = await Swal.fire({
-      title: '¿Estás seguro?',
-      text: 'Esta acción eliminará permanentemente la marca.',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
-      confirmButtonText: 'Sí, eliminar',
-      cancelButtonText: 'Cancelar'
-    });
-
-    if (confirmed.isConfirmed) {
-      try {
-        const response = await deleteData(`inventario/bodegas-eliminar/${id}/`);
-        console.log('Proveedor eliminado:', response.status);
-        NotificationManager.success("Marca eliminada con éxito", "Éxito", 3000);
-
-        // Recargar listado o actualizar estado
-        cargarDatos && cargarDatos();
-      } catch (error) {
-        console.error('Error al eliminar proveedor:', error);
-        NotificationManager.error("Hubo un error al eliminar", "Error", 3000);
-      }
-    }
-  };
-
-  const showModal = () => setShow(!show);
-
-  const abrirModalCrear = () => {
-    setProveedorSeleccionado(null);
-    setModoFormulario('crear');
-    showModal();
-  };
-
-  const abrirModalEditar = (proveedor) => {
-    setProveedorSeleccionado(proveedor);
-    setModoFormulario('editar');
-    showModal();
-  };
-
-  const abrirModalVer = (proveedor) => {
-    setProveedorSeleccionado(proveedor);
-    setModoFormulario('ver');
-    showModal();
-  };
-
-
-  useEffect(() => {
-    cargarDatos()
-  }, [page]);
-
-  const values = {
-    data,
-    show,
-    showModal,
-    nullNextPage,
-    nullPrevPage,
-    nextPage,
-    prevPage,
-    enviarDatos,
-    modoFormulario,
-    setModoFormulario,
-    proveedorSeleccionado,
-    setProveedorSeleccionado,
-    abrirModalEditar,
-    abrirModalCrear,
-    abrirModalVer,
-    actualizarProveedor,
-    eliminarProveedor
-  };
-
-  return <MyContext.Provider value={values}>{children}</MyContext.Provider>;
+  return null;
 };
 
-export const useMyContext = () => useContext(MyContext);
+const findByKey = (items, key) => {
+  if (!Array.isArray(items) || !key) {
+    return null;
+  }
+
+  for (const item of items) {
+    if (item?.key === key) {
+      return item;
+    }
+    if (item?.children) {
+      const nested = findByKey(item.children, key);
+      if (nested) {
+        return nested;
+      }
+    }
+  }
+
+  return null;
+};
+
+const resolveIframeSrc = (item) => {
+  if (!item) {
+    return '';
+  }
+
+  if (item.iframe) {
+    return item.iframe;
+  }
+
+  return '';
+};
+
+export const ContextProvider = ({ children }) => {
+  const [menuItems] = useState(() => menuConfig);
+
+  const firstItem = useMemo(() => findFirstLeaf(menuItems), [menuItems]);
+
+  const [activeMenuKey, setActiveMenuKey] = useState(firstItem?.key ?? null);
+  const [iframeSrc, setIframeSrc] = useState(() => resolveIframeSrc(firstItem));
+  const [patient, setPatient] = useState(null);
+  const [lastSubmission, setLastSubmission] = useState(null);
+
+  useEffect(() => {
+    const initialItem = findFirstLeaf(menuItems);
+    setActiveMenuKey(initialItem?.key ?? null);
+    setIframeSrc(resolveIframeSrc(initialItem));
+  }, [menuItems]);
+
+  const resolveItemByKey = useCallback((key) => findByKey(menuItems, key), [menuItems]);
+
+  const handleMenuSelect = useCallback(
+    (key, item, event) => {
+      if (event?.preventDefault) {
+        event.preventDefault();
+      }
+
+      const resolvedItem = item?.key === key ? item : resolveItemByKey(key);
+      setActiveMenuKey(key ?? null);
+      setIframeSrc(resolveIframeSrc(resolvedItem));
+    },
+    [resolveItemByKey]
+  );
+
+  const handlePatientFormSubmit = useCallback((payload) => {
+    if (payload?.patient) {
+      setPatient(payload.patient);
+    }
+    setLastSubmission(payload ?? null);
+  }, []);
+
+  const value = useMemo(
+    () => ({
+      menuItems,
+      activeMenuKey,
+      iframeSrc,
+      patient,
+      lastSubmission,
+      handleMenuSelect,
+      setIframeSrc,
+      setPatient,
+      handlePatientFormSubmit
+    }),
+    [
+      menuItems,
+      activeMenuKey,
+      iframeSrc,
+      patient,
+      lastSubmission,
+      handleMenuSelect
+    ]
+  );
+
+  return <NursingContext.Provider value={value}>{children}</NursingContext.Provider>;
+};
+
+export const useMyContext = () => {
+  const context = useContext(NursingContext);
+  if (!context) {
+    throw new Error('useMyContext must be used within a ContextProvider');
+  }
+  return context;
+};
+
