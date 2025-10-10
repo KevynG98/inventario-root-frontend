@@ -5,39 +5,45 @@ import Swal from 'sweetalert2';
 // 🌍 SMART ENVIRONMENT DETECTION (LAN / ZeroTier / Localhost)
 // =============================================================
 
-const DEV = process.env.REACT_APP_DEVELOPMENT === 'true';
+// Detecta si está en modo desarrollo automáticamente
+const isDevMode =
+  process.env.NODE_ENV === 'development' ||
+  process.env.REACT_APP_DEVELOPMENT === 'true';
+
 const currentHost = window.location.hostname;
-console.log("🔎 HOST:", currentHost);
+console.log("🔎 HOST detectado:", currentHost);
 
 let API_URL;
 
-// Modo desarrollo: detecta red automáticamente
-if (DEV) {
-  if (currentHost.startsWith("10.")) {
-    // 🖥️ Red LAN interna
+// =============================================================
+// 🔧 Detección automática del entorno
+// =============================================================
+if (isDevMode) {
+  // MODO DESARROLLO
+  if (["localhost", "127.0.0.1"].includes(currentHost)) {
+    API_URL = process.env.REACT_APP_API_URL_LOCAL || "http://127.0.0.1:8077/";
+    console.log("🧪 DEV → Backend local detectado");
+  } else if (currentHost.startsWith("10.")) {
     API_URL = process.env.REACT_APP_API_URL_LAN || "http://10.10.20.16:8077/";
-    console.log("📡 Detectado acceso LAN → usando backend LAN");
+    console.log("📡 DEV → Red LAN detectada");
   } else if (currentHost.startsWith("172.")) {
-    // 🌐 Red ZeroTier
     API_URL = process.env.REACT_APP_API_URL_ZT || "http://172.25.146.246:8077/";
-    console.log("🌍 Detectado acceso ZeroTier → usando backend ZeroTier");
-  } else if (["localhost", "127.0.0.1"].includes(currentHost)) {
-    // 💻 Localhost (desarrollo local)
-    API_URL = process.env.REACT_APP_API_URL_LOCAL || "http://127.0.0.1:8000/";
-    console.log("🧪 Detectado entorno local → usando backend local");
+    console.log("🌍 DEV → Red ZeroTier detectada");
   } else {
-    // Fallback: LAN por defecto
     API_URL = process.env.REACT_APP_API_URL_LAN || "http://10.10.20.16:8077/";
-    console.log("⚙️ Default fallback → usando backend LAN");
+    console.log("⚙️ DEV → Fallback a backend LAN");
   }
 } else {
-  // Modo producción (build compilado)
-  if (currentHost.startsWith("172.")) {
+  // MODO PRODUCCIÓN
+  if (["localhost", "127.0.0.1"].includes(currentHost)) {
+    API_URL = process.env.REACT_APP_API_URL_LOCAL || "http://127.0.0.1:8077/";
+    console.log("🧪 PROD (local build) → Backend local detectado");
+  } else if (currentHost.startsWith("172.")) {
     API_URL = process.env.REACT_APP_API_URL_ZT || "http://172.25.146.246:8077/";
-    console.log("🏭 Producción en ZeroTier → backend ZeroTier");
+    console.log("🏭 PROD → Red ZeroTier detectada");
   } else {
     API_URL = process.env.REACT_APP_API_URL_LAN || "http://10.10.20.16:8077/";
-    console.log("🏭 Producción en LAN → backend LAN");
+    console.log("🏭 PROD → Red LAN detectada");
   }
 }
 
@@ -132,7 +138,8 @@ const putData = async (url, data, options = {}) => {
   try {
     if (!options.__skipLoader) {
       __loaderCount += 1;
-      if (__loaderCount === 1) showGlobalLoader(options.__loaderTitle || "Cargando...");
+      if (__loaderCount === 1)
+        showGlobalLoader(options.__loaderTitle || "Cargando...");
     }
     const headers = {
       "Content-Type": "application/json",
@@ -230,11 +237,13 @@ const hideGlobalLoader = () => {
   __loaderActive = false;
 };
 
+// Interceptores de Axios para el loader
 apiClient.interceptors.request.use(
   (config) => {
     if (!config.__skipLoader) {
       __loaderCount += 1;
-      if (__loaderCount === 1) showGlobalLoader(config.__loaderTitle || "Cargando...");
+      if (__loaderCount === 1)
+        showGlobalLoader(config.__loaderTitle || "Cargando...");
     }
     return config;
   },
