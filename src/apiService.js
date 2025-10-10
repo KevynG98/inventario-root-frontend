@@ -217,6 +217,7 @@ const logout = async () => {
 
 let __loaderCount = 0;
 let __loaderActive = false;
+let __sessionExpiryAlert = false;
 
 const showGlobalLoader = (title) => {
   if (!__loaderActive && !Swal.isVisible()) {
@@ -262,6 +263,35 @@ apiClient.interceptors.response.use(
     if (!error.config?.__skipLoader) {
       __loaderCount = Math.max(0, __loaderCount - 1);
       if (__loaderCount === 0) hideGlobalLoader();
+    }
+
+    const status = error.response?.status;
+    const requestURL = error.config?.url || "";
+
+    if (status === 401 && !requestURL.includes("user/login") && !__sessionExpiryAlert) {
+      __sessionExpiryAlert = true;
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+
+      const redirectToLogin = () => {
+        __sessionExpiryAlert = false;
+        // HashRouter usa hash, mantenemos consistencia
+        window.location.hash = "#/auth/signin-1";
+      };
+
+      // Evita superponer un Swal si ya hay uno visible
+      if (Swal.isVisible()) {
+        Swal.close();
+      }
+
+      Swal.fire({
+        icon: "warning",
+        title: "Sesión expirada",
+        text: "Inicia sesión nuevamente para continuar",
+        confirmButtonText: "Ir al inicio de sesión",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+      }).then(redirectToLogin).catch(redirectToLogin);
     }
     return Promise.reject(error);
   }
