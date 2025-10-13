@@ -1,8 +1,11 @@
 import React from 'react';
-import FormData from './FormData';
+import { InfoPacienteProvider } from './Context';
+import InfoPacienteList from './List';
 
-const InfoPaciente = () => {
-    return <FormData />;
-};
+const InfoPaciente = () => (
+  <InfoPacienteProvider>
+    <InfoPacienteList />
+  </InfoPacienteProvider>
+);
 
 export default InfoPaciente;

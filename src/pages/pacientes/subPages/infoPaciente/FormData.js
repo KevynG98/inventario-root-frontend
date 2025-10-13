@@ -1,5 +1,5 @@
-import React from "react";
-import { Card, Row, Col, Form } from "react-bootstrap";
+import React from 'react';
+import { Card, Row, Col, Form } from 'react-bootstrap';
 
 const FormData = ({ data }) => {
   // Example shape:
@@ -35,7 +35,7 @@ const FormData = ({ data }) => {
             <Form.Control
               type="text"
               readOnly
-              value={data?.paciente?.fechaNacimiento || ""}
+              value={data?.paciente?.fechaNacimiento || ''}
             />
           </Form.Group>
         </Col>
@@ -45,7 +45,7 @@ const FormData = ({ data }) => {
             <Form.Control
               type="text"
               readOnly
-              value={data?.paciente?.religion || ""}
+              value={data?.paciente?.religion || ''}
             />
           </Form.Group>
         </Col>
@@ -55,7 +55,7 @@ const FormData = ({ data }) => {
             <Form.Control
               type="text"
               readOnly
-              value={data?.paciente?.telefono || ""}
+              value={data?.paciente?.telefono || ''}
             />
           </Form.Group>
         </Col>
@@ -68,7 +68,7 @@ const FormData = ({ data }) => {
             <Form.Control
               type="text"
               readOnly
-              value={data?.paciente?.direccion || ""}
+              value={data?.paciente?.direccion || ''}
             />
           </Form.Group>
         </Col>
@@ -78,7 +78,7 @@ const FormData = ({ data }) => {
             <Form.Control
               type="text"
               readOnly
-              value={data?.paciente?.tipoIdentificacion || ""}
+              value={data?.paciente?.tipoIdentificacion || ''}
             />
           </Form.Group>
         </Col>
@@ -88,7 +88,7 @@ const FormData = ({ data }) => {
             <Form.Control
               type="text"
               readOnly
-              value={data?.paciente?.numeroIdentificacion || ""}
+              value={data?.paciente?.numeroIdentificacion || ''}
             />
           </Form.Group>
         </Col>
@@ -105,7 +105,7 @@ const FormData = ({ data }) => {
             <Form.Control
               type="text"
               readOnly
-              value={data?.acompanante?.parentesco || ""}
+              value={data?.acompanante?.parentesco || ''}
             />
           </Form.Group>
         </Col>
@@ -115,7 +115,7 @@ const FormData = ({ data }) => {
             <Form.Control
               type="text"
               readOnly
-              value={data?.acompanante?.nombre || ""}
+              value={data?.acompanante?.nombre || ''}
             />
           </Form.Group>
         </Col>
@@ -125,7 +125,7 @@ const FormData = ({ data }) => {
             <Form.Control
               type="text"
               readOnly
-              value={data?.acompanante?.correo || ""}
+              value={data?.acompanante?.correo || ''}
             />
           </Form.Group>
         </Col>
@@ -135,7 +135,7 @@ const FormData = ({ data }) => {
             <Form.Control
               type="text"
               readOnly
-              value={data?.acompanante?.telefono || ""}
+              value={data?.acompanante?.telefono || ''}
             />
           </Form.Group>
         </Col>

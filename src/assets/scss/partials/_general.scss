@@ -65,6 +65,68 @@ strong {
     font-weight: 400;
 }
 
+.modal-dialog.enfermeria-modal-wide {
+    max-width: 1200px;
+    width: 95%;
+}
+
+.enfermeria-modal-wide .modal-body {
+    padding: 0;
+}
+
+.timeline-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: #d1d5db;
+    transition: background-color 0.3s ease;
+}
+
+.timeline-dot.active {
+    background-color: $primary-color;
+}
+
+.timeline-connector {
+    width: 40px;
+    height: 2px;
+    background-color: #d1d5db;
+    margin: 0 6px;
+}
+
+.antecedente-preview {
+    max-height: 120px;
+    overflow-y: auto;
+    padding-right: 0.5rem;
+    color: #4b5563;
+}
+
+.antecedentes-viewer .antecedente-preview {
+    max-height: none;
+}
+
+.control-medicamento-module .table thead th {
+    background-color: #f9fafc;
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+}
+
+.control-medicamento-module .table td,
+.control-medicamento-module .table th {
+    vertical-align: middle;
+}
+
+.control-medicamento-module .table select,
+.control-medicamento-module .table textarea,
+.control-medicamento-module .table input {
+    font-size: 0.85rem;
+}
+
+.control-medicamento-module .list-group-item.active {
+    background-color: $primary-color;
+    border-color: $primary-color;
+}
+
 .img-radius {
     border-radius: 50%;
 }
@@ -881,3 +943,22 @@ p.text-muted {
     -webkit-font-smoothing: antialiased;
 }
 /* material icon for material datetime picker */
+
+.signos-encamamiento-table {
+    max-height: 480px;
+    overflow-y: auto;
+}
+
+.signos-encamamiento-table table {
+    font-size: 0.85rem;
+}
+
+.signos-encamamiento-table thead th {
+    text-align: center;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+.signos-encamamiento-table tbody td input {
+    text-align: center;
+}
