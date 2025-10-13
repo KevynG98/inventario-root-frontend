@@ -136,6 +136,176 @@ export const AppProvider = ({ children }) => {
         }
     };
 
+    const acompananteTieneDatos = (acompanante = {}) => {
+        return Object.values(acompanante).some((valor) => {
+            if (typeof valor === 'boolean') {
+                return valor === true;
+            }
+            if (valor == null) {
+                return false;
+            }
+            if (typeof valor === 'number') {
+                return !Number.isNaN(valor);
+            }
+            if (typeof valor === 'string') {
+                return valor.trim() !== '';
+            }
+            if (Array.isArray(valor)) {
+                return valor.length > 0;
+            }
+            if (typeof valor === 'object') {
+                return Object.keys(valor).length > 0;
+            }
+            return false;
+        });
+    };
+
+    const transformarCampos = (formData) => {
+        const valueFrom = (...keys) => {
+            for (const key of keys) {
+                if (formData[key] !== undefined) {
+                    return formData[key];
+                }
+            }
+            return undefined;
+        };
+
+        const payload = {
+            ...formData,
+            p_primer_nombre: valueFrom('p_primer_nombre', 'primerNombre'),
+            p_segundo_nombre: valueFrom('p_segundo_nombre', 'segundoNombre'),
+            p_primer_apellido: valueFrom('p_primer_apellido', 'primerApellido'),
+            p_segundo_apellido: valueFrom('p_segundo_apellido', 'segundoApellido'),
+            p_apellido_casada: valueFrom('p_apellido_casada', 'apellidoCasada'),
+            p_genero: valueFrom('p_genero', 'genero'),
+            p_estado_civil: valueFrom('p_estado_civil', 'estadoCivil'),
+            p_fecha_nacimiento: valueFrom('p_fecha_nacimiento', 'fechaNacimiento'),
+            p_tipo_identificacion: valueFrom('p_tipo_identificacion', 'tipoIdentificacion'),
+            p_numero_identificacion: valueFrom('p_numero_identificacion', 'numeroIdentificacion'),
+            p_telefono: valueFrom('p_telefono', 'telefono1'),
+            edad: valueFrom('edad', 'edadPaciente'),
+            direccion: valueFrom('direccion'),
+            telefono1: valueFrom('telefono1'),
+            telefono2: valueFrom('telefono2'),
+            correo: valueFrom('correo'),
+            observacion: valueFrom('observacion'),
+            religion: valueFrom('religion'),
+            nit: valueFrom('nit'),
+            tipo_sangre: valueFrom('tipo_sangre', 'tipoSangre') ?? null,
+
+            responsablePrimerNombre: valueFrom('responsablePrimerNombre', 'resp_primerNombre'),
+            responsableSegundoNombre: valueFrom('responsableSegundoNombre', 'resp_segundoNombre'),
+            responsablePrimerApellido: valueFrom('responsablePrimerApellido', 'resp_primerApellido'),
+            responsableSegundoApellido: valueFrom('responsableSegundoApellido', 'resp_segundoApellido'),
+            responsableTipoIdentificacion: valueFrom('responsableTipoIdentificacion', 'resp_tipoIdentificacion'),
+            responsableNumeroIdentificacion: valueFrom('responsableNumeroIdentificacion', 'resp_numeroIdentificacion'),
+            responsableFechaNacimiento: valueFrom('responsableFechaNacimiento', 'resp_fechaNacimiento'),
+            responsableEdad: valueFrom('responsableEdad', 'resp_edad'),
+            responsableGenero: valueFrom('responsableGenero', 'resp_genero'),
+            responsableRelacionPaciente: valueFrom('responsableRelacionPaciente', 'resp_relacion'),
+            responsableOcupacion: valueFrom('responsableOcupacion', 'resp_ocupacion'),
+            responsableDomicilio: valueFrom('responsableDomicilio', 'resp_domicilio'),
+            responsableEmpresa: valueFrom('responsableEmpresa', 'resp_empresa'),
+            responsableDireccion: valueFrom('responsableDireccion', 'resp_direccion'),
+            responsableTelefono1: valueFrom('responsableTelefono1', 'resp_telefono1'),
+            responsableTelefono2: valueFrom('responsableTelefono2', 'resp_telefono2'),
+            responsableContacto: valueFrom('responsableContacto', 'resp_contacto'),
+            responsableEmail: valueFrom('responsableEmail', 'resp_email'),
+
+            esposoNombre: valueFrom('esposoNombre', 'esposo_nombre'),
+            esposoGenero: valueFrom('esposoGenero', 'esposo_genero'),
+            esposoTipoIdentificacion: valueFrom('esposoTipoIdentificacion', 'esposo_tipoIdentificacion'),
+            esposoNumeroIdentificacion: valueFrom('esposoNumeroIdentificacion', 'esposo_numeroIdentificacion'),
+            esposoFechaNacimiento: valueFrom('esposoFechaNacimiento', 'esposo_fechaNacimiento'),
+            esposoEdad: valueFrom('esposoEdad', 'esposo_edad'),
+            esposoTelefono1: valueFrom('esposoTelefono1', 'esposo_telefono1'),
+            esposoTelefono2: valueFrom('esposoTelefono2', 'esposo_telefono2'),
+            esposoDomicilio: valueFrom('esposoDomicilio', 'esposo_domicilio'),
+            esposoOcupacion: valueFrom('esposoOcupacion', 'esposo_ocupacion'),
+            esposoEmpresa: valueFrom('esposoEmpresa', 'esposo_empresa'),
+            esposoDireccion: valueFrom('esposoDireccion', 'esposo_direccion'),
+            esposoEmail: valueFrom('esposoEmail', 'esposo_email'),
+
+            empresa: valueFrom('empresa'),
+            direccionEmpresa: valueFrom('direccionEmpresa'),
+            telefonoEmpresa1: valueFrom('telefonoEmpresa1'),
+            telefonoEmpresa2: valueFrom('telefonoEmpresa2'),
+            ocupacion: valueFrom('ocupacion'),
+
+            aseguradora: valueFrom('aseguradora'),
+            listaPrecios: valueFrom('listaPrecios'),
+            carnet: valueFrom('carnet'),
+            certificado: valueFrom('certificado'),
+            nombreTitular: valueFrom('nombreTitular'),
+            coaseguro: valueFrom('coaseguro'),
+            valorCopago: valueFrom('valorCopago'),
+            valorDeducible: valueFrom('valorDeducible'),
+            numero_poliza: valueFrom('numero_poliza'),
+
+            tipoGarantia: valueFrom('tipoGarantia', 'garantiaPago'),
+            numeroTcCheque: valueFrom('numeroTcCheque', 'tcCheque'),
+            nombreFactura: valueFrom('nombreFactura'),
+            direccionFactura: valueFrom('direccionFactura'),
+            correoFactura: valueFrom('correoFactura'),
+        };
+
+        const acompanantes = Array.isArray(valueFrom('acompanantes'))
+            ? valueFrom('acompanantes').filter(acompananteTieneDatos)
+            : [];
+
+        payload.acompanantes = acompanantes;
+
+        delete payload.idFicha;
+        delete payload.primerNombre;
+        delete payload.segundoNombre;
+        delete payload.primerApellido;
+        delete payload.segundoApellido;
+        delete payload.apellidoCasada;
+        delete payload.genero;
+        delete payload.estadoCivil;
+        delete payload.fechaNacimiento;
+        delete payload.tipoIdentificacion;
+        delete payload.numeroIdentificacion;
+        delete payload.tipoSangre;
+
+        delete payload.resp_primerNombre;
+        delete payload.resp_segundoNombre;
+        delete payload.resp_primerApellido;
+        delete payload.resp_segundoApellido;
+        delete payload.resp_tipoIdentificacion;
+        delete payload.resp_numeroIdentificacion;
+        delete payload.resp_fechaNacimiento;
+        delete payload.resp_edad;
+        delete payload.resp_genero;
+        delete payload.resp_relacion;
+        delete payload.resp_ocupacion;
+        delete payload.resp_domicilio;
+        delete payload.resp_empresa;
+        delete payload.resp_direccion;
+        delete payload.resp_telefono1;
+        delete payload.resp_telefono2;
+        delete payload.resp_contacto;
+        delete payload.resp_email;
+
+        delete payload.esposo_nombre;
+        delete payload.esposo_genero;
+        delete payload.esposo_tipoIdentificacion;
+        delete payload.esposo_numeroIdentificacion;
+        delete payload.esposo_fechaNacimiento;
+        delete payload.esposo_edad;
+        delete payload.esposo_telefono1;
+        delete payload.esposo_telefono2;
+        delete payload.esposo_domicilio;
+        delete payload.esposo_ocupacion;
+        delete payload.esposo_empresa;
+        delete payload.esposo_direccion;
+        delete payload.esposo_email;
+        delete payload.garantiaPago;
+        delete payload.tcCheque;
+
+        return payload;
+    };
+
     const nextPage = () => {
         setPage(prev => prev + 1);
     }
@@ -257,31 +427,39 @@ export const AppProvider = ({ children }) => {
         }
     };
 
-    const onSubmit = async (data) => {
-        // Filtrar campos vacíos ("" o null)
-        console.log("DATOS DEL FORMULARIO", data);
-
+    const onSubmit = async (formData) => {
+        setLoading(true);
         try {
-            const payload = {
-                ...data,
-                tipo_sangre: data.tipoSangre || null,
-            };
-
-            delete payload.tipoSangre;
-
-            const { status, data: response } = await putData(`admisiones/editar/${data.idFicha}/`, payload);
+            const payload = transformarCampos(formData);
+            const { status } = await putData(`admisiones/editar/${formData.idFicha}/`, payload);
 
             if (status === 200) {
-                console.log('Actualizado correctamente:', response);
                 setMostrarModal(false);
+                await getAdmisionesResumen();
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Admisión actualizada',
+                    text: 'Los cambios se guardaron correctamente.',
+                    timer: 2500,
+                    showConfirmButton: false,
+                });
             } else {
-                console.error('Error al actualizar:', response);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error al actualizar',
+                    text: 'No se pudieron guardar los cambios.',
+                });
             }
         } catch (error) {
             console.error('Error de red o servidor:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error de red',
+                text: 'Ocurrió un problema al actualizar la admisión.',
+            });
+        } finally {
+            setLoading(false);
         }
-
-        getAdmisionesResumen();
     };
 
 

@@ -68,10 +68,47 @@ const InventarioReporte = React.lazy(() => import('./pages/reportes/inventarios/
 
 
 /* ====== PERMISOS ====== */
-const user = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : null;
-const userPermissions = user?.roles?.map((role) => role.id) || [];
-// Usar todos los roles asignados (unión); sin exclusividad por perfil
-const effectivePermissions = [...userPermissions];
+
+const getEffectivePermissions = () => {
+  try {
+    const storedUser = localStorage.getItem('user');
+    if (!storedUser) {
+      return [];
+    }
+    const parsed = JSON.parse(storedUser);
+    return (parsed?.roles || [])
+      .map((role) => Number(role?.id ?? role))
+      .filter((roleId) => !Number.isNaN(roleId));
+  } catch (error) {
+    console.warn('No se pudieron obtener los roles del usuario desde localStorage:', error);
+    return [];
+  }
+};
+
+const canAccess = (allowed) => {
+  if (allowed == null) {
+    return true;
+  }
+  const normalized = Array.isArray(allowed) ? allowed : [allowed];
+  const effectivePermissions = getEffectivePermissions();
+  return effectivePermissions.some((roleId) => normalized.includes(roleId));
+};
+
+const withGuard = (Component, allowed) => {
+  if (allowed == null) {
+    return Component;
+  }
+
+  const GuardedComponent = (props) => {
+    if (!canAccess(allowed)) {
+      return <Error404 {...props} />;
+    }
+    return <Component {...props} />;
+  };
+
+  GuardedComponent.displayName = `Guarded(${Component.displayName || Component.name || 'Component'})`;
+  return GuardedComponent;
+};
 
 /**
  * Mapa de roles por módulo (IDs según tu hoja/screenshot)
@@ -105,20 +142,12 @@ const INVENTARIO_VER_PRECIOS = [1, 6, 8];
 // Todos excepto 6,7,8,9 (excluye perfiles de inventario de Reportes)
 const ALL_EXCEPT_6_7_8 = ALL.filter((rid) => rid !== 6 && rid !== 7 && rid !== 8 && rid !== 9);
 
-const allow = (allowed) => {
-  if (allowed == null) {
-    return false;
-  }
-  const normalized = Array.isArray(allowed) ? allowed : [allowed];
-  return effectivePermissions.some((roleId) => normalized.includes(roleId));
-};
-
 /* ====== RUTAS ====== */
 const routes = [
   // Acceso abierto (dashboard / soporte / placeholders)
   { path: '/dashboard/default', exact: true, name: 'Default', component: DashboardDefault },
-  { path: '/dashboard/roles', exact: true, name: 'Roles', component: allow([R.ADMIN]) ? Roles : Error404 },
-  { path: '/dashboard/users', exact: true, name: 'Users', component: allow(R.MANTENIMIENTO) ? Users : Error404 },
+  { path: '/dashboard/roles', exact: true, name: 'Roles', component: withGuard(Roles, [R.ADMIN]) },
+  { path: '/dashboard/users', exact: true, name: 'Users', component: withGuard(Users, R.MANTENIMIENTO) },
   { path: '/dashboard/404', exact: true, name: '404', component: Error404 },
   { path: '/dashboard/construccion', exact: true, name: '404', component: Construccion },
   { path: '/dashboard/futuro', exact: true, name: '404', component: Futuro },
@@ -129,43 +158,43 @@ const routes = [
     path: '/dashboard/admisiones/nueva',
     exact: true,
     name: 'Nueva Admision',
-    component: allow(R.ADMISIONES) ? NuevaAdmision : Error404,
+    component: withGuard(NuevaAdmision, R.ADMISIONES),
   },
   {
     path: '/dashboard/admisiones/listar-admision',
     exact: true,
     name: 'Listar Admision',
-    component: allow(R.ADMISIONES) ? ListadoAdmisiones : Error404,
+    component: withGuard(ListadoAdmisiones, R.ADMISIONES),
   },
   {
     path: '/dashboard/admisiones/listar-admision-estados',
     exact: true,
     name: 'Listar Admision',
-    component: allow(R.ADMISIONES) ? EstadoCuenta : Error404,
+    component: withGuard(EstadoCuenta, R.ADMISIONES),
   },
   {
     path: '/dashboard/admisiones/consulta-externa',
     exact: true,
     name: 'Consulta Externa',
-    component: allow(R.ADMISIONES) ? ConsultaExterna : Error404,
+    component: withGuard(ConsultaExterna, R.ADMISIONES),
   },
   {
     path: '/dashboard/admisiones/caja',
     exact: true,
     name: 'Caja',
-    component: allow(R.ADMISIONES) ? AdmisionCaja : Error404,
+    component: withGuard(AdmisionCaja, R.ADMISIONES),
   },
   {
     path: '/dashboard/admisiones/estado-habitacion',
     exact: true,
     name: 'Estado Habitaciones',
-    component: allow(R.ADMISIONES) ? EstadoHabitaciones : Error404,
+    component: withGuard(EstadoHabitaciones, R.ADMISIONES),
   },
   {
     path: '/dashboard/admisiones/seguros',
     exact: true,
     name: 'Seguros',
-    component: allow(R.ADMISIONES) ? AdmisionSeguro : Error404,
+    component: withGuard(AdmisionSeguro, R.ADMISIONES),
   },
 
   /* Inventario */
@@ -173,160 +202,160 @@ const routes = [
     path: '/dashboard/inventario/proveedores',
     exact: true,
     name: 'Inventario Proveedores',
-    component: allow(INVENTARIO_GESTION) ? InventarioProveedores : Error404,
+    component: withGuard(InventarioProveedores, INVENTARIO_GESTION),
   },
   {
     path: '/dashboard/inventario/marcas',
     exact: true,
     name: 'Inventario Marcas',
-    component: allow(INVENTARIO_GESTION) ? inventarioMarca : Error404,
+    component: withGuard(inventarioMarca, INVENTARIO_GESTION),
   },
   {
     path: '/dashboard/inventario/unidades-medida',
     exact: true,
     name: 'Inventario Unidades de Medida',
-    component: allow(INVENTARIO_GESTION) ? InventarioUnidadesMedida : Error404,
+    component: withGuard(InventarioUnidadesMedida, INVENTARIO_GESTION),
   },
   {
     path: '/dashboard/inventario/categorias',
     exact: true,
     name: 'Inventario Categorias',
-    component: allow(INVENTARIO_GESTION) ? InventarioCategorias : Error404,
+    component: withGuard(InventarioCategorias, INVENTARIO_GESTION),
   },
   {
     path: '/dashboard/inventario/movimientos',
     exact: true,
     name: 'Inventario Movimientos',
-    component: allow(INVENTARIO_CONSULTA) ? InventarioMovimiento : Error404,
+    component: withGuard(InventarioMovimiento, INVENTARIO_CONSULTA),
   },
   {
     path: '/dashboard/inventario/bodegas',
     exact: true,
     name: 'Inventario Bodega',
-    component: allow([1]) ? InventarioBodega : Error404,
+    component: withGuard(InventarioBodega, [1]),
   },
   {
     path: '/dashboard/inventario/sku',
     exact: true,
     name: 'Gestión SKU',
-    component: allow(INVENTARIO_GESTION) ? InventarioSku : Error404,
+    component: withGuard(InventarioSku, INVENTARIO_GESTION),
   },
   {
     path: '/dashboard/inventario/stock',
     exact: true,
     name: 'Stock',
-    component: allow(INVENTARIO_CONSULTA) ? InventarioStock : Error404,
+    component: withGuard(InventarioStock, INVENTARIO_CONSULTA),
   },
   {
     path: '/dashboard/inventario/precios',
     exact: true,
     name: 'Precios',
-    component: allow([1, 9]) ? InventarioPrecios : Error404,
+    component: withGuard(InventarioPrecios, [1, 9]),
   },
   {
     path: '/dashboard/inventario/consignacion',
     exact: true,
     name: 'Consignación',
-    component: allow(INVENTARIO_GESTION) ? InventarioConsignacion : Error404,
+    component: withGuard(InventarioConsignacion, INVENTARIO_GESTION),
   },
   {
     path: '/dashboard/inventario/controlados',
     exact: true,
     name: 'Controlados',
-    component: allow(INVENTARIO_GESTION) ? InventarioControlados : Error404,
+    component: withGuard(InventarioControlados, INVENTARIO_GESTION),
   },
   {
     path: '/dashboard/inventario/principiosActivos',
     exact: true,
     name: 'Principios Activos',
-    component: allow(INVENTARIO_GESTION) ? InventarioPrincipiosActivos : Error404,
+    component: withGuard(InventarioPrincipiosActivos, INVENTARIO_GESTION),
   },
   {
     path: '/dashboard/inventario/ver-precios',
     exact: true,
     name: 'Ver Precios',
-    component: allow(INVENTARIO_VER_PRECIOS) ? InventarioVerPrecios : Error404,
+    component: withGuard(InventarioVerPrecios, INVENTARIO_VER_PRECIOS),
   },
   /* Bodegas */
   {
     path: '/dashboard/bodegas/compras/generar',
     exact: true,
     name: 'Compras - Generar Requisición',
-    component: allow([1, 11]) ? InventarioComprasGenerar : Error404,
+    component: withGuard(InventarioComprasGenerar, [1, 11]),
   },
   {
     path: '/dashboard/bodegas/compras/visualizar',
     exact: true,
     name: 'Compras - Visualizar Requisiciones',
     // Incluir rol 14 (Bodega - Autoriza) con acceso exclusivo a esta opción
-    component: allow([1, 11, 14]) ? InventarioComprasVisualizar : Error404,
+    component: withGuard(InventarioComprasVisualizar, [1, 11, 14]),
   },
   {
     path: '/dashboard/bodegas/compras/orden',
     exact: true,
     name: 'Compras - Orden de Compra',
-    component: allow([1, 13]) ? InventarioComprasOrden : Error404,
+    component: withGuard(InventarioComprasOrden, [1, 13]),
   },
   {
     path: '/dashboard/bodegas/compras/orden/:id',
     exact: true,
     name: 'Compras - Orden de Compra Detalle',
-    component: allow([1, 13]) ? InventarioComprasOrdenDetalle : Error404,
+    component: withGuard(InventarioComprasOrdenDetalle, [1, 13]),
   },
   {
     path: '/dashboard/bodegas/entradas',
     exact: true,
     name: 'Entradas',
-    component: allow([1, 10, 12]) ? InventarioEntradas : Error404,
+    component: withGuard(InventarioEntradas, [1, 10, 12]),
   },
   {
     path: '/dashboard/bodegas/salidas',
     exact: true,
     name: 'Salidas',
-    component: allow([1, 10, 12]) ? InventarioSalidas : Error404,
+    component: withGuard(InventarioSalidas, [1, 10, 12]),
   },
   {
     path: '/dashboard/bodegas/traslados',
     exact: true,
     name: 'Traslados',
-    component: allow([1, 10, 12]) ? InventarioTraslados : Error404,
+    component: withGuard(InventarioTraslados, [1, 10, 12]),
   },
   /*Pacientes*/
   {
     path: '/dashboard/pacientes/enfermeria',
     exact: true,
     name: 'Pacientes',
-    component: allow(R.ADMIN) ? PacientesEnfermeria : Error404,
+    component: withGuard(PacientesEnfermeria, R.ADMIN),
   },
   {
     path: '/dashboard/pacientes/enfermeria/iframe/:view',
     exact: true,
     name: 'Pacientes (iframe)',
-    component: allow(R.ADMIN) ? PacientesEnfermeriaFrame : Error404,
+    component: withGuard(PacientesEnfermeriaFrame, R.ADMIN),
   },
   {
     path: '/dashboard/pacientes/medicos-residentes',
     exact: true,
     name: 'Medicos Residentes',
-    component: allow(R.ADMIN) ? PacientesMedicosResidentes : Error404,
+    component: withGuard(PacientesMedicosResidentes, R.ADMIN),
   },
   {
     path: '/dashboard/pacientes/medicos-tratantes',
     exact: true,
     name: 'Medicos Tratantes',
-    component: allow(R.ADMIN) ? PacientesMedicosTratantes : Error404,
+    component: withGuard(PacientesMedicosTratantes, R.ADMIN),
   },
   {
     path: '/dashboard/pacientes/devoluciones',
     exact: true,
     name: 'Devoluciones a Farmacia',
-    component: allow(R.ADMIN) ? PacientesDevoluciones : Error404,
+    component: withGuard(PacientesDevoluciones, R.ADMIN),
   },
   {
     path: '/dashboard/pacientes/calendario-operaciones',
     exact: true,
     name: 'Calentario de Operaciones',
-    component: allow(R.ADMIN) ? PacientesCalendario : Error404,
+    component: withGuard(PacientesCalendario, R.ADMIN),
   },
   {
     path: '/dashboard/pacientes/info-paciente',
@@ -340,61 +369,61 @@ const routes = [
     path: '/dashboard/mantenimiento/habitaciones',
     exact: true,
     name: 'Estado de Habitaciones',
-    component: allow(R.MANTENIMIENTO) ? MantenimientoHabitacion : Error404,
+    component: withGuard(MantenimientoHabitacion, R.MANTENIMIENTO),
   },
   {
     path: '/dashboard/mantenimiento/seguros',
     exact: true,
     name: 'Seguros',
-    component: allow(R.MANTENIMIENTO) ? InventarioSeguros : Error404,
+    component: withGuard(InventarioSeguros, R.MANTENIMIENTO),
   },
   {
     path: '/dashboard/mantenimiento/users',
     exact: true,
     name: 'Users',
-    component: allow(R.MANTENIMIENTO) ? Users : Error404,
+    component: withGuard(Users, R.MANTENIMIENTO),
   },
   {
     path: '/dashboard/mantenimiento/medicos',
     exact: true,
     name: 'Médicos',
-    component: allow(R.MANTENIMIENTO) ? UsersDoctores : Error404,
+    component: withGuard(UsersDoctores, R.MANTENIMIENTO),
   },
   {
     path: '/dashboard/mantenimiento/extensiones',
     exact: true,
     name: 'Directorio Extensiones',
-    component: allow(R.MANTENIMIENTO) ? DirectorioExtensiones : Error404,
+    component: withGuard(DirectorioExtensiones, R.MANTENIMIENTO),
   },
   {
     path: '/dashboard/mantenimiento/centroCostos',
     exact: true,
     name: 'Centros de Costo',
-    component: allow(R.MANTENIMIENTO) ? centroCostos : Error404,
+    component: withGuard(centroCostos, R.MANTENIMIENTO),
   },
   {
     path: '/dashboard/mantenimiento/departamentos',
     exact: true,
     name: 'Departamentos',
-    component: allow(R.MANTENIMIENTO) ? departamentos : Error404,
+    component: withGuard(departamentos, R.MANTENIMIENTO),
   },
   {
     path: '/dashboard/mantenimiento/cuentasContables',
     exact: true,
     name: 'Cuentas Contables',
-    component: allow(R.MANTENIMIENTO) ? cuentasContables : Error404,
+    component: withGuard(cuentasContables, R.MANTENIMIENTO),
   },
   {
     path: '/dashboard/mantenimiento/carga-masiva/existencias',
     exact: true,
     name: 'Carga Masiva Existencias',
-    component: allow(R.MANTENIMIENTO) ? CargaMasivaExistencias : Error404,
+    component: withGuard(CargaMasivaExistencias, R.MANTENIMIENTO),
   },
   {
     path: '/dashboard/mantenimiento/carga-masiva/precios',
     exact: true,
     name: 'Carga Masiva Precios',
-    component: allow(R.MANTENIMIENTO) ? CargaMasivaPrecios : Error404,
+    component: withGuard(CargaMasivaPrecios, R.MANTENIMIENTO),
   },
 
   /* Reportes (excluye inventario estándar 6, auxiliar 7 y operador 8) */
@@ -402,19 +431,19 @@ const routes = [
     path: '/dashboard/reportes/historial-general',
     exact: true,
     name: 'Historial General',
-    component: allow(ALL_EXCEPT_6_7_8) ? HIstorialGeneral : Error404,
+    component: withGuard(HIstorialGeneral, ALL_EXCEPT_6_7_8),
   },
   {
     path: '/dashboard/reportes/users',
     exact: true,
     name: 'Usuarios',
-    component: allow(ALL_EXCEPT_6_7_8) ? UsersReporte : Error404,
+    component: withGuard(UsersReporte, ALL_EXCEPT_6_7_8),
   },
   {
     path: '/dashboard/reportes/inventarios',
     exact: true,
     name: 'Inventarios',
-    component: allow(ALL_EXCEPT_6_7_8) ? InventarioReporte : Error404,
+    component: withGuard(InventarioReporte, ALL_EXCEPT_6_7_8),
   },
 
   // -------------------------------------------------------------------------------------------------------------------------------
