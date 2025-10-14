@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { Alert, Button, Card } from 'react-bootstrap';
 import ReactQuill from 'react-quill';
 import { useAntecedentesContext } from './Context';
-import 'react-quill/dist/quill.snow.css';
+import 'quill/dist/quill.snow.css';
 
 const AntecedentesEditor = () => {
   const {

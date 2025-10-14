@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { Alert, Button, Card, Col, Form, Row } from 'react-bootstrap';
 import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
+import 'quill/dist/quill.snow.css';
 import { useNotasEnfermeriaContext } from './Context';
 
 const toolbarModules = {

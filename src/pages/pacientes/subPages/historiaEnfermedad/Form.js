@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import ReactQuill from 'react-quill';
 import { useHistoriaEnfermedadContext } from './Context';
-import 'react-quill/dist/quill.snow.css';
+import 'quill/dist/quill.snow.css';
 
 const HistoriaEnfermedadForm = () => {
   const { title, content, handleContentChange } =
