@@ -1,21 +1,12 @@
 import React from 'react';
-import { DietasProvider, useDietasContext } from './Context';
-import DietasList from './List';
+import { DietasProvider } from './Context';
 import DietasForm from './Form';
+import DietasList from './List';
 
-const DietasContent = () => {
-  const { mode } = useDietasContext();
-
-  if (mode === 'LIST') {
-    return <DietasList />;
-  }
-
-  return <DietasForm />;
-};
-
-const Dietas = () => (
-  <DietasProvider>
-    <DietasContent />
+const Dietas = ({ value }) => (
+  <DietasProvider value={value}>
+    <DietasForm />
+    <DietasList />
   </DietasProvider>
 );
 

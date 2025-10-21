@@ -1,16 +1,13 @@
 import React from 'react';
-import { SeguimientoOrdenesMedicasProvider } from './Context';
-import SeguimientoOrdenesMedicasList from './List';
-import SeguimientoOrdenesMedicasDetail from './Detail';
+import { SeguimientoOrdenesProvider } from './Context';
+import OrdenMedicaForm from './Form';
+import SeguimientoOrdenesList from './List';
 
-const SeguimientoOrdenesMedicas = () => (
-  <SeguimientoOrdenesMedicasProvider>
-    <div className="seguimiento-ordenes-medicas d-flex flex-column gap-4">
-      <SeguimientoOrdenesMedicasList />
-      <SeguimientoOrdenesMedicasDetail />
-    </div>
-  </SeguimientoOrdenesMedicasProvider>
+const SeguimientoOrdenesMedicas = ({ value }) => (
+  <SeguimientoOrdenesProvider value={value}>
+    <OrdenMedicaForm />
+    <SeguimientoOrdenesList />
+  </SeguimientoOrdenesProvider>
 );
 
 export default SeguimientoOrdenesMedicas;
-

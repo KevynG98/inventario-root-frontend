@@ -1,177 +1,85 @@
-import React, {
-  createContext,
-  useCallback,
-  useContext,
-  useMemo,
-  useState
-} from 'react';
+import React, { createContext, useContext, useMemo, useState } from 'react';
 
-const TITLE = 'Seguimiento Órdenes Médicas';
-
-const STATUS = {
-  ACTIVO: 'ACTIVO',
-  EN_PROCESO: 'EN_PROCESO',
-  FINALIZADA: 'FINALIZADA',
-  OMITIDA: 'OMITIDA'
-};
-
-const STATUS_LABELS = {
-  [STATUS.ACTIVO]: 'Activo',
-  [STATUS.EN_PROCESO]: 'En Proceso',
-  [STATUS.FINALIZADA]: 'Finalizada',
-  [STATUS.OMITIDA]: 'Omitida'
-};
-
-const SAMPLE_ORDERS = [
-  {
-    id: 'order-1',
-    status: STATUS.ACTIVO,
-    doctor: 'Dr. Ruiz',
-    patient: 'Juan Pérez',
-    description: 'Suministrar 500ml de suero intravenoso cada 8 horas.',
-    createdAt: '2025-01-22T18:30:00-06:00',
-    lastUpdatedAt: null,
-    allowedTransitions: [STATUS.EN_PROCESO, STATUS.FINALIZADA],
-    canOmit: false
-  },
-  {
-    id: 'order-2',
-    status: STATUS.EN_PROCESO,
-    doctor: 'Dr. López',
-    patient: 'Ana Díaz',
-    description: 'Administrar Paracetamol 1g IV cada 6 horas según dolor.',
-    createdAt: '2025-01-22T19:10:00-06:00',
-    lastUpdatedAt: '2025-01-23T07:45:00-06:00',
-    allowedTransitions: [STATUS.EN_PROCESO, STATUS.FINALIZADA],
-    canOmit: false
-  },
-  {
-    id: 'order-3',
-    status: STATUS.ACTIVO,
-    doctor: 'Dr. Gómez',
-    patient: 'Luis Méndez',
-    description:
-      'Control de signos vitales cada 30 minutos durante las primeras 2 horas.',
-    createdAt: '2025-01-22T20:05:00-06:00',
-    lastUpdatedAt: null,
-    allowedTransitions: [STATUS.EN_PROCESO, STATUS.FINALIZADA],
-    canOmit: false
-  },
-  {
-    id: 'order-4',
-    status: STATUS.ACTIVO,
-    doctor: 'Dr. Juan Pérez (Residente)',
-    patient: 'Carla Torres',
-    description:
-      'Evaluar respuesta al tratamiento y documentar cualquier efecto adverso.',
-    createdAt: '2025-01-23T09:25:00-06:00',
-    lastUpdatedAt: null,
-    allowedTransitions: [STATUS.EN_PROCESO, STATUS.FINALIZADA, STATUS.OMITIDA],
-    canOmit: true
-  }
+const ESTADOS = [
+  { value: 'ACTIVA', label: 'Activa' },
+  { value: 'EN_PROCESO', label: 'En proceso' },
+  { value: 'FINALIZADA', label: 'Finalizada' },
+  { value: 'CANCELADA', label: 'Cancelada' }
 ];
 
-const SeguimientoOrdenesMedicasContext = createContext(null);
+const PRIORIDADES = [
+  { value: 'BAJA', label: 'Baja' },
+  { value: 'MEDIA', label: 'Media' },
+  { value: 'ALTA', label: 'Alta' },
+  { value: 'URGENTE', label: 'Urgente' }
+];
 
-export const useSeguimientoOrdenesMedicasContext = () =>
-  useContext(SeguimientoOrdenesMedicasContext);
+const SeguimientoContext = createContext(null);
 
-const formatDateTime = (isoString) => {
-  if (!isoString) return null;
+const formatDateTime = (iso) => {
+  if (!iso) return '—';
   try {
-    const date = new Date(isoString);
     return new Intl.DateTimeFormat('es-GT', {
       dateStyle: 'short',
       timeStyle: 'short'
-    }).format(date);
+    }).format(new Date(iso));
   } catch (error) {
-    return isoString;
+    return iso;
   }
 };
 
-export const SeguimientoOrdenesMedicasProvider = ({ children }) => {
-  const [orders, setOrders] = useState(() =>
-    SAMPLE_ORDERS.map((order) => ({
-      ...order,
-      createdAtLabel: formatDateTime(order.createdAt),
-      lastUpdatedAtLabel: formatDateTime(order.lastUpdatedAt)
-    }))
+const mapOrden = (orden) => ({
+  ...orden,
+  creadoEnLabel: formatDateTime(orden.creado_en),
+  actualizadoEnLabel: formatDateTime(orden.actualizado_en),
+  cerradoEnLabel: formatDateTime(orden.cerrado_en),
+  eventos: (orden.eventos || []).map((evento) => ({
+    ...evento,
+    creadoEnLabel: formatDateTime(evento.creado_en)
+  }))
+});
+
+export const SeguimientoOrdenesProvider = ({ children, value }) => {
+  const ordenes = useMemo(
+    () => (value?.items ?? []).map(mapOrden),
+    [value?.items]
   );
+  const [activeId, setActiveId] = useState(ordenes[0]?.id ?? null);
 
-  const [activeOrderId, setActiveOrderId] = useState(orders[0]?.id ?? null);
-  const [search, setSearch] = useState('');
-
-  const filteredOrders = useMemo(() => {
-    if (!search.trim()) {
-      return orders;
-    }
-    const term = search.trim().toLowerCase();
-    return orders.filter((order) => {
-      const haystack = [
-        order.doctor,
-        order.patient,
-        order.description,
-        STATUS_LABELS[order.status]
-      ]
-        .join(' ')
-        .toLowerCase();
-      return haystack.includes(term);
-    });
-  }, [orders, search]);
-
-  const setActiveOrder = useCallback((orderId) => {
-    setActiveOrderId(orderId);
-  }, []);
-
-  const updateOrderStatus = useCallback((orderId, nextStatus) => {
-    setOrders((prev) =>
-      prev.map((order) => {
-        if (order.id !== orderId) {
-          return order;
-        }
-
-        const nowIso = new Date().toISOString();
-        return {
-          ...order,
-          status: nextStatus,
-          lastUpdatedAt: nowIso,
-          lastUpdatedAtLabel: formatDateTime(nowIso)
-        };
-      })
-    );
-  }, []);
-
-  const value = useMemo(
+  const contextValue = useMemo(
     () => ({
-      title: TITLE,
-      orders,
-      filteredOrders,
-      activeOrderId,
-      setActiveOrder,
-      updateOrderStatus,
-      STATUS,
-      STATUS_LABELS,
-      search,
-      setSearch
+      title: 'Seguimiento de Órdenes Médicas',
+      ordenes,
+      loading: value?.loading ?? false,
+      error: value?.error ?? null,
+      activeId,
+      setActiveId,
+      estados: ESTADOS,
+      prioridades: PRIORIDADES,
+      handlers: {
+        create: value?.create,
+        update: value?.update,
+        remove: value?.remove,
+        crearEvento: value?.crearEvento
+      }
     }),
-    [
-      TITLE,
-      orders,
-      filteredOrders,
-      activeOrderId,
-      setActiveOrder,
-      updateOrderStatus,
-      STATUS,
-      STATUS_LABELS,
-      search,
-      setSearch
-    ]
+    [ordenes, value, activeId]
   );
 
   return (
-    <SeguimientoOrdenesMedicasContext.Provider value={value}>
+    <SeguimientoContext.Provider value={contextValue}>
       {children}
-    </SeguimientoOrdenesMedicasContext.Provider>
+    </SeguimientoContext.Provider>
   );
+};
+
+export const useSeguimientoOrdenesContext = () => {
+  const context = useContext(SeguimientoContext);
+  if (!context) {
+    throw new Error(
+      'useSeguimientoOrdenesContext must be used within SeguimientoOrdenesProvider'
+    );
+  }
+  return context;
 };
 

@@ -1,21 +1,12 @@
 import React from 'react';
-import { NotasEnfermeriaProvider, useNotasEnfermeriaContext } from './Context';
-import NotasEnfermeriaList from './List';
+import { NotasEnfermeriaProvider } from './Context';
 import NotasEnfermeriaForm from './Form';
+import NotasEnfermeriaList from './List';
 
-const NotasEnfermeriaContent = () => {
-  const { mode } = useNotasEnfermeriaContext();
-
-  if (mode === 'LIST') {
-    return <NotasEnfermeriaList />;
-  }
-
-  return <NotasEnfermeriaForm />;
-};
-
-const NotasEnfermeria = () => (
-  <NotasEnfermeriaProvider>
-    <NotasEnfermeriaContent />
+const NotasEnfermeria = ({ value }) => (
+  <NotasEnfermeriaProvider value={value}>
+    <NotasEnfermeriaForm />
+    <NotasEnfermeriaList />
   </NotasEnfermeriaProvider>
 );
 

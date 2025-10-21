@@ -1,13 +1,11 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import {
-  Alert,
-  Button,
-  Card,
-  Col,
-  Form,
-  InputGroup,
-  Row
-} from 'react-bootstrap';
+import Alert from 'react-bootstrap/Alert';
+import Button from 'react-bootstrap/Button';
+import Card from 'react-bootstrap/Card';
+import Col from 'react-bootstrap/Col';
+import Form from 'react-bootstrap/Form';
+import InputGroup from 'react-bootstrap/InputGroup';
+import Row from 'react-bootstrap/Row';
 import { useSignosVitalesEmergenciaContext } from './Context';
 
 const buildInitialState = (fields, getInitialFormState) =>
@@ -24,7 +22,8 @@ const SignosVitalesEmergenciaForm = () => {
     fields,
     recordVitalSigns,
     getInitialFormState,
-    currentUserName
+    currentUserName,
+    loading
   } = useSignosVitalesEmergenciaContext();
   const [formState, setFormState] = useState(() =>
     buildInitialState(fields, getInitialFormState)
@@ -60,9 +59,9 @@ const SignosVitalesEmergenciaForm = () => {
     }));
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    const response = recordVitalSigns(formState);
+    const response = await recordVitalSigns(formState);
 
     if (response?.success) {
       setStatus({ type: 'success', message: 'Signos registrados correctamente.' });
@@ -154,11 +153,12 @@ const SignosVitalesEmergenciaForm = () => {
               onClick={() =>
                 setFormState(buildInitialState(fields, getInitialFormState))
               }
-            >
+            disabled={loading}
+          >
               Limpiar formulario
             </Button>
-            <Button type="submit" variant="primary">
-              Guardar signos
+            <Button type="submit" variant="primary" disabled={loading}>
+              {loading ? 'Guardando…' : 'Guardar signos'}
             </Button>
           </div>
         </Form>

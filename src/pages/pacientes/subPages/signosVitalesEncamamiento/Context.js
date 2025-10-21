@@ -8,93 +8,65 @@ import React, {
 
 const TITLE = 'Signos Vitales (Encamamiento)';
 
-const FIELD_DEFINITIONS = [
-  { key: 'frecuenciaRespiratoria', label: 'Frecuencia Respiratoria', type: 'number' },
-  { key: 'presionArterial', label: 'Presión Arterial', type: 'text' },
-  { key: 'presionArterialMedia', label: 'Presión Arterial Media', type: 'number' },
-  { key: 'temperatura', label: 'Temperatura °C', type: 'number', step: '0.1' },
-  { key: 'frecuenciaCardiaca', label: 'Frecuencia Cardíaca', type: 'number' },
-  { key: 'oxigenacion', label: 'Oxigenación (%)', type: 'number' },
-  { key: 'glucosa', label: 'Glucosa', type: 'number' },
-  { key: 'insulina', label: 'Insulina (UI)', type: 'number' }
+const FIELDS = [
+  { id: 'frecuenciaRespiratoria', label: 'FR (rpm)' },
+  { id: 'presionArterial', label: 'PA (mmHg)' },
+  { id: 'presionArterialMedia', label: 'PAM' },
+  { id: 'temperatura', label: 'Temp °C' },
+  { id: 'frecuenciaCardiaca', label: 'FC (ppm)' },
+  { id: 'oxigenacion', label: 'SpO₂ (%)' },
+  { id: 'glucosa', label: 'Glucosa' },
+  { id: 'insulina', label: 'Insulina (UI)' }
 ];
 
-const HOURS_TEMPLATE = [
-  '07:00 - 08:00',
-  '08:00 - 09:00',
-  '09:00 - 10:00',
-  '10:00 - 11:00',
-  '11:00 - 12:00',
-  '12:00 - 13:00',
-  '13:00 - 14:00',
-  '14:00 - 15:00',
-  '15:00 - 16:00',
-  '16:00 - 17:00',
-  '17:00 - 18:00',
-  '18:00 - 19:00',
-  '19:00 - 20:00',
-  '20:00 - 21:00',
-  '21:00 - 22:00',
-  '22:00 - 23:00',
-  '23:00 - 00:00',
-  '00:00 - 01:00',
-  '01:00 - 02:00',
-  '02:00 - 03:00',
-  '03:00 - 04:00',
-  '04:00 - 05:00',
-  '05:00 - 06:00',
-  '06:00 - 07:00'
-];
+const SignosEncamamientoContext = createContext(null);
 
-const SAMPLE_DATA = [
-  {
-    hour: '07:00 - 08:00',
-    frecuenciaRespiratoria: '12',
-    presionArterial: '150/69',
-    presionArterialMedia: '68',
-    temperatura: '36.8',
-    frecuenciaCardiaca: '71',
-    oxigenacion: '',
-    glucosa: '154',
-    insulina: ''
-  },
-  {
-    hour: '08:00 - 09:00',
-    frecuenciaRespiratoria: '12',
-    presionArterial: '168/66',
-    presionArterialMedia: '71',
-    temperatura: '37.1',
-    frecuenciaCardiaca: '97',
-    oxigenacion: '',
-    glucosa: '159',
-    insulina: ''
-  },
-  {
-    hour: '09:00 - 10:00',
-    frecuenciaRespiratoria: '13',
-    presionArterial: '192/71',
-    presionArterialMedia: '110',
-    temperatura: '38.1',
-    frecuenciaCardiaca: '68',
-    oxigenacion: '142',
-    glucosa: '142',
-    insulina: ''
+const normalizeRecord = (record) => {
+  const mediciones = record?.mediciones || {};
+  return {
+    id: record.id,
+    tomadoEn: record.tomado_en,
+    tomadoPor: record.registrado_por || '—',
+    comentarios: record.comentarios || '',
+    valores: {
+      frecuenciaRespiratoria: mediciones.frecuenciaRespiratoria ?? mediciones.frecuencia_respiratoria ?? '',
+      presionArterial: mediciones.presionArterial ?? mediciones.presion_arterial ?? '',
+      presionArterialMedia: mediciones.presionArterialMedia ?? mediciones.presion_arterial_media ?? '',
+      temperatura: mediciones.temperatura ?? mediciones.temperatura_c ?? '',
+      frecuenciaCardiaca: mediciones.frecuenciaCardiaca ?? mediciones.frecuencia_cardiaca ?? '',
+      oxigenacion: mediciones.oxigenacion ?? '',
+      glucosa: mediciones.glucosa ?? mediciones.glucosa_mg_dl ?? '',
+      insulina: mediciones.insulina ?? mediciones.insulina_u ?? ''
+    }
+  };
+};
+
+const formatDate = (iso) => {
+  if (!iso) {
+    return '—';
   }
-];
+  try {
+    const date = new Date(iso);
+    return new Intl.DateTimeFormat('es-GT', {
+      dateStyle: 'short',
+      timeStyle: 'short'
+    }).format(date);
+  } catch (error) {
+    return iso;
+  }
+};
 
-const SignosVitalesEncamamientoContext = createContext(null);
-
-const resolveCurrentUser = () => {
+const resolveUser = () => {
   if (typeof window === 'undefined') return 'Usuario Enfermería';
   try {
-    const storedUser =
+    const stored =
       window.localStorage?.getItem('user') ||
       window.localStorage?.getItem('usuario');
-    if (!storedUser) return 'Usuario Enfermería';
+    if (!stored) return 'Usuario Enfermería';
     const parsed =
-      typeof storedUser === 'string' && storedUser.startsWith('{')
-        ? JSON.parse(storedUser)
-        : { username: storedUser };
+      typeof stored === 'string' && stored.startsWith('{')
+        ? JSON.parse(stored)
+        : { username: stored };
     return (
       parsed?.nombreCompleto ||
       parsed?.fullName ||
@@ -107,92 +79,129 @@ const resolveCurrentUser = () => {
   }
 };
 
-const buildEmptyRow = (hour) => {
-  const row = { hour };
-  FIELD_DEFINITIONS.forEach((field) => {
-    row[field.key] = '';
-  });
-  return row;
-};
+export const SignosEncamamientoProvider = ({ children, value }) => {
+  const items = value?.items ?? [];
+  const create = value?.create;
+  const remove = value?.remove;
+  const loading = value?.loading ?? false;
+  const error = value?.error ?? null;
 
-const buildInitialRows = () => {
-  const sampleMap = new Map(SAMPLE_DATA.map((item) => [item.hour, item]));
-  return HOURS_TEMPLATE.map((hour) => {
-    if (sampleMap.has(hour)) {
-      return { ...buildEmptyRow(hour), ...sampleMap.get(hour) };
-    }
-    return buildEmptyRow(hour);
-  });
-};
+  const registros = useMemo(() => items.map(normalizeRecord), [items]);
+  const [formState, setFormState] = useState(() => ({
+    tomadoEn: '',
+    valores: FIELDS.reduce((acc, field) => ({ ...acc, [field.id]: '' }), {}),
+    comentarios: ''
+  }));
+  const [saving, setSaving] = useState(false);
 
-export const SignosVitalesEncamamientoProvider = ({ children }) => {
-  const [rows, setRows] = useState(buildInitialRows);
-  const [feedback, setFeedback] = useState(null);
-
-  const handleCellChange = useCallback((hour, field, value) => {
-    setRows((prev) =>
-      prev.map((row) =>
-        row.hour === hour
-          ? {
-              ...row,
-              [field]: value
-            }
-          : row
-      )
-    );
-  }, []);
-
-  const saveRows = useCallback(() => {
-    const user = resolveCurrentUser();
-    const now = new Date().toISOString();
-
-    // In a real implementation this data would be sent to the backend
-    const payload = rows.map((row) => ({
-      ...row,
-      recordedBy: user,
-      recordedAt: now
+  const handleFieldChange = useCallback((fieldId, value) => {
+    setFormState((prev) => ({
+      ...prev,
+      valores: {
+        ...prev.valores,
+        [fieldId]: value
+      }
     }));
-
-    console.table(payload); // Dev aid
-    setFeedback({
-      type: 'success',
-      message: 'Signos vitales guardados correctamente (simulación).'
-    });
-    return payload;
-  }, [rows]);
-
-  const resetRows = useCallback(() => {
-    setRows(buildInitialRows());
-    setFeedback(null);
   }, []);
+
+  const handleTimestampChange = useCallback((value) => {
+    setFormState((prev) => ({
+      ...prev,
+      tomadoEn: value
+    }));
+  }, []);
+
+  const handleCommentsChange = useCallback((value) => {
+    setFormState((prev) => ({
+      ...prev,
+      comentarios: value
+    }));
+  }, []);
+
+  const resetForm = useCallback(() => {
+    setFormState({
+      tomadoEn: '',
+      valores: FIELDS.reduce((acc, field) => ({ ...acc, [field.id]: '' }), {}),
+      comentarios: ''
+    });
+  }, []);
+
+  const saveRecord = useCallback(async () => {
+    if (typeof create !== 'function') {
+      return { success: false };
+    }
+    const payload = {
+      tomado_en: formState.tomadoEn || new Date().toISOString(),
+      registrado_por: resolveUser(),
+      comentarios: formState.comentarios,
+      mediciones: { ...formState.valores }
+    };
+    setSaving(true);
+    try {
+      await create(payload);
+      resetForm();
+      return { success: true };
+    } finally {
+      setSaving(false);
+    }
+  }, [create, formState, resetForm]);
+
+  const deleteRecord = useCallback(
+    async (id) => {
+      if (typeof remove !== 'function') {
+        return;
+      }
+      await remove(id);
+    },
+    [remove]
+  );
 
   const contextValue = useMemo(
     () => ({
       title: TITLE,
-      fieldDefinitions: FIELD_DEFINITIONS,
-      rows,
-      handleCellChange,
-      saveRows,
-      resetRows,
-      feedback,
-      setFeedback
+      fields: FIELDS,
+      registros,
+      loading,
+      error,
+      formState,
+      saving,
+      handleFieldChange,
+      handleTimestampChange,
+      handleCommentsChange,
+      resetForm,
+      saveRecord,
+      deleteRecord,
+      formatDate
     }),
-    [rows, handleCellChange, saveRows, resetRows, feedback]
+    [
+      registros,
+      loading,
+      error,
+      formState,
+      saving,
+      handleFieldChange,
+      handleTimestampChange,
+      handleCommentsChange,
+      resetForm,
+      saveRecord,
+      deleteRecord
+    ]
   );
 
   return (
-    <SignosVitalesEncamamientoContext.Provider value={contextValue}>
+    <SignosEncamamientoContext.Provider value={contextValue}>
       {children}
-    </SignosVitalesEncamamientoContext.Provider>
+    </SignosEncamamientoContext.Provider>
   );
 };
 
-export const useSignosVitalesEncamamientoContext = () => {
-  const context = useContext(SignosVitalesEncamamientoContext);
+export const useSignosEncamamientoContext = () => {
+  const context = useContext(SignosEncamamientoContext);
   if (!context) {
     throw new Error(
-      'useSignosVitalesEncamamientoContext must be used within SignosVitalesEncamamientoProvider'
+      'useSignosEncamamientoContext must be used within SignosEncamamientoProvider'
     );
   }
   return context;
 };
+

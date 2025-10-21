@@ -2,8 +2,7 @@ import React, {
   createContext,
   useCallback,
   useContext,
-  useMemo,
-  useState
+  useMemo
 } from 'react';
 
 const TITLE = 'Signos Vitales (Emergencia)';
@@ -11,14 +10,16 @@ const TITLE = 'Signos Vitales (Emergencia)';
 const FIELDS = [
   {
     id: 'peso',
+    attr: 'peso_kg',
     label: 'Peso',
-    placeholder: 'Ej. 180',
-    unit: 'lbs',
+    placeholder: 'Ej. 70',
+    unit: 'kg',
     type: 'number',
     step: '0.1'
   },
   {
     id: 'estatura',
+    attr: 'estatura_cm',
     label: 'Estatura',
     placeholder: 'Ej. 165',
     unit: 'cm',
@@ -27,20 +28,23 @@ const FIELDS = [
   },
   {
     id: 'presionArterial',
-    label: 'Presión Arterial',
+    attr: 'presion_arterial',
+    label: 'Presión arterial',
     placeholder: 'Ej. 120/80',
     unit: 'mmHg',
     type: 'text'
   },
   {
     id: 'presionArterialMedia',
-    label: 'Presión Arterial Media',
+    attr: 'presion_arterial_media',
+    label: 'Presión arterial media',
     placeholder: 'Ej. 95',
     unit: 'mmHg',
     type: 'number'
   },
   {
     id: 'temperatura',
+    attr: 'temperatura_c',
     label: 'Temperatura',
     placeholder: 'Ej. 36.5',
     unit: '°C',
@@ -49,13 +53,15 @@ const FIELDS = [
   },
   {
     id: 'frecuenciaCardiaca',
-    label: 'Frecuencia Cardíaca',
+    attr: 'frecuencia_cardiaca',
+    label: 'Frecuencia cardiaca',
     placeholder: 'Ej. 80',
     unit: 'ppm',
     type: 'number'
   },
   {
     id: 'oxigenacion',
+    attr: 'oxigenacion',
     label: 'Oxigenación',
     placeholder: 'Ej. 95',
     unit: '%',
@@ -63,13 +69,15 @@ const FIELDS = [
   },
   {
     id: 'frecuenciaRespiratoria',
-    label: 'Frecuencia Respiratoria',
+    attr: 'frecuencia_respiratoria',
+    label: 'Frecuencia respiratoria',
     placeholder: 'Ej. 18',
     unit: 'rpm',
     type: 'number'
   },
   {
     id: 'glucosa',
+    attr: 'glucosa_mg_dl',
     label: 'Glucosa',
     placeholder: 'Ej. 110',
     unit: 'mg/dL',
@@ -77,6 +85,7 @@ const FIELDS = [
   },
   {
     id: 'insulina',
+    attr: 'insulina_u',
     label: 'Insulina',
     placeholder: 'Ej. 8',
     unit: 'U',
@@ -87,16 +96,15 @@ const FIELDS = [
 const resolveCurrentUser = () => {
   if (typeof window === 'undefined') return 'Usuario actual';
   try {
-    const storedUser =
+    const stored =
       window.localStorage?.getItem('user') ||
       window.localStorage?.getItem('usuario');
-    if (!storedUser) {
-      return 'Usuario actual';
-    }
+    if (!stored) return 'Usuario actual';
+
     const parsed =
-      typeof storedUser === 'string' && storedUser.startsWith('{')
-        ? JSON.parse(storedUser)
-        : { username: storedUser };
+      typeof stored === 'string' && stored.startsWith('{')
+        ? JSON.parse(stored)
+        : { username: stored };
 
     return (
       parsed?.nombreCompleto ||
@@ -110,39 +118,29 @@ const resolveCurrentUser = () => {
   }
 };
 
-const buildSeedRecords = () => {
-  const seedTimestamp = new Date('2025-01-23T20:51:47-06:00').toISOString();
-  const sampleMeasurements = [
-    { fieldId: 'peso', value: '180', comment: '' },
-    { fieldId: 'estatura', value: '1.61', comment: '' },
-    { fieldId: 'presionArterial', value: '141/85', comment: '' },
-    { fieldId: 'temperatura', value: '36.5', comment: '' },
-    { fieldId: 'frecuenciaCardiaca', value: '80', comment: '' },
-    { fieldId: 'oxigenacion', value: '93', comment: '' },
-    { fieldId: 'frecuenciaRespiratoria', value: '20', comment: '' }
-  ];
-
-  return [
-    {
-      id: 'seed-record-1',
-      timestamp: seedTimestamp,
-      takenBy: 'JHONY GERARDO PINEDA CASTRO',
-      measurements: sampleMeasurements
-        .map((entry) => {
-          const field = FIELDS.find((item) => item.id === entry.fieldId);
-          if (!field) return null;
-
-          return {
-            id: field.id,
-            label: field.label,
-            unit: field.unit,
-            value: entry.value,
-            comment: entry.comment
-          };
-        })
-        .filter(Boolean)
+const normalizeRecord = (record) => {
+  const measurements = FIELDS.map((field) => {
+    const rawValue = record?.[field.attr];
+    const extra = record?.datos_extra?.[field.id];
+    const value = rawValue ?? extra?.valor;
+    if (value === undefined || value === null || value === '') {
+      return null;
     }
-  ];
+    return {
+      id: field.id,
+      label: field.label,
+      unit: field.unit,
+      value,
+      comment: extra?.comentario || ''
+    };
+  }).filter(Boolean);
+
+  return {
+    id: record.id,
+    timestamp: record.tomado_en,
+    takenBy: record.registrado_por || '—',
+    measurements
+  };
 };
 
 const SignosVitalesEmergenciaContext = createContext(null);
@@ -150,40 +148,13 @@ const SignosVitalesEmergenciaContext = createContext(null);
 export const useSignosVitalesEmergenciaContext = () =>
   useContext(SignosVitalesEmergenciaContext);
 
-export const SignosVitalesEmergenciaProvider = ({ children }) => {
-  const [records, setRecords] = useState(buildSeedRecords);
-
-  const recordVitalSigns = useCallback((formValues) => {
-    const measurements = FIELDS.map((field) => {
-      const fieldValues = formValues[field.id] || {};
-      const value = `${fieldValues.value ?? ''}`.trim();
-      const comment = `${fieldValues.comment ?? ''}`.trim();
-
-      return {
-        id: field.id,
-        label: field.label,
-        unit: field.unit,
-        value,
-        comment
-      };
-    }).filter((item) => item.value !== '');
-
-    if (measurements.length === 0) {
-      return { success: false, reason: 'EMPTY' };
-    }
-
-    setRecords((prev) => [
-      {
-        id: `record-${Date.now()}`,
-        timestamp: new Date().toISOString(),
-        takenBy: resolveCurrentUser(),
-        measurements
-      },
-      ...prev
-    ]);
-
-    return { success: true };
-  }, []);
+export const SignosVitalesEmergenciaProvider = ({ children, value }) => {
+  const recordsSource = value?.records ?? value?.items ?? [];
+  const records = Array.isArray(recordsSource) ? recordsSource : [];
+  const loading = value?.loading ?? false;
+  const error = value?.error ?? null;
+  const create = value?.create;
+  const remove = value?.remove;
 
   const getInitialFormState = useCallback(() => {
     return FIELDS.reduce((acc, field) => {
@@ -192,20 +163,69 @@ export const SignosVitalesEmergenciaProvider = ({ children }) => {
     }, {});
   }, []);
 
-  const value = useMemo(
+  const recordVitalSigns = useCallback(
+    async (formValues) => {
+      if (typeof create !== 'function') {
+        return { success: false, reason: 'NO_HANDLER' };
+      }
+
+      const payload = {};
+      const extra = {};
+      const comments = [];
+
+      FIELDS.forEach((field) => {
+        const fieldValues = formValues[field.id] || {};
+        const value = `${fieldValues.value ?? ''}`.trim();
+        const comment = `${fieldValues.comment ?? ''}`.trim();
+
+        if (value === '') {
+          return;
+        }
+
+        payload[field.attr] = value;
+        extra[field.id] = {
+          valor: value,
+          comentario: comment
+        };
+
+        if (comment) {
+          comments.push(`${field.label}: ${comment}`);
+        }
+      });
+
+      if (Object.keys(payload).length === 0) {
+        return { success: false, reason: 'EMPTY' };
+      }
+
+      payload.datos_extra = extra;
+      payload.registrado_por = resolveCurrentUser();
+      if (comments.length > 0) {
+        payload.comentarios = comments.join('\n');
+      }
+
+      await create(payload);
+      return { success: true };
+    },
+    [create]
+  );
+
+  const valueMemo = useMemo(
     () => ({
       title: TITLE,
       fields: FIELDS,
-      records,
-      recordVitalSigns,
+      records: records.map(normalizeRecord),
+      loading,
+      error,
+      currentUserName: resolveCurrentUser(),
       getInitialFormState,
-      currentUserName: resolveCurrentUser()
+      recordVitalSigns,
+      removeMeasurement: remove
     }),
-    [records, recordVitalSigns, getInitialFormState]
+    [records, loading, error, getInitialFormState, recordVitalSigns, remove]
   );
 
   return (
-    <SignosVitalesEmergenciaContext.Provider value={value}>
+    <SignosVitalesEmergenciaContext.Provider value={valueMemo}>
       {children}
     </SignosVitalesEmergenciaContext.Provider>
   );

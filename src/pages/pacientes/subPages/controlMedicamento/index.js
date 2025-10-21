@@ -1,12 +1,28 @@
 import React from 'react';
-import { ControlMedicamentoProvider } from './Context';
+import { Alert } from 'react-bootstrap';
+import { ControlMedicamentoProvider, useControlMedicamentoContext } from './Context';
+import ControlMedicamentoForm from './Form';
 import ControlMedicamentoList from './List';
 
-const ControlMedicamento = () => (
-  <ControlMedicamentoProvider>
-    <ControlMedicamentoList />
+const ControlMedicamentoContent = () => {
+  const { error } = useControlMedicamentoContext();
+  return (
+    <>
+      {error ? (
+        <Alert variant="danger" className="mb-3">
+          {error}
+        </Alert>
+      ) : null}
+      <ControlMedicamentoForm />
+      <ControlMedicamentoList />
+    </>
+  );
+};
+
+const ControlMedicamento = ({ value }) => (
+  <ControlMedicamentoProvider value={value}>
+    <ControlMedicamentoContent />
   </ControlMedicamentoProvider>
 );
 
 export default ControlMedicamento;
-

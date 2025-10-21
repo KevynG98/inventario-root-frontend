@@ -1,11 +1,21 @@
 import React from 'react';
-import { SignosVitalesEncamamientoProvider } from './Context';
-import SignosVitalesEncamamientoList from './List';
+import { Alert } from 'react-bootstrap';
+import SignosEncamamientoForm from './Form';
+import SignosEncamamientoList from './List';
+import { SignosEncamamientoProvider } from './Context';
 
-const SignosVitalesEncamamiento = () => (
-  <SignosVitalesEncamamientoProvider>
-    <SignosVitalesEncamamientoList />
-  </SignosVitalesEncamamientoProvider>
+const SignosVitalesEncamamiento = ({ value }) => (
+  <SignosEncamamientoProvider value={value}>
+    {value?.error ? (
+      <Alert variant="danger" className="mb-3">
+        {value.error}
+      </Alert>
+    ) : null}
+    <div className="d-flex flex-column gap-4">
+      <SignosEncamamientoForm />
+      <SignosEncamamientoList />
+    </div>
+  </SignosEncamamientoProvider>
 );
 
 export default SignosVitalesEncamamiento;

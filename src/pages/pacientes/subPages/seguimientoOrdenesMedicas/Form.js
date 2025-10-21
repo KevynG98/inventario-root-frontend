@@ -4,16 +4,16 @@ import Card from 'react-bootstrap/Card';
 import Col from 'react-bootstrap/Col';
 import Form from 'react-bootstrap/Form';
 import Row from 'react-bootstrap/Row';
-import { useDietasContext } from './Context';
+import { useSeguimientoOrdenesContext } from './Context';
 
 const initialState = {
-  tiempo: 'DESAYUNO',
-  dieta: '',
-  observaciones: ''
+  titulo: '',
+  descripcion: '',
+  prioridad: 'MEDIA'
 };
 
-const DietasForm = () => {
-  const { tiempos, handlers } = useDietasContext();
+const OrdenMedicaForm = () => {
+  const { prioridades, handlers } = useSeguimientoOrdenesContext();
   const [formState, setFormState] = useState(initialState);
   const [saving, setSaving] = useState(false);
 
@@ -23,18 +23,20 @@ const DietasForm = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    if (!formState.dieta?.trim()) {
-      window.alert('Ingresa la dieta indicada.');
+    if (!formState.titulo?.trim()) {
+      window.alert('Ingresa el título de la orden.');
       return;
     }
-    if (typeof handlers.create !== 'function') return;
-
+    if (typeof handlers.create !== 'function') {
+      return;
+    }
     setSaving(true);
     try {
       await handlers.create({
-        tiempo: formState.tiempo,
-        dieta: formState.dieta,
-        observaciones: formState.observaciones
+        titulo: formState.titulo,
+        descripcion: formState.descripcion,
+        prioridad: formState.prioridad,
+        estado: 'ACTIVA'
       });
       setFormState(initialState);
     } finally {
@@ -45,48 +47,48 @@ const DietasForm = () => {
   return (
     <Card className="shadow-sm border-0 mb-4">
       <Card.Header className="bg-white border-0">
-        <h4 className="mb-0">Registrar dieta</h4>
+        <h4 className="mb-0">Nueva orden médica</h4>
       </Card.Header>
       <Card.Body>
         <Form onSubmit={handleSubmit} className="d-flex flex-column gap-3">
           <Row className="g-3">
+            <Col md={8}>
+              <Form.Group controlId="orden-titulo">
+                <Form.Label>Título</Form.Label>
+                <Form.Control
+                  type="text"
+                  value={formState.titulo}
+                  onChange={handleChange('titulo')}
+                  placeholder="Descripción corta"
+                  required
+                />
+              </Form.Group>
+            </Col>
             <Col md={4}>
-              <Form.Group controlId="dieta-tiempo">
-                <Form.Label>Tiempo</Form.Label>
+              <Form.Group controlId="orden-prioridad">
+                <Form.Label>Prioridad</Form.Label>
                 <Form.Control
                   as="select"
-                  value={formState.tiempo}
-                  onChange={handleChange('tiempo')}
+                  value={formState.prioridad}
+                  onChange={handleChange('prioridad')}
                 >
-                  {tiempos.map((tiempo) => (
-                    <option key={tiempo} value={tiempo}>
-                      {tiempo}
+                  {prioridades.map((opcion) => (
+                    <option key={opcion.value} value={opcion.value}>
+                      {opcion.label}
                     </option>
                   ))}
                 </Form.Control>
               </Form.Group>
             </Col>
-            <Col md={8}>
-              <Form.Group controlId="dieta-nombre">
-                <Form.Label>Dieta indicada</Form.Label>
-                <Form.Control
-                  type="text"
-                  value={formState.dieta}
-                  onChange={handleChange('dieta')}
-                  placeholder="Ej. Dieta blanda"
-                  required
-                />
-              </Form.Group>
-            </Col>
           </Row>
-          <Form.Group controlId="dieta-observaciones">
-            <Form.Label>Observaciones</Form.Label>
+          <Form.Group controlId="orden-descripcion">
+            <Form.Label>Descripción / Indicaciones</Form.Label>
             <Form.Control
               as="textarea"
-              rows={2}
-              value={formState.observaciones}
-              onChange={handleChange('observaciones')}
-              placeholder="Notas adicionales (opcional)"
+              rows={3}
+              value={formState.descripcion}
+              onChange={handleChange('descripcion')}
+              placeholder="Detalle la orden médica"
             />
           </Form.Group>
           <div className="d-flex justify-content-end gap-2">
@@ -99,7 +101,7 @@ const DietasForm = () => {
               Limpiar
             </Button>
             <Button type="submit" variant="primary" disabled={saving}>
-              {saving ? 'Guardando…' : 'Agregar registro'}
+              {saving ? 'Guardando…' : 'Crear orden'}
             </Button>
           </div>
         </Form>
@@ -108,4 +110,4 @@ const DietasForm = () => {
   );
 };
 
-export default DietasForm;
+export default OrdenMedicaForm;

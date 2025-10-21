@@ -1,5 +1,5 @@
-import React, { useMemo } from 'react';
-import { Alert, Button, Card } from 'react-bootstrap';
+import React, { useMemo, useState } from 'react';
+import { Alert, Button, Card, Col, Form, Row } from 'react-bootstrap';
 import ReactQuill from 'react-quill';
 import { useAntecedentesContext } from './Context';
 import 'quill/dist/quill.snow.css';
@@ -8,11 +8,15 @@ const AntecedentesEditor = () => {
   const {
     mode,
     activeRecord,
-    editorContent,
-    setEditorContent,
+    editorState,
+    setDescripcion,
+    setTipo,
+    setEsActivo,
     returnToList,
-    saveRecord
+    saveRecord,
+    saving
   } = useAntecedentesContext();
+  const [feedback, setFeedback] = useState(null);
 
   const modules = useMemo(
     () => ({
@@ -49,10 +53,18 @@ const AntecedentesEditor = () => {
 
   const isReadOnly = mode === 'VIEW';
 
-  const handleSave = () => {
-    const response = saveRecord({ content: editorContent });
-    if (!response.success) {
-      window.alert('Debes ingresar contenido para guardar el antecedente.');
+  const handleSave = async () => {
+    const response = await saveRecord();
+    if (!response?.success) {
+      setFeedback({
+        type: 'danger',
+        message: 'Debes ingresar una descripción para guardar el antecedente.'
+      });
+    } else {
+      setFeedback({
+        type: 'success',
+        message: 'Antecedente guardado correctamente.'
+      });
     }
   };
 
@@ -68,22 +80,35 @@ const AntecedentesEditor = () => {
       <Card.Header className="bg-white border-0">
         <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
           <h4 className="mb-0">{headerTitle}</h4>
-          <div className="text-end">
+          <div className="text-end small">
             {activeRecord ? (
               <>
-                <strong>Médico:</strong> {activeRecord.doctorName}{' '}
-                <span className="text-muted">
-                  ({activeRecord.doctorLicense})
-                </span>
-                <div className="text-muted small">
-                  Registrado: {activeRecord.createdAtLabel}
+                <div>
+                  <strong>Registrado por:</strong> {activeRecord.registrado_por}
                 </div>
+                <div className="text-muted">
+                  Registrado el {activeRecord.registradoEnLabel}
+                </div>
+                {activeRecord.actualizadoEnLabel ? (
+                  <div className="text-muted">
+                    Últ. actualización {activeRecord.actualizadoEnLabel}
+                  </div>
+                ) : null}
               </>
             ) : null}
           </div>
         </div>
       </Card.Header>
       <Card.Body>
+        {feedback ? (
+          <Alert
+            variant={feedback.type}
+            onClose={() => setFeedback(null)}
+            dismissible
+          >
+            {feedback.message}
+          </Alert>
+        ) : null}
         {isReadOnly ? (
           <Alert variant="info">
             Vista en modo lectura. Puedes consultar el antecedente sin
@@ -96,11 +121,49 @@ const AntecedentesEditor = () => {
           </Alert>
         )}
 
+        {!isReadOnly ? (
+          <Row className="mb-3 g-3">
+            <Col md={6}>
+              <Form.Group controlId="antecedente-tipo">
+                <Form.Label>Tipo de antecedente</Form.Label>
+                <Form.Control
+                  as="select"
+                  value={editorState.tipo}
+                  onChange={(event) => setTipo(event.target.value)}
+                >
+                  <option value="PERSONALES">Personales</option>
+                  <option value="FAMILIARES">Familiares</option>
+                  <option value="QUIRURGICOS">Quirúrgicos</option>
+                  <option value="FARMACOLOGICOS">Farmacológicos</option>
+                  <option value="ALERGIAS">Alergias</option>
+                  <option value="OTROS">Otros</option>
+                </Form.Control>
+              </Form.Group>
+            </Col>
+            <Col md={6} className="d-flex align-items-end">
+              <Form.Check
+                type="switch"
+                id="antecedente-activo"
+                label="Antecedente activo"
+                checked={editorState.es_activo}
+                onChange={(event) => setEsActivo(event.target.checked)}
+              />
+            </Col>
+          </Row>
+        ) : (
+          <div className="mb-3">
+            <strong>Tipo:</strong>{' '}
+            <span className="badge bg-light text-dark">
+              {activeRecord?.tipoLabel}
+            </span>
+          </div>
+        )}
+
         <div className="mx-auto" style={{ maxWidth: '820px' }}>
           <ReactQuill
             theme="snow"
-            value={editorContent}
-            onChange={setEditorContent}
+            value={editorState.descripcion}
+            onChange={setDescripcion}
             modules={modules}
             formats={formats}
             readOnly={isReadOnly}
@@ -114,7 +177,7 @@ const AntecedentesEditor = () => {
           Volver
         </Button>
         <Button variant="primary" onClick={handleSave} disabled={isReadOnly}>
-          Guardar
+          {saving ? 'Guardando…' : 'Guardar'}
         </Button>
       </Card.Footer>
     </Card>

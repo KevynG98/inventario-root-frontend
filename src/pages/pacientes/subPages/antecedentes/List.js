@@ -6,10 +6,13 @@ const AntecedentesList = () => {
   const {
     title,
     records,
+    loading,
+    error,
     activeRecordId,
     startCreate,
     startEdit,
-    startViewOnly
+    startViewOnly,
+    handleDelete
   } = useAntecedentesContext();
 
   return (
@@ -18,26 +21,35 @@ const AntecedentesList = () => {
         <div>
           <h4 className="mb-1">{title} - Listado General</h4>
           <small className="text-muted">
-            Consulta los antecedentes clínicos registrados por médicos
-            residentes.
+            Consulta los antecedentes clínicos registrados.
           </small>
         </div>
         <Button onClick={startCreate}>Nuevo antecedente</Button>
       </Card.Header>
       <Card.Body className="p-0">
-        {records.length === 0 ? (
+        {error ? (
+          <div className="p-4 text-center text-danger">{error}</div>
+        ) : null}
+        {loading && records.length === 0 ? (
+          <div className="p-4 text-center text-muted">
+            Cargando antecedentes clínicos...
+          </div>
+        ) : null}
+        {records.length === 0 && !loading ? (
           <div className="p-4 text-center text-muted">
             Aún no hay antecedentes registrados.
           </div>
-        ) : (
+        ) : null}
+        {records.length > 0 ? (
           <div className="table-responsive">
             <Table hover className="mb-0 align-middle">
               <thead>
                 <tr>
-                  <th style={{ minWidth: '180px' }}>Fecha y hora</th>
-                  <th style={{ minWidth: '220px' }}>Médico</th>
-                  <th>Antecedente</th>
-                  <th style={{ minWidth: '160px' }} className="text-end">
+                  <th style={{ minWidth: '180px' }}>Fecha</th>
+                  <th style={{ minWidth: '220px' }}>Registrado por</th>
+                  <th style={{ minWidth: '120px' }}>Tipo</th>
+                  <th>Descripción</th>
+                  <th style={{ minWidth: '180px' }} className="text-end">
                     Acciones
                   </th>
                 </tr>
@@ -47,22 +59,31 @@ const AntecedentesList = () => {
                   <tr
                     key={record.id}
                     className={
-                      activeRecordId === record.id ? 'table-primary' : undefined
+                      String(activeRecordId) === String(record.id)
+                        ? 'table-primary'
+                        : undefined
                     }
                   >
-                    <td>{record.createdAtLabel}</td>
+                    <td>{record.registradoEnLabel}</td>
                     <td>
                       <div className="d-flex flex-column">
-                        <span>{record.doctorName}</span>
-                        <Badge bg="light" text="dark" className="align-self-start">
-                          {record.doctorLicense}
-                        </Badge>
+                        <span>{record.registrado_por}</span>
+                        {record.actualizadoEnLabel ? (
+                          <small className="text-muted">
+                            Actualizado {record.actualizadoEnLabel}
+                          </small>
+                        ) : null}
                       </div>
+                    </td>
+                    <td>
+                      <Badge bg="light" text="dark">
+                        {record.tipoLabel}
+                      </Badge>
                     </td>
                     <td>
                       <div
                         className="antecedente-preview"
-                        dangerouslySetInnerHTML={{ __html: record.content }}
+                        dangerouslySetInnerHTML={{ __html: record.descripcion }}
                       />
                     </td>
                     <td className="text-end">
@@ -81,13 +102,28 @@ const AntecedentesList = () => {
                       >
                         Editar
                       </Button>
+                      <Button
+                        variant="outline-danger"
+                        size="sm"
+                        className="ms-2"
+                        onClick={() => {
+                          if (
+                            typeof handleDelete === 'function' &&
+                            window.confirm('¿Eliminar este antecedente?')
+                          ) {
+                            handleDelete(record.id);
+                          }
+                        }}
+                      >
+                        Eliminar
+                      </Button>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </Table>
           </div>
-        )}
+        ) : null}
       </Card.Body>
     </Card>
   );

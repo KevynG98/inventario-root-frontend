@@ -2,8 +2,8 @@ import React from 'react';
 import { InfoPacienteProvider } from './Context';
 import InfoPacienteList from './List';
 
-const InfoPaciente = () => (
-  <InfoPacienteProvider>
+const InfoPaciente = ({ value }) => (
+  <InfoPacienteProvider value={value}>
     <InfoPacienteList />
   </InfoPacienteProvider>
 );

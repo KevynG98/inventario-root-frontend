@@ -1,5 +1,5 @@
 // NursingPatientForm.jsx
-import React, { useMemo, useState, useEffect } from 'react'
+import React, { useCallback, useMemo, useState, useEffect } from 'react'
 import { Container, Row, Col, Form, Tabs, Tab, Button, Card } from 'react-bootstrap'
 
 /**
@@ -19,7 +19,7 @@ import { Container, Row, Col, Form, Tabs, Tab, Button, Card } from 'react-bootst
  *  }
  *  onSave?: (payload) => void        // optional
  */
-export default function NursingPatientForm({ patient, onSave }) {
+export default function NursingPatientForm({ patient, onSave, onSelectAdmission }) {
   const formatDate = (d) => {
     if (!d) return ''
     const dt = d instanceof Date ? d : new Date(d)
@@ -47,6 +47,19 @@ export default function NursingPatientForm({ patient, onSave }) {
   const [notes, setNotes] = useState('')
   const [procedures, setProcedures] = useState('')
   const [other, setOther] = useState('')
+
+  useEffect(() => {
+    setVitals((prev) => ({
+      ...prev,
+      weightKg: patient?.weightKg ?? ''
+    }))
+  }, [patient?.weightKg])
+
+  const handleSelectAdmission = useCallback(() => {
+    if (typeof onSelectAdmission === 'function') {
+      onSelectAdmission()
+    }
+  }, [onSelectAdmission])
 
   // Keep weight reflected in header whenever it changes in the Vitals tab
   const headerWeight = useMemo(() => {
@@ -97,40 +110,69 @@ export default function NursingPatientForm({ patient, onSave }) {
                 Enfermería: Ficha del Paciente
               </h3>
             </Col>
+            <Col xs="auto">
+              <Button variant="primary" size="sm" onClick={handleSelectAdmission}>
+                Seleccionar admisión
+              </Button>
+            </Col>
           </Row>
           <hr />
-          <Row className="gy-2" style={{ fontSize: '1.05rem', lineHeight: 1.3 }}>
+          <Row className="gy-3">
             <Col md={3}>
-              <strong>Admisión:</strong>{' '}
-              <span>{patient?.admissionNumber ?? '—'}</span>
+              <div className="text-uppercase text-muted small fw-semibold mb-1">
+                Admisión
+              </div>
+              <div className="fw-semibold fs-5 text-dark">
+                {patient?.admissionNumber ?? '—'}
+              </div>
             </Col>
             <Col md={3}>
-              <strong>Fecha de Admisión:</strong>{' '}
-              <span>{formatDate(patient?.admissionDate) || '—'}</span>
+              <div className="text-uppercase text-muted small fw-semibold mb-1">
+                Fecha de admisión
+              </div>
+              <div className="fw-semibold fs-5 text-dark">
+                {formatDate(patient?.admissionDate) || '—'}
+              </div>
             </Col>
             <Col md={3}>
-              <strong>Nombre:</strong>{' '}
-              <span>{patient?.name ?? '—'}</span>
+              <div className="text-uppercase text-muted small fw-semibold mb-1">
+                Paciente
+              </div>
+              <div className="fw-semibold fs-5 text-dark">
+                {patient?.name ?? '—'}
+              </div>
             </Col>
             <Col md={3}>
-              <strong>Edad:</strong>{' '}
-              <span>{patient?.age ?? '—'}</span>
+              <div className="text-uppercase text-muted small fw-semibold mb-1">
+                Edad
+              </div>
+              <div className="fw-semibold fs-5 text-dark">
+                {patient?.age ?? '—'}
+              </div>
             </Col>
 
             <Col md={4}>
-              <strong>Área:</strong>{' '}
-              <span>
+              <div className="text-uppercase text-muted small fw-semibold mb-1">
+                Área / ubicación
+              </div>
+              <div className="fw-semibold fs-5 text-dark">
                 {patient?.areaType ?? '—'}
                 {patient?.location ? ` — ${patient.location}` : ''}
-              </span>
+              </div>
             </Col>
             <Col md={4}>
-              <strong>Aseguradora:</strong>{' '}
-              <span>{patient?.insurer ?? '—'}</span>
+              <div className="text-uppercase text-muted small fw-semibold mb-1">
+                Aseguradora
+              </div>
+              <div className="fw-semibold fs-5 text-dark">
+                {patient?.insurer ?? '—'}
+              </div>
             </Col>
             <Col md={4}>
-              <strong>Peso:</strong>{' '}
-              <span>{headerWeight}</span>
+              <div className="text-uppercase text-muted small fw-semibold mb-1">
+                Peso
+              </div>
+              <div className="fw-semibold fs-5 text-dark">{headerWeight}</div>
             </Col>
           </Row>
 

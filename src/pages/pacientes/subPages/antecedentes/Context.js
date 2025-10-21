@@ -2,38 +2,27 @@ import React, {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState
 } from 'react';
 
 const TITLE = 'Antecedentes';
 
-const SAMPLE_RECORDS = [
-  {
-    id: 'antecedente-1',
-    createdAt: '2025-01-22T10:15:00-06:00',
-    doctorName: 'Dr. Juan Pérez',
-    doctorLicense: 'COL.1234',
-    content:
-      '<p>Paciente con hipertensión controlada, tratamiento con Losartán 50mg diario.</p>'
-  },
-  {
-    id: 'antecedente-2',
-    createdAt: '2025-01-23T09:30:00-06:00',
-    doctorName: 'Dra. María López',
-    doctorLicense: 'COL.4567',
-    content:
-      '<p>Reacción alérgica a penicilina reportada en 2020. Evitar este antibiótico.</p>'
-  },
-  {
-    id: 'antecedente-3',
-    createdAt: '2025-01-24T14:45:00-06:00',
-    doctorName: 'Dr. Luis Mendoza',
-    doctorLicense: 'COL.9876',
-    content:
-      '<p>Sin antecedentes quirúrgicos. Último chequeo general en octubre 2024.</p>'
-  }
-];
+const TIPO_LABELS = {
+  PERSONALES: 'Personales',
+  FAMILIARES: 'Familiares',
+  QUIRURGICOS: 'Quirúrgicos',
+  FARMACOLOGICOS: 'Farmacológicos',
+  ALERGIAS: 'Alergias',
+  OTROS: 'Otros'
+};
+
+const buildEditorState = (record) => ({
+  descripcion: record?.descripcion ?? '',
+  tipo: record?.tipo ?? 'OTROS',
+  es_activo: record?.es_activo ?? true
+});
 
 const AntecedentesContext = createContext(null);
 
@@ -45,121 +34,205 @@ const formatDate = (isoString) => {
       timeStyle: 'short'
     }).format(date);
   } catch (error) {
-    return isoString;
+    return isoString || '';
   }
 };
 
-export const AntecedentesProvider = ({ children }) => {
-  const [records, setRecords] = useState(() =>
-    SAMPLE_RECORDS.map((record) => ({
-      ...record,
-      createdAtLabel: formatDate(record.createdAt)
-    }))
+export const AntecedentesProvider = ({ children, value }) => {
+  const registros = value?.records ?? [];
+  const loading = value?.loading ?? false;
+  const error = value?.error ?? null;
+  const onCreate = value?.create;
+  const onUpdate = value?.update;
+  const onRemove = value?.remove;
+  const refresh = value?.refresh;
+
+  const formattedRecords = useMemo(
+    () =>
+      registros.map((record) => ({
+        id: record.id,
+        tipo: record.tipo,
+        tipoLabel: TIPO_LABELS[record.tipo] ?? record.tipo,
+        descripcion: record.descripcion,
+        es_activo: record.es_activo,
+        registrado_por: record.registrado_por || '—',
+        registrado_en: record.registrado_en,
+        registradoEnLabel: formatDate(record.registrado_en),
+        actualizado_en: record.actualizado_en,
+        actualizadoEnLabel: record.actualizado_en
+          ? formatDate(record.actualizado_en)
+          : null
+      })),
+    [registros]
   );
+
   const [mode, setMode] = useState('LIST'); // LIST | CREATE | EDIT | VIEW
   const [activeRecordId, setActiveRecordId] = useState(null);
-  const [editorContent, setEditorContent] = useState('');
+  const [editorState, setEditorState] = useState(buildEditorState());
+  const [saving, setSaving] = useState(false);
 
   const activeRecord = useMemo(
-    () => records.find((record) => record.id === activeRecordId) ?? null,
-    [records, activeRecordId]
+    () =>
+      formattedRecords.find((record) => String(record.id) === String(activeRecordId)) ??
+      null,
+    [formattedRecords, activeRecordId]
   );
+
+  useEffect(() => {
+    if (!activeRecord) {
+      setEditorState(buildEditorState());
+      return;
+    }
+    setEditorState(buildEditorState(activeRecord));
+  }, [activeRecord]);
 
   const startCreate = useCallback(() => {
     setMode('CREATE');
     setActiveRecordId(null);
-    setEditorContent('');
+    setEditorState(buildEditorState());
   }, []);
 
   const startEdit = useCallback(
     (recordId) => {
-      const target = records.find((record) => record.id === recordId);
-      if (!target) return;
+      const target = formattedRecords.find(
+        (record) => String(record.id) === String(recordId)
+      );
+      if (!target) {
+        return;
+      }
 
       setMode('EDIT');
       setActiveRecordId(recordId);
-      setEditorContent(target.content);
+      setEditorState(buildEditorState(target));
     },
-    [records]
+    [formattedRecords]
   );
 
   const startViewOnly = useCallback(
     (recordId) => {
-      const target = records.find((record) => record.id === recordId);
-      if (!target) return;
+      const target = formattedRecords.find(
+        (record) => String(record.id) === String(recordId)
+      );
+      if (!target) {
+        return;
+      }
 
       setMode('VIEW');
       setActiveRecordId(recordId);
-      setEditorContent(target.content);
+      setEditorState(buildEditorState(target));
     },
-    [records]
+    [formattedRecords]
   );
 
   const returnToList = useCallback(() => {
     setMode('LIST');
     setActiveRecordId(null);
-    setEditorContent('');
+    setEditorState(buildEditorState());
   }, []);
 
-  const saveRecord = useCallback(
-    ({ content }) => {
-      if (mode !== 'CREATE' && mode !== 'EDIT') {
-        return { success: false, reason: 'READ_ONLY' };
-      }
-      if (!content?.trim()) {
-        return { success: false, reason: 'EMPTY' };
-      }
+  const saveRecord = useCallback(async () => {
+    if (mode !== 'CREATE' && mode !== 'EDIT') {
+      return { success: false, reason: 'READ_ONLY' };
+    }
+    if (!editorState.descripcion?.trim()) {
+      return { success: false, reason: 'EMPTY' };
+    }
+
+    const payload = {
+      descripcion: editorState.descripcion,
+      tipo: editorState.tipo,
+      es_activo: editorState.es_activo
+    };
+
+    setSaving(true);
+    try {
       if (mode === 'CREATE') {
-        const newRecord = {
-          id: `antecedente-${Date.now()}`,
-          createdAt: new Date().toISOString(),
-          createdAtLabel: formatDate(new Date().toISOString()),
-          doctorName: 'Dr. Residente (Mock)',
-          doctorLicense: 'COL.0000',
-          content
-        };
-        setRecords((prev) => [newRecord, ...prev]);
-      } else if (mode === 'EDIT' && activeRecordId) {
-        setRecords((prev) =>
-          prev.map((record) =>
-            record.id === activeRecordId ? { ...record, content } : record
-          )
-        );
+        if (typeof onCreate === 'function') {
+          await onCreate(payload);
+        }
+      } else if (mode === 'EDIT' && activeRecordId && typeof onUpdate === 'function') {
+        await onUpdate(activeRecordId, payload);
       }
-      setMode('LIST');
-      setActiveRecordId(null);
-      setEditorContent('');
+      await refresh?.();
+      returnToList();
       return { success: true };
+    } finally {
+      setSaving(false);
+    }
+  }, [
+    mode,
+    editorState,
+    activeRecordId,
+    onCreate,
+    onUpdate,
+    refresh,
+    returnToList
+  ]);
+
+  const handleDelete = useCallback(
+    async (recordId) => {
+      if (typeof onRemove !== 'function') {
+        return;
+      }
+      await onRemove(recordId);
+      if (String(recordId) === String(activeRecordId)) {
+        returnToList();
+      }
     },
-    [mode, activeRecordId]
+    [onRemove, activeRecordId, returnToList]
   );
+
+  const setDescripcion = useCallback((nextValue) => {
+    setEditorState((prev) => ({ ...prev, descripcion: nextValue }));
+  }, []);
+
+  const setTipo = useCallback((nextValue) => {
+    setEditorState((prev) => ({ ...prev, tipo: nextValue }));
+  }, []);
+
+  const setEsActivo = useCallback((nextValue) => {
+    setEditorState((prev) => ({ ...prev, es_activo: nextValue }));
+  }, []);
 
   const contextValue = useMemo(
     () => ({
       title: TITLE,
-      records,
+      records: formattedRecords,
+      loading,
+      error,
       mode,
       activeRecordId,
       activeRecord,
-      editorContent,
-      setEditorContent,
+      editorState,
+      setDescripcion,
+      setTipo,
+      setEsActivo,
       startCreate,
       startEdit,
       startViewOnly,
       returnToList,
-      saveRecord
+      saveRecord,
+      saving,
+      handleDelete
     }),
     [
-      records,
+      formattedRecords,
+      loading,
+      error,
       mode,
       activeRecordId,
       activeRecord,
-      editorContent,
+      editorState,
+      setDescripcion,
+      setTipo,
+      setEsActivo,
       startCreate,
       startEdit,
       startViewOnly,
       returnToList,
-      saveRecord
+      saveRecord,
+      saving,
+      handleDelete
     ]
   );
 

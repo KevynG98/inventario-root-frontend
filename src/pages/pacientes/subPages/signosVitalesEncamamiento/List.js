@@ -1,102 +1,111 @@
-import React, { useEffect, useMemo, useRef } from 'react';
-import { Button, Card } from 'react-bootstrap';
-import { useSignosVitalesEncamamientoContext } from './Context';
+import React, { useMemo } from 'react';
+import { Badge, Button, Card, Table } from 'react-bootstrap';
+import { useSignosEncamamientoContext } from './Context';
 
-const SignosVitalesEncamamientoList = () => {
-  const { title, fieldDefinitions, rows, handleCellChange, saveRows, resetRows, feedback, setFeedback } =
-    useSignosVitalesEncamamientoContext();
-  const tableContainerRef = useRef(null);
+const SignosEncamamientoList = () => {
+  const {
+    registros,
+    fields,
+    loading,
+    error,
+    deleteRecord,
+    formatDate
+  } = useSignosEncamamientoContext();
 
-  const firstFilledIndex = useMemo(() => {
-    return rows.findIndex((row) =>
-      fieldDefinitions.some((field) => `${row[field.key] ?? ''}`.trim() !== '')
-    );
-  }, [rows, fieldDefinitions]);
-
-  useEffect(() => {
-    if (firstFilledIndex < 0 || !tableContainerRef.current) {
-      return;
-    }
-    const targetRow = tableContainerRef.current.querySelector(
-      `[data-hour-index="${firstFilledIndex}"]`
-    );
-    if (targetRow) {
-      targetRow.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    }
-  }, [firstFilledIndex]);
-
-  const handleInputFocus = (event) => {
-    event.target.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
-  };
+  const headers = useMemo(
+    () => [
+      { key: 'timestamp', label: 'Fecha y hora', minWidth: 160 },
+      { key: 'registrado', label: 'Registrado por', minWidth: 160 },
+      ...fields.map((field) => ({
+        key: field.id,
+        label: field.label,
+        minWidth: 120
+      })),
+      { key: 'comentarios', label: 'Comentarios', minWidth: 160 }
+    ],
+    [fields]
+  );
 
   return (
     <Card className="shadow-sm border-0">
-      <Card.Header className="bg-white border-0 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
-        <div>
-          <h4 className="mb-1">{title}</h4>
-          <small className="text-muted">
-            Registra y consulta los signos vitales por hora durante el encamamiento.
-          </small>
-        </div>
-        <div className="d-flex gap-2 flex-wrap">
-          <Button variant="outline-secondary" onClick={resetRows}>
-            Nuevo registro
-          </Button>
-          <Button variant="primary" onClick={saveRows}>
-            Guardar datos
-          </Button>
-        </div>
+      <Card.Header className="bg-white border-0">
+        <h4 className="mb-0">Registros anteriores</h4>
       </Card.Header>
-      <Card.Body>
-        {feedback ? (
-          <div className={`alert alert-${feedback.type}`} role="alert">
-            {feedback.message}
-            <button
-              type="button"
-              className="btn-close float-end"
-              aria-label="Close"
-              onClick={() => setFeedback(null)}
-            />
+      <Card.Body className="p-0">
+        {error ? (
+          <div className="p-4 text-center text-danger">{error}</div>
+        ) : null}
+        {loading && registros.length === 0 ? (
+          <div className="p-4 text-center text-muted">
+            Cargando signos vitales…
           </div>
         ) : null}
-        <div className="table-responsive signos-encamamiento-table" ref={tableContainerRef}>
-          <table className="table table-bordered align-middle">
-            <thead className="table-light">
-              <tr>
-                <th style={{ minWidth: '140px' }}>Hora</th>
-                {fieldDefinitions.map((field) => (
-                  <th key={field.key} style={{ minWidth: '160px' }}>
-                    {field.label}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((row, index) => (
-                <tr key={row.hour} data-hour-index={index}>
-                  <td className="fw-semibold">{row.hour}</td>
-                  {fieldDefinitions.map((field) => (
-                    <td key={`${row.hour}-${field.key}`}>
-                      <input
-                        type={field.type}
-                        step={field.step}
-                        className="form-control form-control-sm"
-                        value={row[field.key] ?? ''}
-                        onChange={(event) =>
-                          handleCellChange(row.hour, field.key, event.target.value)
-                        }
-                        onFocus={handleInputFocus}
-                      />
-                    </td>
+        {registros.length === 0 && !loading ? (
+          <div className="p-4 text-center text-muted">
+            Sin registros guardados hasta el momento.
+          </div>
+        ) : null}
+        {registros.length > 0 ? (
+          <div className="table-responsive">
+            <Table hover className="mb-0 align-middle">
+              <thead>
+                <tr>
+                  {headers.map((header) => (
+                    <th key={header.key} style={{ minWidth: header.minWidth }}>
+                      {header.label}
+                    </th>
                   ))}
+                  <th className="text-end" style={{ minWidth: 120 }}>
+                    Acciones
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {registros.map((registro) => (
+                  <tr key={registro.id}>
+                    <td>{formatDate(registro.tomadoEn)}</td>
+                    <td>
+                      <div className="d-flex flex-column">
+                        <span>{registro.tomadoPor}</span>
+                      </div>
+                    </td>
+                    {fields.map((field) => (
+                      <td key={`${registro.id}-${field.id}`}>
+                        {registro.valores[field.id] ?? '—'}
+                      </td>
+                    ))}
+                    <td>
+                      {registro.comentarios ? (
+                        <Badge bg="light" text="dark">
+                          {registro.comentarios}
+                        </Badge>
+                      ) : '—'}
+                    </td>
+                    <td className="text-end">
+                      <Button
+                        variant="outline-danger"
+                        size="sm"
+                        onClick={() => {
+                          if (
+                            typeof deleteRecord === 'function' &&
+                            window.confirm('¿Eliminar este registro?')
+                          ) {
+                            deleteRecord(registro.id);
+                          }
+                        }}
+                      >
+                        Eliminar
+                      </Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          </div>
+        ) : null}
       </Card.Body>
     </Card>
   );
 };
 
-export default SignosVitalesEncamamientoList;
+export default SignosEncamamientoList;

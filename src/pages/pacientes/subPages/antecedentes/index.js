@@ -1,4 +1,5 @@
 import React from 'react';
+import { Alert } from 'react-bootstrap';
 import { AntecedentesProvider, useAntecedentesContext } from './Context';
 import AntecedentesList from './List';
 import AntecedentesEditor from './Editor';
@@ -13,10 +14,20 @@ const AntecedentesContent = () => {
   return <AntecedentesEditor />;
 };
 
-const Antecedentes = () => (
-  <AntecedentesProvider>
-    <AntecedentesContent />
-  </AntecedentesProvider>
-);
+const Antecedentes = ({ value }) => {
+  const error = value?.error ?? null;
+
+  return (
+    <AntecedentesProvider value={value}>
+      {error ? (
+        <Alert variant="danger" className="mb-3">
+          {error}
+        </Alert>
+      ) : null}
+      <AntecedentesContent />
+    </AntecedentesProvider>
+  );
+};
 
 export default Antecedentes;
+

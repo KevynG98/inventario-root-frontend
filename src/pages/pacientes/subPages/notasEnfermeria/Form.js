@@ -1,214 +1,147 @@
-import React, { useMemo } from 'react';
-import { Alert, Button, Card, Col, Form, Row } from 'react-bootstrap';
-import ReactQuill from 'react-quill';
-import 'quill/dist/quill.snow.css';
+import React, { useEffect, useState } from 'react';
+import Button from 'react-bootstrap/Button';
+import Card from 'react-bootstrap/Card';
+import Col from 'react-bootstrap/Col';
+import Form from 'react-bootstrap/Form';
+import Row from 'react-bootstrap/Row';
 import { useNotasEnfermeriaContext } from './Context';
 
-const toolbarModules = {
-  toolbar: [
-    [{ size: ['small', false, 'large', 'huge'] }],
-    ['bold', 'italic', 'underline', 'strike'],
-    [{ list: 'ordered' }, { list: 'bullet' }],
-    ['blockquote', 'code-block'],
-    ['link'],
-    ['clean']
-  ]
+const initialState = {
+  turno: '',
+  estado: 'EDICION',
+  contenido: ''
 };
 
-const toolbarFormats = [
-  'size',
-  'bold',
-  'italic',
-  'underline',
-  'strike',
-  'list',
-  'bullet',
-  'blockquote',
-  'code-block',
-  'link'
-];
-
 const NotasEnfermeriaForm = () => {
-  const {
-    mode,
-    notes,
-    schedules,
-    statusOptions,
-    statusLabels,
-    activeNote,
-    editorContent,
-    setEditorContent,
-    editorSchedule,
-    setEditorSchedule,
-    editorStatus,
-    setEditorStatus,
-    saveNote,
-    confirmCloseNote,
-    enterListMode,
-    feedback,
-    setFeedback
-  } = useNotasEnfermeriaContext();
+  const { mode, active, turnos, estados, setMode, handlers } =
+    useNotasEnfermeriaContext();
+  const [formState, setFormState] = useState(initialState);
+  const [saving, setSaving] = useState(false);
 
-  const isReadOnly = mode === 'VIEW' || (activeNote && activeNote.status === statusOptions.CERRADA);
-
-  const panelTitle = useMemo(() => {
-    switch (mode) {
-      case 'CREATE':
-        return 'Nueva nota de enfermería';
-      case 'EDIT':
-        return 'Editar nota de enfermería';
-      case 'VIEW':
-        return 'Detalle de nota de enfermería';
-      default:
-        return 'Detalle de nota de enfermería';
-    }
-  }, [mode]);
-
-  const handleStatusChange = (event) => {
-    const value = event.target.value;
-    if (value === statusOptions.CERRADA && mode === 'EDIT') {
-      const result = confirmCloseNote();
-      if (!result.success) {
-        // Revert to previous value if cancel
-        setEditorStatus(statusOptions.EDICION);
-      }
+  useEffect(() => {
+    if (mode === 'EDIT' && active) {
+      setFormState({
+        turno: active.turno,
+        estado: active.estado,
+        contenido: active.contenido || ''
+      });
     } else {
-      setEditorStatus(value);
+      setFormState(initialState);
+    }
+  }, [mode, active]);
+
+  const handleChange = (field) => (event) => {
+    setFormState((prev) => ({ ...prev, [field]: event.target.value }));
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    if (!formState.turno) {
+      window.alert('Selecciona un turno.');
+      return;
+    }
+    if (!formState.contenido?.trim()) {
+      window.alert('Ingresa el contenido de la nota.');
+      return;
+    }
+
+    setSaving(true);
+    try {
+      if (mode === 'EDIT' && active && typeof handlers.update === 'function') {
+        await handlers.update(active.id, {
+          turno: formState.turno,
+          estado: formState.estado,
+          contenido: formState.contenido
+        });
+      } else if (typeof handlers.create === 'function') {
+        await handlers.create({
+          turno: formState.turno,
+          estado: formState.estado,
+          contenido: formState.contenido
+        });
+      }
+      setMode('LIST');
+    } finally {
+      setSaving(false);
     }
   };
 
+  if (mode === 'LIST') {
+    return null;
+  }
+
   return (
-    <Card className="shadow-sm border-0">
-      <Card.Header className="bg-white border-0">
-        <div className="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
-          <div>
-            <h4 className="mb-1">{panelTitle}</h4>
-            <small className="text-muted">
-              {isReadOnly
-                ? 'Vista solo lectura. Esta nota se encuentra cerrada.'
-                : 'Completa la nota y guarda tus comentarios para el paciente.'}
-            </small>
-          </div>
-          {activeNote ? (
-            <div className="text-end small text-muted">
-              <div>
-                <strong>Autor:</strong> {activeNote.author}
-              </div>
-              <div>
-                <strong>Creación:</strong> {activeNote.createdAtLabel}
-              </div>
-              {activeNote.lastUpdatedAtLabel ? (
-                <div>
-                  <strong>Última modificación:</strong> {activeNote.lastUpdatedAtLabel}
-                </div>
-              ) : null}
-              {activeNote.closedAtLabel ? (
-                <div>
-                  <strong>Cierre:</strong> {activeNote.closedAtLabel}
-                </div>
-              ) : null}
-            </div>
-          ) : null}
-        </div>
+    <Card className="shadow-sm border-0 mb-4">
+      <Card.Header className="bg-white border-0 d-flex justify-content-between align-items-center">
+        <h4 className="mb-0">
+          {mode === 'EDIT' ? 'Editar nota de enfermería' : 'Nueva nota de enfermería'}
+        </h4>
+        <Button variant="outline-secondary" onClick={() => setMode('LIST')}>
+          Cerrar
+        </Button>
       </Card.Header>
       <Card.Body>
-        {feedback ? (
-          <Alert
-            variant={feedback.type}
-            dismissible
-            onClose={() => setFeedback(null)}
-          >
-            {feedback.message}
-          </Alert>
-        ) : null}
-
-        <Row className="g-4">
-          <Col lg={4}>
-            <Card className="border-0 shadow-sm h-100">
-              <Card.Header className="bg-white border-0">
-                <h6 className="mb-0">Historial de notas</h6>
-                <small className="text-muted">Notas recientes primero.</small>
-              </Card.Header>
-              <Card.Body className="p-0">
-                {notes.length === 0 ? (
-                  <div className="p-3 text-muted">No hay notas registradas.</div>
-                ) : (
-                  <div className="list-group list-group-flush">
-                    {notes.map((note) => (
-                      <div
-                        key={note.id}
-                        className={`list-group-item text-start ${
-                          activeNote?.id === note.id ? 'active' : ''
-                        }`}
-                      >
-                        <div className="fw-semibold small">{note.createdAtLabel}</div>
-                        <div className="text-muted small text-truncate">
-                          {note.schedule}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </Card.Body>
-            </Card>
-          </Col>
-          <Col lg={8}>
-            <Form.Group className="mb-3">
-              <Form.Label>Horario de la nota</Form.Label>
-              <Form.Control
-                as="select"
-                value={editorSchedule}
-                onChange={(event) => setEditorSchedule(event.target.value)}
-                disabled={isReadOnly}
-              >
-                {schedules.map((schedule) => (
-                  <option key={schedule} value={schedule}>
-                    {schedule}
-                  </option>
-                ))}
-              </Form.Control>
-            </Form.Group>
-
-            <Form.Group className="mb-3">
-              <Form.Label>Estatus</Form.Label>
-              <Form.Control
-                as="select"
-                value={editorStatus}
-                onChange={handleStatusChange}
-                disabled={isReadOnly}
-              >
-                <option value={statusOptions.EDICION}>
-                  {statusLabels[statusOptions.EDICION]}
-                </option>
-                <option value={statusOptions.CERRADA}>
-                  {statusLabels[statusOptions.CERRADA]}
-                </option>
-              </Form.Control>
-            </Form.Group>
-
-            <ReactQuill
-              theme="snow"
-              value={editorContent}
-              onChange={setEditorContent}
-              modules={toolbarModules}
-              formats={toolbarFormats}
-              readOnly={isReadOnly}
-              placeholder="Escribe la nota de enfermería aquí..."
-              style={{ minHeight: '260px', marginBottom: '1.5rem' }}
+        <Form onSubmit={handleSubmit} className="d-flex flex-column gap-3">
+          <Row className="g-3">
+            <Col md={4}>
+              <Form.Group controlId="nota-turno">
+                <Form.Label>Turno</Form.Label>
+                <Form.Control
+                  as="select"
+                  value={formState.turno}
+                  onChange={handleChange('turno')}
+                  required
+                >
+                  <option value="">Seleccionar</option>
+                  {turnos.map((turno) => (
+                    <option key={turno} value={turno}>
+                      {turno}
+                    </option>
+                  ))}
+                </Form.Control>
+              </Form.Group>
+            </Col>
+            <Col md={4}>
+              <Form.Group controlId="nota-estado">
+                <Form.Label>Estado</Form.Label>
+                <Form.Control
+                  as="select"
+                  value={formState.estado}
+                  onChange={handleChange('estado')}
+                >
+                  {estados.map((estado) => (
+                    <option key={estado.value} value={estado.value}>
+                      {estado.label}
+                    </option>
+                  ))}
+                </Form.Control>
+              </Form.Group>
+            </Col>
+          </Row>
+          <Form.Group controlId="nota-contenido">
+            <Form.Label>Contenido</Form.Label>
+            <Form.Control
+              as="textarea"
+              rows={6}
+              value={formState.contenido}
+              onChange={handleChange('contenido')}
+              placeholder="Describe la atención brindada, evolución y observaciones relevantes"
             />
-
-            <div className="d-flex justify-content-end gap-2">
-              <Button variant="outline-secondary" onClick={enterListMode}>
-                Volver
-              </Button>
-              {!isReadOnly ? (
-                <Button variant="primary" onClick={saveNote}>
-                  Guardar
-                </Button>
-              ) : null}
-            </div>
-          </Col>
-        </Row>
+          </Form.Group>
+          <div className="d-flex justify-content-end gap-2">
+            <Button
+              type="button"
+              variant="outline-secondary"
+              onClick={() => setMode('LIST')}
+              disabled={saving}
+            >
+              Cancelar
+            </Button>
+            <Button type="submit" variant="primary" disabled={saving}>
+              {saving ? 'Guardando…' : 'Guardar nota'}
+            </Button>
+          </div>
+        </Form>
       </Card.Body>
     </Card>
   );

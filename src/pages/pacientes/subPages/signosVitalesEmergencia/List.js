@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Badge, Card, Table } from 'react-bootstrap';
+import { Badge, Button, Card, Table } from 'react-bootstrap';
 import { useSignosVitalesEmergenciaContext } from './Context';
 
 const formatDateTime = (iso) => {
@@ -16,7 +16,8 @@ const formatDateTime = (iso) => {
 };
 
 const SignosVitalesEmergenciaList = () => {
-  const { records } = useSignosVitalesEmergenciaContext();
+  const { records, loading, error, removeMeasurement } =
+    useSignosVitalesEmergenciaContext();
   const totalSessions = useMemo(() => records.length, [records]);
 
   return (
@@ -34,11 +35,21 @@ const SignosVitalesEmergenciaList = () => {
         </Badge>
       </Card.Header>
       <Card.Body className="p-0">
+        {error ? (
+          <div className="p-4 text-center text-danger">{error}</div>
+        ) : null}
+        {loading && records.length === 0 ? (
+          <div className="p-4 text-center text-muted">
+            Cargando signos vitales...
+          </div>
+        ) : null}
         {records.length === 0 ? (
+          !loading && !error ? (
           <div className="p-4 text-center text-muted">
             Todavía no hay signos registrados. Usa el formulario para crear la
             primera toma.
           </div>
+          ) : null
         ) : (
           <div className="table-responsive">
             <Table hover className="mb-0 align-middle">
@@ -49,6 +60,9 @@ const SignosVitalesEmergenciaList = () => {
                   <th style={{ minWidth: '150px' }}>Valor</th>
                   <th>Comentario</th>
                   <th style={{ minWidth: '200px' }}>Tomado por</th>
+                  <th className="text-end" style={{ minWidth: '120px' }}>
+                    Acciones
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -70,7 +84,20 @@ const SignosVitalesEmergenciaList = () => {
                       </td>
                       <td>{measurement.comment || '—'}</td>
                       {index === 0 ? (
-                        <td rowSpan={measurements.length}>{record.takenBy}</td>
+                        <>
+                          <td rowSpan={measurements.length}>
+                            {record.takenBy}
+                          </td>
+                          <td rowSpan={measurements.length} className="text-end">
+                            <Button
+                              variant="outline-danger"
+                              size="sm"
+                              onClick={() => removeMeasurement?.(record.id)}
+                            >
+                              Eliminar
+                            </Button>
+                          </td>
+                        </>
                       ) : null}
                     </tr>
                   ));
