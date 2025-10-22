@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Card, Row, Col, Form } from 'react-bootstrap';
 
 const buildFullName = (person = {}) =>
@@ -14,33 +14,133 @@ const buildFullName = (person = {}) =>
     .trim();
 
 const FormData = ({ data }) => {
-  // Example shape:
-  // data = {
-  //   paciente: {
-  //     fechaNacimiento: "1990-05-12",
-  //     religion: "Católica",
-  //     direccion: "Zona 10, Ciudad de Guatemala",
-  //     telefono: "5555-1234",
-  //     tipoIdentificacion: "DPI",
-  //     numeroIdentificacion: "1234567890101"
-  //   },
-  //   acompanante: {
-  //     parentesco: "Hermano",
-  //     nombre: "Luis Pérez",
-  //     correo: "luis@example.com",
-  //     telefono: "5555-9876"
-  //   }
-  // }
-
   const hasData = Boolean(data);
-  const paciente = data?.paciente ?? {};
-  const acompanante = data?.acompanante ?? null;
+  const pacienteData = data?.paciente ?? {};
+  const acompananteData = data?.acompanante ?? null;
   const acompanantesExtra = Array.isArray(data?.raw?.acompanantes)
     ? data.raw.acompanantes
     : [];
   const acompanantesSecundarios = acompanantesExtra.filter(
-    (item) => item && item !== acompanante
+    (item) => item && item !== acompananteData
   );
+
+  const pacienteInitial = useMemo(
+    () => ({
+      fechaNacimiento: pacienteData.fechaNacimiento ?? '',
+      religion: pacienteData.religion ?? '',
+      direccion: pacienteData.direccion ?? '',
+      telefono: pacienteData.telefono ?? '',
+      tipoIdentificacion: pacienteData.tipoIdentificacion ?? '',
+      numeroIdentificacion: pacienteData.numeroIdentificacion ?? '',
+      correo: pacienteData.correo ?? '',
+      nit: pacienteData.nit ?? ''
+    }),
+    [
+      pacienteData.correo,
+      pacienteData.direccion,
+      pacienteData.fechaNacimiento,
+      pacienteData.nit,
+      pacienteData.numeroIdentificacion,
+      pacienteData.religion,
+      pacienteData.telefono,
+      pacienteData.tipoIdentificacion
+    ]
+  );
+
+  const [pacienteForm, setPacienteForm] = useState(pacienteInitial);
+
+  useEffect(() => {
+    setPacienteForm(pacienteInitial);
+  }, [pacienteInitial]);
+
+  const acompananteInitial = useMemo(
+    () =>
+      acompananteData
+        ? {
+            parentesco: acompananteData.parentesco ?? '',
+            nombre: acompananteData.nombre ?? '',
+            correo: acompananteData.correo ?? '',
+            telefono: acompananteData.telefono ?? ''
+          }
+        : null,
+    [
+      acompananteData?.correo,
+      acompananteData?.nombre,
+      acompananteData?.parentesco,
+      acompananteData?.telefono
+    ]
+  );
+
+  const [acompananteForm, setAcompananteForm] = useState(acompananteInitial);
+
+  useEffect(() => {
+    setAcompananteForm(acompananteInitial);
+  }, [acompananteInitial]);
+
+  const acompanantesExtraInitial = useMemo(
+    () =>
+      acompanantesSecundarios.map((item, index) => ({
+        parentesco: item.parentesco ?? item.tipo ?? item.relacion ?? '',
+        nombre: item.nombre ?? buildFullName(item) ?? '',
+        correo:
+          item.correo ??
+          item.correo_contacto ??
+          item.correo_empresa ??
+          item.email ??
+          '',
+        telefono:
+          item.telefono ??
+          item.telefono_contacto ??
+          item.telefono_empresa ??
+          item.telefono1 ??
+          item.telefono2 ??
+          '',
+        key: item.id ?? `${item.nombre || 'acompanante'}-${index}`
+      })),
+    [acompanantesSecundarios]
+  );
+
+  const [acompanantesExtraForm, setAcompanantesExtraForm] = useState(
+    acompanantesExtraInitial
+  );
+
+  useEffect(() => {
+    setAcompanantesExtraForm(acompanantesExtraInitial);
+  }, [acompanantesExtraInitial]);
+
+  const handlePacienteChange = (field) => (event) => {
+    const { value } = event.target;
+    setPacienteForm((prev) => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const handleAcompananteChange = (field) => (event) => {
+    const { value } = event.target;
+    setAcompananteForm((prev) =>
+      prev
+        ? {
+            ...prev,
+            [field]: value
+          }
+        : prev
+    );
+  };
+
+  const handleAcompananteExtraChange = (index, field) => (event) => {
+    const { value } = event.target;
+    setAcompanantesExtraForm((prev) =>
+      prev.map((item, currentIndex) =>
+        currentIndex === index
+          ? {
+              ...item,
+              [field]: value
+            }
+          : item
+      )
+    );
+  };
 
   return (
     <Card className="p-4 shadow-sm border-0">
@@ -62,8 +162,8 @@ const FormData = ({ data }) => {
             <Form.Label>Fecha de Nacimiento</Form.Label>
             <Form.Control
               type="text"
-              readOnly
-              value={paciente?.fechaNacimiento || ''}
+              value={pacienteForm.fechaNacimiento}
+              onChange={handlePacienteChange('fechaNacimiento')}
             />
           </Form.Group>
         </Col>
@@ -72,8 +172,8 @@ const FormData = ({ data }) => {
             <Form.Label>Religión</Form.Label>
             <Form.Control
               type="text"
-              readOnly
-              value={paciente?.religion || ''}
+              value={pacienteForm.religion}
+              onChange={handlePacienteChange('religion')}
             />
           </Form.Group>
         </Col>
@@ -82,8 +182,8 @@ const FormData = ({ data }) => {
             <Form.Label>Teléfono</Form.Label>
             <Form.Control
               type="text"
-              readOnly
-              value={paciente?.telefono || ''}
+              value={pacienteForm.telefono}
+              onChange={handlePacienteChange('telefono')}
             />
           </Form.Group>
         </Col>
@@ -95,8 +195,8 @@ const FormData = ({ data }) => {
             <Form.Label>Dirección</Form.Label>
             <Form.Control
               type="text"
-              readOnly
-              value={paciente?.direccion || ''}
+              value={pacienteForm.direccion}
+              onChange={handlePacienteChange('direccion')}
             />
           </Form.Group>
         </Col>
@@ -105,8 +205,8 @@ const FormData = ({ data }) => {
             <Form.Label>Tipo de Identificación</Form.Label>
             <Form.Control
               type="text"
-              readOnly
-              value={paciente?.tipoIdentificacion || ''}
+              value={pacienteForm.tipoIdentificacion}
+              onChange={handlePacienteChange('tipoIdentificacion')}
             />
           </Form.Group>
         </Col>
@@ -115,8 +215,8 @@ const FormData = ({ data }) => {
             <Form.Label>Número de Identificación</Form.Label>
             <Form.Control
               type="text"
-              readOnly
-              value={paciente?.numeroIdentificacion || ''}
+              value={pacienteForm.numeroIdentificacion}
+              onChange={handlePacienteChange('numeroIdentificacion')}
             />
           </Form.Group>
         </Col>
@@ -128,8 +228,8 @@ const FormData = ({ data }) => {
             <Form.Label>Correo</Form.Label>
             <Form.Control
               type="text"
-              readOnly
-              value={paciente?.correo || ''}
+              value={pacienteForm.correo}
+              onChange={handlePacienteChange('correo')}
             />
           </Form.Group>
         </Col>
@@ -138,8 +238,8 @@ const FormData = ({ data }) => {
             <Form.Label>NIT</Form.Label>
             <Form.Control
               type="text"
-              readOnly
-              value={paciente?.nit || ''}
+              value={pacienteForm.nit}
+              onChange={handlePacienteChange('nit')}
             />
           </Form.Group>
         </Col>
@@ -149,15 +249,15 @@ const FormData = ({ data }) => {
 
       {/* ACOMPAÑANTE */}
       <h5 className="text-secondary mb-3">Acompañante</h5>
-      {acompanante ? (
+      {acompananteForm ? (
         <Row className="mb-3">
           <Col md={3}>
             <Form.Group>
               <Form.Label>Parentesco</Form.Label>
               <Form.Control
                 type="text"
-                readOnly
-                value={acompanante?.parentesco || ''}
+                value={acompananteForm.parentesco}
+                onChange={handleAcompananteChange('parentesco')}
               />
             </Form.Group>
           </Col>
@@ -166,8 +266,8 @@ const FormData = ({ data }) => {
               <Form.Label>Nombre</Form.Label>
               <Form.Control
                 type="text"
-                readOnly
-                value={acompanante?.nombre || ''}
+                value={acompananteForm.nombre}
+                onChange={handleAcompananteChange('nombre')}
               />
             </Form.Group>
           </Col>
@@ -176,8 +276,8 @@ const FormData = ({ data }) => {
               <Form.Label>Correo</Form.Label>
               <Form.Control
                 type="text"
-                readOnly
-                value={acompanante?.correo || ''}
+                value={acompananteForm.correo}
+                onChange={handleAcompananteChange('correo')}
               />
             </Form.Group>
           </Col>
@@ -186,8 +286,8 @@ const FormData = ({ data }) => {
               <Form.Label>Teléfono</Form.Label>
               <Form.Control
                 type="text"
-                readOnly
-                value={acompanante?.telefono || ''}
+                value={acompananteForm.telefono}
+                onChange={handleAcompananteChange('telefono')}
               />
             </Form.Group>
           </Col>
@@ -198,24 +298,19 @@ const FormData = ({ data }) => {
         </p>
       )}
 
-      {acompanantesSecundarios.length > 0 && (
+      {acompanantesExtraForm.length > 0 && (
         <>
           <hr className="my-4" />
           <h6 className="text-secondary mb-2">Acompañantes adicionales</h6>
-          {acompanantesSecundarios.map((item, index) => (
-            <Row className="mb-3" key={`${item.id || item.nombre || index}`}>
+          {acompanantesExtraForm.map((item, index) => (
+            <Row className="mb-3" key={item.key || index}>
               <Col md={3}>
                 <Form.Group>
                   <Form.Label>Parentesco</Form.Label>
                   <Form.Control
                     type="text"
-                    readOnly
-                    value={
-                      item.parentesco ??
-                      item.tipo ??
-                      item.relacion ??
-                      ''
-                    }
+                    value={item.parentesco}
+                    onChange={handleAcompananteExtraChange(index, 'parentesco')}
                   />
                 </Form.Group>
               </Col>
@@ -224,8 +319,8 @@ const FormData = ({ data }) => {
                   <Form.Label>Nombre</Form.Label>
                   <Form.Control
                     type="text"
-                    readOnly
-                    value={item.nombre ?? buildFullName(item) ?? ''}
+                    value={item.nombre}
+                    onChange={handleAcompananteExtraChange(index, 'nombre')}
                   />
                 </Form.Group>
               </Col>
@@ -234,14 +329,8 @@ const FormData = ({ data }) => {
                   <Form.Label>Correo</Form.Label>
                   <Form.Control
                     type="text"
-                    readOnly
-                    value={
-                      item.correo ??
-                      item.correo_contacto ??
-                      item.correo_empresa ??
-                      item.email ??
-                      ''
-                    }
+                    value={item.correo}
+                    onChange={handleAcompananteExtraChange(index, 'correo')}
                   />
                 </Form.Group>
               </Col>
@@ -250,15 +339,8 @@ const FormData = ({ data }) => {
                   <Form.Label>Teléfono</Form.Label>
                   <Form.Control
                     type="text"
-                    readOnly
-                    value={
-                      item.telefono ??
-                      item.telefono_contacto ??
-                      item.telefono_empresa ??
-                      item.telefono1 ??
-                      item.telefono2 ??
-                      ''
-                    }
+                    value={item.telefono}
+                    onChange={handleAcompananteExtraChange(index, 'telefono')}
                   />
                 </Form.Group>
               </Col>
