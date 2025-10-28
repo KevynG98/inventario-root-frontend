@@ -1,6 +1,6 @@
 import React from 'react';
 import { Alert } from 'react-bootstrap';
-import SignosEncamamientoForm from './Form';
+// import SignosEncamamientoForm from './Form';
 import SignosEncamamientoList from './List';
 import { SignosEncamamientoProvider } from './Context';
 
@@ -12,7 +12,7 @@ const SignosVitalesEncamamiento = ({ value }) => (
       </Alert>
     ) : null}
     <div className="d-flex flex-column gap-4">
-      <SignosEncamamientoForm />
+      {/* <SignosEncamamientoForm /> */}
       <SignosEncamamientoList />
     </div>
   </SignosEncamamientoProvider>

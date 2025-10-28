@@ -310,6 +310,19 @@ const PacientesEnfermeriaFrame = ({ match }) => {
     [enfermeriaData]
   );
 
+  const evolucionesValue = useMemo(
+    () => ({
+      items: enfermeriaData.evoluciones.items,
+      loading: enfermeriaData.loading,
+      error: enfermeriaData.error,
+      create: enfermeriaData.evoluciones.create,
+      update: enfermeriaData.evoluciones.update,
+      remove: enfermeriaData.evoluciones.remove,
+      refresh: enfermeriaData.evoluciones.refresh
+    }),
+    [enfermeriaData]
+  );
+
   const ordenesValue = useMemo(
     () => ({
       items: enfermeriaData.ordenes.items,
@@ -335,11 +348,11 @@ const PacientesEnfermeriaFrame = ({ match }) => {
       'control-medicamento': controlesValue,
       'notas-enfermeria': notasValue,
       'dietas': dietasValue,
+      'evolucion': evolucionesValue,
       'seguimiento-ordenes-medicas': ordenesValue,
       'solicitud-medicamentos': ordenesValue,
       'laboratorios': {},
       'imagenes': {},
-      'evolucion': {},
       'ingesta-excreta': {}
     }),
     [
@@ -352,6 +365,7 @@ const PacientesEnfermeriaFrame = ({ match }) => {
       controlesValue,
       notasValue,
       dietasValue,
+      evolucionesValue,
       ordenesValue
     ]
   );

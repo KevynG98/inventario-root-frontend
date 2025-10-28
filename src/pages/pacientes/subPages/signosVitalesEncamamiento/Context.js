@@ -9,17 +9,115 @@ import React, {
 const TITLE = 'Signos Vitales (Encamamiento)';
 
 const FIELDS = [
-  { id: 'frecuenciaRespiratoria', label: 'FR (rpm)' },
-  { id: 'presionArterial', label: 'PA (mmHg)' },
-  { id: 'presionArterialMedia', label: 'PAM' },
-  { id: 'temperatura', label: 'Temp °C' },
-  { id: 'frecuenciaCardiaca', label: 'FC (ppm)' },
-  { id: 'oxigenacion', label: 'SpO₂ (%)' },
-  { id: 'glucosa', label: 'Glucosa' },
-  { id: 'insulina', label: 'Insulina (UI)' }
+  {
+    id: 'frecuenciaRespiratoria',
+    label: 'FR (rpm)',
+    tableHeader: ['Frecuencia', 'Respiratoria']
+  },
+  {
+    id: 'presionArterial',
+    label: 'PA (mmHg)',
+    tableHeader: ['Presion', 'Arterial']
+  },
+  {
+    id: 'presionArterialMedia',
+    label: 'PAM',
+    tableHeader: ['Presion Arterial', 'Media']
+  },
+  {
+    id: 'temperatura',
+    label: 'Temp °C',
+    tableHeader: ['Temperatura °C']
+  },
+  {
+    id: 'frecuenciaCardiaca',
+    label: 'FC (ppm)',
+    tableHeader: ['Frecuencia', 'Cardiaca']
+  },
+  {
+    id: 'oxigenacion',
+    label: 'SpO₂ (%)',
+    tableHeader: ['Oxigenacion', '(%)']
+  },
+  {
+    id: 'glucosa',
+    label: 'Glucosa',
+    tableHeader: ['Glucosa']
+  },
+  {
+    id: 'insulina',
+    label: 'Insulina (UI)',
+    tableHeader: ['Insulina', '(U)']
+  }
 ];
 
 const SignosEncamamientoContext = createContext(null);
+
+const TIMELINE_ROWS = (() => {
+  const rows = [];
+  for (let hour = 7; hour < 24; hour += 1) {
+    const start = String(hour).padStart(2, '0');
+    const nextHour = (hour + 1) % 24;
+    const end = nextHour === 0 ? '24' : String(nextHour).padStart(2, '0');
+    rows.push(`${start}-${end}`);
+  }
+  rows.push('24-01');
+  for (let hour = 1; hour <= 6; hour += 1) {
+    const start = String(hour).padStart(2, '0');
+    const nextHour = (hour + 1) % 24;
+    const end = String(nextHour).padStart(2, '0');
+    rows.push(`${start}-${end}`);
+  }
+  return rows;
+})();
+
+const rowLabelToStartHour = (label) => {
+  if (!label || typeof label !== 'string') {
+    return 0;
+  }
+  const [start] = label.split('-');
+  const parsed = parseInt(start, 10);
+  if (Number.isNaN(parsed)) {
+    return 0;
+  }
+  if (parsed === 24) {
+    return 0;
+  }
+  return parsed % 24;
+};
+
+const todayDateString = () => {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+const normalizeDateInput = (value) => {
+  if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return value;
+  }
+  return todayDateString();
+};
+
+const normalizeTimeInput = (value, fallbackHour) => {
+  if (typeof value === 'string' && /^\d{2}:\d{2}$/.test(value)) {
+    return value;
+  }
+  const hour = rowLabelToStartHour(String(fallbackHour ?? 0));
+  return `${String(hour).padStart(2, '0')}:00`;
+};
+
+const buildTimestampFromInputs = (dateInput, timeInput, rowLabel) => {
+  const baseDate = normalizeDateInput(dateInput);
+  const baseTime = normalizeTimeInput(timeInput, rowLabelToStartHour(rowLabel));
+  const candidate = new Date(`${baseDate}T${baseTime}`);
+  if (Number.isNaN(candidate.getTime())) {
+    return new Date().toISOString();
+  }
+  return candidate.toISOString();
+};
 
 const normalizeRecord = (record) => {
   const mediciones = record?.mediciones || {};
@@ -82,11 +180,53 @@ const resolveUser = () => {
 export const SignosEncamamientoProvider = ({ children, value }) => {
   const items = value?.items ?? [];
   const create = value?.create;
+  const update = value?.update;
   const remove = value?.remove;
   const loading = value?.loading ?? false;
   const error = value?.error ?? null;
 
   const registros = useMemo(() => items.map(normalizeRecord), [items]);
+  const timelineRecords = useMemo(() => {
+    const map = new Map();
+    registros.forEach((registro) => {
+      if (!registro.tomadoEn) {
+        return;
+      }
+      const date = new Date(registro.tomadoEn);
+      if (Number.isNaN(date.getTime())) {
+        return;
+      }
+      const hour = date.getHours();
+      const startLabel =
+        hour === 0 ? '24' : String(hour).padStart(2, '0');
+      const nextHour = (hour + 1) % 24;
+      const endLabel =
+        hour === 23
+          ? '24'
+          : hour === 0
+          ? '01'
+          : String(nextHour).padStart(2, '0');
+      const label = `${startLabel}-${endLabel}`;
+      const current = map.get(label);
+      if (!current) {
+        map.set(label, registro);
+        return;
+      }
+      const currentDate = new Date(current.tomadoEn);
+      if (Number.isNaN(currentDate.getTime()) || date > currentDate) {
+        map.set(label, registro);
+      }
+    });
+    return map;
+  }, [registros]);
+  const timelineRows = useMemo(
+    () =>
+      TIMELINE_ROWS.map((label) => ({
+        label,
+        registro: timelineRecords.get(label) ?? null
+      })),
+    [timelineRecords]
+  );
   const [formState, setFormState] = useState(() => ({
     tomadoEn: '',
     valores: FIELDS.reduce((acc, field) => ({ ...acc, [field.id]: '' }), {}),
@@ -156,11 +296,71 @@ export const SignosEncamamientoProvider = ({ children, value }) => {
     [remove]
   );
 
+  const saveCellMeasurement = useCallback(
+    async ({
+      rowLabel,
+      fieldId,
+      value,
+      comment,
+      date,
+      time,
+      registroId,
+      existingValues
+    }) => {
+      if (!fieldId) {
+        return { success: false };
+      }
+      const preparedValues =
+        existingValues && typeof existingValues === 'object'
+          ? { ...existingValues }
+          : FIELDS.reduce(
+              (acc, field) => ({
+                ...acc,
+                [field.id]: ''
+              }),
+              {}
+            );
+      const sanitizedValue =
+        value === null || value === undefined ? '' : String(value);
+      const sanitizedComment =
+        comment === null || comment === undefined ? '' : String(comment);
+      const mediciones = FIELDS.reduce((acc, field) => {
+        if (field.id === fieldId) {
+          acc[field.id] = sanitizedValue;
+        } else {
+          acc[field.id] =
+            preparedValues[field.id] !== undefined
+              ? preparedValues[field.id]
+              : '';
+        }
+        return acc;
+      }, {});
+      const payload = {
+        tomado_en: buildTimestampFromInputs(date, time, rowLabel),
+        registrado_por: resolveUser(),
+        comentarios: sanitizedComment,
+        mediciones
+      };
+
+      if (registroId && typeof update === 'function') {
+        await update(registroId, payload);
+      } else if (typeof create === 'function') {
+        await create(payload);
+      } else {
+        return { success: false };
+      }
+
+      return { success: true };
+    },
+    [create, update]
+  );
+
   const contextValue = useMemo(
     () => ({
       title: TITLE,
       fields: FIELDS,
       registros,
+      timelineRows,
       loading,
       error,
       formState,
@@ -171,10 +371,12 @@ export const SignosEncamamientoProvider = ({ children, value }) => {
       resetForm,
       saveRecord,
       deleteRecord,
-      formatDate
+      formatDate,
+      saveCellMeasurement
     }),
     [
       registros,
+      timelineRows,
       loading,
       error,
       formState,
@@ -184,7 +386,8 @@ export const SignosEncamamientoProvider = ({ children, value }) => {
       handleCommentsChange,
       resetForm,
       saveRecord,
-      deleteRecord
+      deleteRecord,
+      saveCellMeasurement
     ]
   );
 
@@ -204,4 +407,3 @@ export const useSignosEncamamientoContext = () => {
   }
   return context;
 };
-

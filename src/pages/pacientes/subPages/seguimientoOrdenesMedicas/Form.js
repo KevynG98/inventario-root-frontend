@@ -18,7 +18,8 @@ const OrdenMedicaForm = () => {
   const [saving, setSaving] = useState(false);
 
   const handleChange = (field) => (event) => {
-    setFormState((prev) => ({ ...prev, [field]: event.target.value }));
+    const { value } = event.target;
+    setFormState((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleSubmit = async (event) => {

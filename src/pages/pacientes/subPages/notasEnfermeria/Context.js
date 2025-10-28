@@ -14,21 +14,26 @@ const ESTADOS = [
 
 const NotasEnfermeriaContext = createContext(null);
 
-const mapNota = (nota) => ({
-  ...nota,
-  creadoEnLabel: nota.creado_en
-    ? new Intl.DateTimeFormat('es-GT', {
-        dateStyle: 'short',
-        timeStyle: 'short'
-      }).format(new Date(nota.creado_en))
-    : '',
-  actualizadoEnLabel: nota.actualizado_en
-    ? new Intl.DateTimeFormat('es-GT', {
-        dateStyle: 'short',
-        timeStyle: 'short'
-      }).format(new Date(nota.actualizado_en))
-    : null
-});
+const mapNota = (nota) => {
+  const estado = nota.estado ?? '';
+  return {
+    ...nota,
+    estado,
+    isEditable: estado !== 'CERRADA',
+    creadoEnLabel: nota.creado_en
+      ? new Intl.DateTimeFormat('es-GT', {
+          dateStyle: 'short',
+          timeStyle: 'short'
+        }).format(new Date(nota.creado_en))
+      : '',
+    actualizadoEnLabel: nota.actualizado_en
+      ? new Intl.DateTimeFormat('es-GT', {
+          dateStyle: 'short',
+          timeStyle: 'short'
+        }).format(new Date(nota.actualizado_en))
+      : null
+  };
+};
 
 export const NotasEnfermeriaProvider = ({ children, value }) => {
   const notas = useMemo(
@@ -75,4 +80,3 @@ export const useNotasEnfermeriaContext = () => {
   }
   return context;
 };
-

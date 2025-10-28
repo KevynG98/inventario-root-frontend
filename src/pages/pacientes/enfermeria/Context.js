@@ -4,14 +4,12 @@ import React, {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState
 } from 'react';
 import { getData } from '../../../apiService';
 import { menu as menuConfig } from './pages';
-import {
-  getStoredSelection,
-  persistSelection
-} from './patientStore';
+import { persistSelection, startSelectionSession } from './patientStore';
 
 const NursingContext = createContext(null);
 
@@ -178,35 +176,30 @@ const resolveIframeSrc = (item) => {
 };
 
 export const ContextProvider = ({ children }) => {
+  const sessionRef = useRef(null);
+  if (sessionRef.current === null && typeof window !== 'undefined') {
+    sessionRef.current = startSelectionSession();
+  }
+
   const [menuItems] = useState(() => menuConfig);
 
   const firstItem = useMemo(() => findFirstLeaf(menuItems), [menuItems]);
 
-  const initialStoredState = useMemo(() => getStoredSelection(), []);
-
   const [activeMenuKey, setActiveMenuKey] = useState(firstItem?.key ?? null);
   const [iframeSrc, setIframeSrc] = useState(() => resolveIframeSrc(firstItem));
-  const [patient, setPatient] = useState(() => initialStoredState?.summary ?? null);
+  const [patient, setPatient] = useState(null);
   const [lastSubmission, setLastSubmission] = useState(null);
   const [admissions, setAdmissions] = useState([]);
   const [admissionsLoading, setAdmissionsLoading] = useState(false);
   const [admissionsError, setAdmissionsError] = useState(null);
-  const [admissionsModalOpen, setAdmissionsModalOpen] = useState(
-    () => !(initialStoredState?.summary)
-  );
+  const [admissionsModalOpen, setAdmissionsModalOpen] = useState(true);
   const [admissionsPage, setAdmissionsPage] = useState(1);
   const [admissionsNextPage, setAdmissionsNextPage] = useState(null);
   const [admissionsPrevPage, setAdmissionsPrevPage] = useState(null);
-  const [selectedAdmissionId, setSelectedAdmissionId] = useState(
-    () => initialStoredState?.summary?.admissionId ?? null
-  );
-  const [selectedAdmissionDetail, setSelectedAdmissionDetail] = useState(
-    () => initialStoredState?.detail ?? null
-  );
+  const [selectedAdmissionId, setSelectedAdmissionId] = useState(null);
+  const [selectedAdmissionDetail, setSelectedAdmissionDetail] = useState(null);
   const [admissionDetailLoading, setAdmissionDetailLoading] = useState(false);
-  const [lastDetailRequestId, setLastDetailRequestId] = useState(() =>
-    initialStoredState?.detail ? initialStoredState?.summary?.admissionId ?? null : null
-  );
+  const [lastDetailRequestId, setLastDetailRequestId] = useState(null);
 
   useEffect(() => {
     const initialItem = findFirstLeaf(menuItems);

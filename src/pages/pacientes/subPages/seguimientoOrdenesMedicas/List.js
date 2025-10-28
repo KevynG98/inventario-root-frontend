@@ -85,7 +85,13 @@ const SeguimientoOrdenesList = () => {
                           estado,
                           comentario
                         });
-                        event.currentTarget.reset();
+                        const formElement = event.currentTarget;
+                        if (
+                          formElement &&
+                          typeof formElement.reset === 'function'
+                        ) {
+                          formElement.reset();
+                        }
                       }
                     }}
                   >

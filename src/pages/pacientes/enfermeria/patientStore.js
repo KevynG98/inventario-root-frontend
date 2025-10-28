@@ -1,4 +1,8 @@
 const STORAGE_KEY = 'nursingPatientSelection';
+const SESSION_KEY = 'nursingPatientSessionId';
+
+const generateSessionId = () =>
+  `session-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
 
 const safeParse = (value) => {
   if (!value) {
@@ -13,15 +17,39 @@ const safeParse = (value) => {
   }
 };
 
+const getSessionId = () => {
+  if (typeof window === 'undefined') {
+    return null;
+  }
+
+  return window.localStorage.getItem(SESSION_KEY);
+};
+
+export const startSelectionSession = () => {
+  if (typeof window === 'undefined') {
+    return null;
+  }
+
+  const nextSessionId = generateSessionId();
+  window.localStorage.setItem(SESSION_KEY, nextSessionId);
+  window.localStorage.removeItem(STORAGE_KEY);
+  return nextSessionId;
+};
+
 export const getStoredSelection = () => {
   if (typeof window === 'undefined') {
     return { summary: null, detail: null };
   }
 
+  const currentSessionId = getSessionId();
   const raw = window.localStorage.getItem(STORAGE_KEY);
   const parsed = safeParse(raw);
 
   if (!parsed || typeof parsed !== 'object') {
+    return { summary: null, detail: null };
+  }
+
+  if (!parsed.sessionId || !currentSessionId || parsed.sessionId !== currentSessionId) {
     return { summary: null, detail: null };
   }
 
@@ -37,9 +65,11 @@ export const persistSelection = (summary, detail) => {
   }
 
   try {
+    const sessionId = getSessionId();
     const payload = JSON.stringify({
       summary: summary ?? null,
       detail: detail ?? null,
+      sessionId: sessionId ?? null,
       timestamp: new Date().toISOString()
     });
     window.localStorage.setItem(STORAGE_KEY, payload);

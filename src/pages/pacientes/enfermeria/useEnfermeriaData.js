@@ -31,6 +31,7 @@ export const useEnfermeriaData = (admisionId) => {
   const [controles, setControles] = useState([]);
   const [notas, setNotas] = useState([]);
   const [dietas, setDietas] = useState([]);
+  const [evoluciones, setEvoluciones] = useState([]);
   const [ordenes, setOrdenes] = useState([]);
   const [historia, setHistoria] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -44,6 +45,7 @@ export const useEnfermeriaData = (admisionId) => {
     setControles([]);
     setNotas([]);
     setDietas([]);
+    setEvoluciones([]);
     setOrdenes([]);
     setHistoria(null);
   }, []);
@@ -125,6 +127,26 @@ export const useEnfermeriaData = (admisionId) => {
     setDietas(asArray(response.data));
   }, [admisionId]);
 
+  const fetchEvoluciones = useCallback(async () => {
+    if (!admisionId) {
+      setEvoluciones([]);
+      return;
+    }
+    try {
+      const response = await getData(
+        `enfermeria/evoluciones/${baseParams(admisionId)}`
+      );
+      setEvoluciones(asArray(response.data));
+    } catch (err) {
+      const status = err?.response?.status ?? err?.status ?? null;
+      if (status && status >= 500) {
+        throw err;
+      }
+      console.warn('No se pudieron obtener las evoluciones, se continuará con lista vacía.', err);
+      setEvoluciones([]);
+    }
+  }, [admisionId]);
+
   const fetchOrdenes = useCallback(async () => {
     if (!admisionId) {
       setOrdenes([]);
@@ -163,6 +185,7 @@ export const useEnfermeriaData = (admisionId) => {
         fetchControles(),
         fetchNotas(),
         fetchDietas(),
+        fetchEvoluciones(),
         fetchOrdenes(),
         fetchHistoria()
       ]);
@@ -182,6 +205,7 @@ export const useEnfermeriaData = (admisionId) => {
     fetchControles,
     fetchNotas,
     fetchDietas,
+    fetchEvoluciones,
     fetchOrdenes,
     fetchHistoria
   ]);
@@ -266,6 +290,14 @@ export const useEnfermeriaData = (admisionId) => {
       await fetchSignosEncamamiento();
     },
     [admisionId, fetchSignosEncamamiento]
+  );
+
+  const updateSignoEncamamiento = useCallback(
+    async (id, payload) => {
+      await patchData(`enfermeria/signos-vitales-encamamiento/${id}/`, payload);
+      await fetchSignosEncamamiento();
+    },
+    [fetchSignosEncamamiento]
   );
 
   const deleteSignoEncamamiento = useCallback(
@@ -392,6 +424,33 @@ export const useEnfermeriaData = (admisionId) => {
     [fetchDietas]
   );
 
+  const createEvolucion = useCallback(
+    async (payload) => {
+      await postData('enfermeria/evoluciones/', {
+        ...payload,
+        admision: admisionId
+      });
+      await fetchEvoluciones();
+    },
+    [admisionId, fetchEvoluciones]
+  );
+
+  const updateEvolucion = useCallback(
+    async (id, payload) => {
+      await patchData(`enfermeria/evoluciones/${id}/`, payload);
+      await fetchEvoluciones();
+    },
+    [fetchEvoluciones]
+  );
+
+  const deleteEvolucion = useCallback(
+    async (id) => {
+      await deleteData(`enfermeria/evoluciones/${id}/`);
+      await fetchEvoluciones();
+    },
+    [fetchEvoluciones]
+  );
+
   const createOrden = useCallback(
     async (payload) => {
       await postData('enfermeria/ordenes-medicas/', {
@@ -453,6 +512,7 @@ export const useEnfermeriaData = (admisionId) => {
         items: signosEncamamiento,
         refresh: fetchSignosEncamamiento,
         create: createSignoEncamamiento,
+        update: updateSignoEncamamiento,
         remove: deleteSignoEncamamiento
       },
       antecedentes: {
@@ -484,6 +544,13 @@ export const useEnfermeriaData = (admisionId) => {
         create: createDieta,
         remove: deleteDieta
       },
+      evoluciones: {
+        items: evoluciones,
+        refresh: fetchEvoluciones,
+        create: createEvolucion,
+        update: updateEvolucion,
+        remove: deleteEvolucion
+      },
       ordenes: {
         items: ordenes,
         refresh: fetchOrdenes,
@@ -505,6 +572,7 @@ export const useEnfermeriaData = (admisionId) => {
       controles,
       notas,
       dietas,
+      evoluciones,
       ordenes,
       fetchMedicos,
       createMedico,
@@ -515,6 +583,7 @@ export const useEnfermeriaData = (admisionId) => {
       deleteSignoEmergencia,
       fetchSignosEncamamiento,
       createSignoEncamamiento,
+      updateSignoEncamamiento,
       deleteSignoEncamamiento,
       fetchAntecedentes,
       createAntecedente,
@@ -533,6 +602,10 @@ export const useEnfermeriaData = (admisionId) => {
       fetchDietas,
       createDieta,
       deleteDieta,
+      fetchEvoluciones,
+      createEvolucion,
+      updateEvolucion,
+      deleteEvolucion,
       fetchOrdenes,
       createOrden,
       updateOrden,
@@ -544,4 +617,3 @@ export const useEnfermeriaData = (admisionId) => {
 
   return value;
 };
-

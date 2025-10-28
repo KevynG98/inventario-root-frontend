@@ -57,7 +57,12 @@ const NotasEnfermeriaList = () => {
                   <Button
                     variant="outline-primary"
                     size="sm"
+                    disabled={!nota.isEditable}
                     onClick={() => {
+                      if (!nota.isEditable) {
+                        window.alert('Las notas cerradas no se pueden editar.');
+                        return;
+                      }
                       setActive(nota);
                       setMode('EDIT');
                     }}

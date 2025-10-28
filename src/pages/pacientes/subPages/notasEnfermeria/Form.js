@@ -19,6 +19,12 @@ const NotasEnfermeriaForm = () => {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
+    if (mode === 'EDIT' && active && active.estado === 'CERRADA') {
+      window.alert('Esta nota está cerrada y no se puede editar.');
+      setMode('LIST');
+      return;
+    }
+
     if (mode === 'EDIT' && active) {
       setFormState({
         turno: active.turno,
@@ -28,10 +34,11 @@ const NotasEnfermeriaForm = () => {
     } else {
       setFormState(initialState);
     }
-  }, [mode, active]);
+  }, [mode, active, setMode]);
 
   const handleChange = (field) => (event) => {
-    setFormState((prev) => ({ ...prev, [field]: event.target.value }));
+    const { value } = event.target;
+    setFormState((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleSubmit = async (event) => {
