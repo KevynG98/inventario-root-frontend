@@ -109,6 +109,10 @@ const SolicitudMedicamentosForm = () => {
     loadSkus({ categoriaNombre, subcategoriaNombre: subcategoria });
   };
 
+  if (mode !== 'form') {
+    return null;
+  }
+
   return (
     <Card className="shadow-sm border-0">
       <Card.Header className="bg-white border-0">
