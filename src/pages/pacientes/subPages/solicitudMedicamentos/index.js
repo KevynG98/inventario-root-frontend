@@ -3,9 +3,9 @@ import { SolicitudMedicamentosProvider } from './Context';
 import SolicitudMedicamentosList from './List';
 import SolicitudMedicamentosForm from './Form';
 
-const SolicitudMedicamentos = () => (
-  <SolicitudMedicamentosProvider>
-    <div className="placeholder-page">
+const SolicitudMedicamentos = ({ value }) => (
+  <SolicitudMedicamentosProvider value={value}>
+    <div className="d-flex flex-column gap-4">
       <SolicitudMedicamentosList />
       <SolicitudMedicamentosForm />
     </div>

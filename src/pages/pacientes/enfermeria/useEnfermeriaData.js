@@ -32,6 +32,8 @@ export const useEnfermeriaData = (admisionId) => {
   const [notas, setNotas] = useState([]);
   const [dietas, setDietas] = useState([]);
   const [evoluciones, setEvoluciones] = useState([]);
+  const [ingestaExcreta, setIngestaExcreta] = useState([]);
+  const [solicitudes, setSolicitudes] = useState([]);
   const [ordenes, setOrdenes] = useState([]);
   const [historia, setHistoria] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -46,6 +48,8 @@ export const useEnfermeriaData = (admisionId) => {
     setNotas([]);
     setDietas([]);
     setEvoluciones([]);
+    setIngestaExcreta([]);
+    setSolicitudes([]);
     setOrdenes([]);
     setHistoria(null);
   }, []);
@@ -127,6 +131,17 @@ export const useEnfermeriaData = (admisionId) => {
     setDietas(asArray(response.data));
   }, [admisionId]);
 
+  const fetchIngestaExcreta = useCallback(async () => {
+    if (!admisionId) {
+      setIngestaExcreta([]);
+      return;
+    }
+    const response = await getData(
+      `enfermeria/ingesta-excreta/${baseParams(admisionId)}`
+    );
+    setIngestaExcreta(asArray(response.data));
+  }, [admisionId]);
+
   const fetchEvoluciones = useCallback(async () => {
     if (!admisionId) {
       setEvoluciones([]);
@@ -158,6 +173,17 @@ export const useEnfermeriaData = (admisionId) => {
     setOrdenes(asArray(response.data));
   }, [admisionId]);
 
+  const fetchSolicitudes = useCallback(async () => {
+    if (!admisionId) {
+      setSolicitudes([]);
+      return;
+    }
+    const response = await getData(
+      `enfermeria/solicitudes-medicamentos/${baseParams(admisionId)}`
+    );
+    setSolicitudes(asArray(response.data));
+  }, [admisionId]);
+
   const fetchHistoria = useCallback(async () => {
     if (!admisionId) {
       setHistoria(null);
@@ -186,6 +212,8 @@ export const useEnfermeriaData = (admisionId) => {
         fetchNotas(),
         fetchDietas(),
         fetchEvoluciones(),
+        fetchIngestaExcreta(),
+        fetchSolicitudes(),
         fetchOrdenes(),
         fetchHistoria()
       ]);
@@ -206,6 +234,8 @@ export const useEnfermeriaData = (admisionId) => {
     fetchNotas,
     fetchDietas,
     fetchEvoluciones,
+    fetchIngestaExcreta,
+    fetchSolicitudes,
     fetchOrdenes,
     fetchHistoria
   ]);
@@ -405,6 +435,133 @@ export const useEnfermeriaData = (admisionId) => {
     [fetchNotas]
   );
 
+  const createIngestaRegistro = useCallback(
+    async ({ fecha, columnas = {}, registros = [] }) => {
+      if (!admisionId) {
+        throw new Error('Se requiere una admisión para guardar ingesta/excreta.');
+      }
+      const response = await postData('enfermeria/ingesta-excreta/', {
+        admision: admisionId,
+        fecha,
+        columnas_personalizadas: columnas,
+        registros
+      });
+      await fetchIngestaExcreta();
+      return response.data;
+    },
+    [admisionId, fetchIngestaExcreta]
+  );
+
+  const updateIngestaRegistro = useCallback(
+    async (id, payload) => {
+      const response = await putData(
+        `enfermeria/ingesta-excreta/${id}/`,
+        payload,
+        { __skipLoader: true }
+      );
+      await fetchIngestaExcreta();
+      return response.data;
+    },
+    [fetchIngestaExcreta]
+  );
+
+  const createSolicitudMedicamento = useCallback(
+    async (payload) => {
+      const response = await postData('enfermeria/solicitudes-medicamentos/', {
+        ...payload,
+        admision: admisionId
+      });
+      await fetchSolicitudes();
+      return response.data;
+    },
+    [admisionId, fetchSolicitudes]
+  );
+
+  const updateSolicitudMedicamento = useCallback(
+    async (id, payload) => {
+      const response = await putData(
+        `enfermeria/solicitudes-medicamentos/${id}/`,
+        payload,
+        { __skipLoader: true }
+      );
+      await fetchSolicitudes();
+      return response.data;
+    },
+    [fetchSolicitudes]
+  );
+
+  const enviarSolicitudMedicamento = useCallback(
+    async (id) => {
+      const response = await postData(
+        `enfermeria/solicitudes-medicamentos/${id}/enviar/`,
+        {}
+      );
+      await fetchSolicitudes();
+      return response.data;
+    },
+    [fetchSolicitudes]
+  );
+
+  const marcarPendienteRecibirSolicitud = useCallback(
+    async (id) => {
+      const response = await postData(
+        `enfermeria/solicitudes-medicamentos/${id}/marcar-pendiente-recibir/`,
+        {}
+      );
+      await fetchSolicitudes();
+      return response.data;
+    },
+    [fetchSolicitudes]
+  );
+
+  const recibirSolicitudMedicamento = useCallback(
+    async (id, payload) => {
+      const response = await postData(
+        `enfermeria/solicitudes-medicamentos/${id}/recibir/`,
+        payload
+      );
+      await fetchSolicitudes();
+      return response.data;
+    },
+    [fetchSolicitudes]
+  );
+
+  const cargarSolicitudEstadoCuenta = useCallback(
+    async (id) => {
+      const response = await postData(
+        `enfermeria/solicitudes-medicamentos/${id}/cargar-estado-cuenta/`,
+        {}
+      );
+      await fetchSolicitudes();
+      return response.data;
+    },
+    [fetchSolicitudes]
+  );
+
+  const anularSolicitudMedicamento = useCallback(
+    async (id, payload = {}) => {
+      const response = await postData(
+        `enfermeria/solicitudes-medicamentos/${id}/anular/`,
+        payload
+      );
+      await fetchSolicitudes();
+      return response.data;
+    },
+    [fetchSolicitudes]
+  );
+
+  const devolverItemSolicitud = useCallback(
+    async (solicitudId, itemId, payload) => {
+      const response = await postData(
+        `enfermeria/solicitudes-medicamentos/${solicitudId}/items/${itemId}/devolver/`,
+        payload
+      );
+      await fetchSolicitudes();
+      return response.data;
+    },
+    [fetchSolicitudes]
+  );
+
   const createDieta = useCallback(
     async (payload) => {
       await postData('enfermeria/dietas/', {
@@ -544,6 +701,24 @@ export const useEnfermeriaData = (admisionId) => {
         create: createDieta,
         remove: deleteDieta
       },
+      solicitudes: {
+        items: solicitudes,
+        refresh: fetchSolicitudes,
+        create: createSolicitudMedicamento,
+        update: updateSolicitudMedicamento,
+        enviar: enviarSolicitudMedicamento,
+        marcarPendienteRecibir: marcarPendienteRecibirSolicitud,
+        recibir: recibirSolicitudMedicamento,
+        cargarEstadoCuenta: cargarSolicitudEstadoCuenta,
+        anular: anularSolicitudMedicamento,
+        devolverItem: devolverItemSolicitud
+      },
+      ingestaExcreta: {
+        items: ingestaExcreta,
+        refresh: fetchIngestaExcreta,
+        create: createIngestaRegistro,
+        update: updateIngestaRegistro
+      },
       evoluciones: {
         items: evoluciones,
         refresh: fetchEvoluciones,
@@ -572,6 +747,8 @@ export const useEnfermeriaData = (admisionId) => {
       controles,
       notas,
       dietas,
+      solicitudes,
+      ingestaExcreta,
       evoluciones,
       ordenes,
       fetchMedicos,
@@ -602,6 +779,18 @@ export const useEnfermeriaData = (admisionId) => {
       fetchDietas,
       createDieta,
       deleteDieta,
+      fetchSolicitudes,
+      createSolicitudMedicamento,
+      updateSolicitudMedicamento,
+      enviarSolicitudMedicamento,
+      marcarPendienteRecibirSolicitud,
+      recibirSolicitudMedicamento,
+      cargarSolicitudEstadoCuenta,
+      anularSolicitudMedicamento,
+      devolverItemSolicitud,
+      fetchIngestaExcreta,
+      createIngestaRegistro,
+      updateIngestaRegistro,
       fetchEvoluciones,
       createEvolucion,
       updateEvolucion,

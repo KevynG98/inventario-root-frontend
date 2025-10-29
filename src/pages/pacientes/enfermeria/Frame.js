@@ -337,6 +337,39 @@ const PacientesEnfermeriaFrame = ({ match }) => {
     [enfermeriaData]
   );
 
+  const ingestaExcretaValue = useMemo(
+    () => ({
+      items: enfermeriaData.ingestaExcreta?.items ?? [],
+      loading: enfermeriaData.loading,
+      error: enfermeriaData.error,
+      create: enfermeriaData.ingestaExcreta?.create,
+      update: enfermeriaData.ingestaExcreta?.update,
+      refresh: enfermeriaData.ingestaExcreta?.refresh
+    }),
+    [enfermeriaData]
+  );
+
+  const solicitudesValue = useMemo(
+    () => ({
+      items: enfermeriaData.solicitudes?.items ?? [],
+      loading: enfermeriaData.loading,
+      error: enfermeriaData.error,
+      create: enfermeriaData.solicitudes?.create,
+      update: enfermeriaData.solicitudes?.update,
+      enviar: enfermeriaData.solicitudes?.enviar,
+      marcarPendienteRecibir: enfermeriaData.solicitudes?.marcarPendienteRecibir,
+      recibir: enfermeriaData.solicitudes?.recibir,
+      cargarEstadoCuenta: enfermeriaData.solicitudes?.cargarEstadoCuenta,
+      anular: enfermeriaData.solicitudes?.anular,
+      devolverItem: enfermeriaData.solicitudes?.devolverItem,
+      refresh: enfermeriaData.solicitudes?.refresh,
+      ordenesActivas: (enfermeriaData.ordenes?.items ?? []).filter((orden) =>
+        ['ACTIVA', 'EN_PROCESO'].includes(orden?.estado)
+      )
+    }),
+    [enfermeriaData]
+  );
+
   const bindings = useMemo(
     () => ({
       'informacion-paciente': infoPacienteValue,
@@ -350,10 +383,10 @@ const PacientesEnfermeriaFrame = ({ match }) => {
       'dietas': dietasValue,
       'evolucion': evolucionesValue,
       'seguimiento-ordenes-medicas': ordenesValue,
-      'solicitud-medicamentos': ordenesValue,
+      'solicitud-medicamentos': solicitudesValue,
       'laboratorios': {},
       'imagenes': {},
-      'ingesta-excreta': {}
+      'ingesta-excreta': ingestaExcretaValue
     }),
     [
       infoPacienteValue,
@@ -366,7 +399,9 @@ const PacientesEnfermeriaFrame = ({ match }) => {
       notasValue,
       dietasValue,
       evolucionesValue,
-      ordenesValue
+      ordenesValue,
+      ingestaExcretaValue,
+      solicitudesValue
     ]
   );
 

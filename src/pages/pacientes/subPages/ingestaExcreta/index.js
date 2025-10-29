@@ -3,9 +3,9 @@ import { IngestaExcretaProvider } from './Context';
 import IngestaExcretaList from './List';
 import IngestaExcretaForm from './Form';
 
-const IngestaExcreta = () => (
-  <IngestaExcretaProvider>
-    <div className="placeholder-page">
+const IngestaExcreta = ({ value }) => (
+  <IngestaExcretaProvider value={value}>
+    <div className="d-flex flex-column gap-4">
       <IngestaExcretaList />
       <IngestaExcretaForm />
     </div>
