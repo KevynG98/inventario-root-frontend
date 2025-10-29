@@ -50,17 +50,18 @@ const SolicitudMedicamentosForm = () => {
     loadingAction
   } = context;
 
+  if (mode !== 'form') {
+    return null;
+  }
+
   const originSelectRef = useRef(null);
 
   useEffect(() => {
-    if (mode !== 'form') {
-      return;
-    }
     if (typeof window !== 'undefined') {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
     originSelectRef.current?.focus();
-  }, [mode]);
+  }, []);
 
   const handleClose = () => {
     resetDraft();
