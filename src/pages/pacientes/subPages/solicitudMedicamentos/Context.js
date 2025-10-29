@@ -93,15 +93,26 @@ export const SolicitudMedicamentosProvider = ({ children, value }) => {
   });
   const [subcategoriasFiltradas, setSubcategoriasFiltradas] = useState([]);
 
-  const solicitudes = useMemo(
-    () => (value?.items || []).map(formatSolicitud),
-    [value?.items]
-  );
+  const solicitudes = useMemo(() => {
+    const sourceItems = value?.items;
+    const rawItems = Array.isArray(sourceItems)
+      ? sourceItems
+      : Array.isArray(sourceItems?.results)
+      ? sourceItems.results
+      : [];
+    return rawItems.map(formatSolicitud);
+  }, [value?.items, value?.items?.results]);
 
-  const ordenesActivas = useMemo(
-    () => value?.ordenesActivas || [],
-    [value?.ordenesActivas]
-  );
+  const ordenesActivas = useMemo(() => {
+    const sourceOrdenes = value?.ordenesActivas;
+    if (Array.isArray(sourceOrdenes)) {
+      return sourceOrdenes;
+    }
+    if (Array.isArray(sourceOrdenes?.results)) {
+      return sourceOrdenes.results;
+    }
+    return [];
+  }, [value?.ordenesActivas, value?.ordenesActivas?.results]);
 
   const loadCatalogs = useCallback(async () => {
     try {
