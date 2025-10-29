@@ -6,84 +6,183 @@ import React, {
   useMemo,
   useState
 } from 'react';
-import { NotificationManager } from 'react-notifications';
 import { getData } from '../../../../apiService';
 
-const SolicitudMedicamentosContext = createContext(null);
+const SolicitudContext = createContext(null);
+export const useSolicitudContext = () => useContext(SolicitudContext);
 
-const initialFormState = {
+const EMPTY_FORM = {
   id: null,
+  estatus: 'PENDIENTE_ENVIAR',
   bodega_origen: '',
   bodega_destino: '',
-  comentarios: ''
+  comentarios: '',
+  items: []
 };
 
-const initialItemDraft = {
-  sku: '',
+const EMPTY_ITEM = {
+  id: null,
   categoria: '',
   subcategoria: '',
+  sku: '',
+  descripcion: '',
   cantidad: 1
 };
 
-export const useSolicitudMedicamentosContext = () =>
-  useContext(SolicitudMedicamentosContext);
+const asArray = (data) => {
+  if (!data) {
+    return [];
+  }
+  if (Array.isArray(data)) {
+    return data;
+  }
+  if (Array.isArray(data.results)) {
+    return data.results;
+  }
+  return [];
+};
 
-const formatSolicitud = (solicitud) => ({
-  ...solicitud,
-  fecha_envio: solicitud?.fecha_envio ? new Date(solicitud.fecha_envio) : null,
-  fecha_recibido: solicitud?.fecha_recibido
-    ? new Date(solicitud.fecha_recibido)
-    : null,
-  fecha_cargado_ec: solicitud?.fecha_cargado_ec
-    ? new Date(solicitud.fecha_cargado_ec)
-    : null
+const normalizeBodega = (item) => ({
+  id:
+    item?.id ??
+    item?.pk ??
+    item?.codigo ??
+    item?.nombre_bodega ??
+    item?.nombre ??
+    null,
+  name:
+    item?.nombre_bodega ||
+    item?.nombre ||
+    item?.descripcion ||
+    item?.codigo ||
+    ''
 });
 
-const dedupe = (items = [], key = 'nombre') => {
-  const map = new Map();
-  items.forEach((item) => {
-    if (!item || !item[key]) {
-      return;
-    }
-    map.set(item[key], item);
-  });
-  return Array.from(map.values());
+const normalizeCategoria = (item) => ({
+  id: item?.id ?? item?.categoria_id ?? null,
+  name: item?.nombre || item?.descripcion || item?.codigo || ''
+});
+
+const normalizeSubcategoria = (item, categoriaId) => ({
+  id: item?.id ?? item?.subcategoria_id ?? null,
+  name: item?.nombre || item?.descripcion || item?.codigo || '',
+  categoriaId
+});
+
+const normalizeSku = (item) => ({
+  id: item?.id ?? item?.sku_id ?? null,
+  code: item?.codigo_sku || item?.codigo || '',
+  name: item?.nombre || item?.descripcion || ''
+});
+
+const normalizeDepartamento = (item) => ({
+  id: item?.id ?? item?.departamento_id ?? null,
+  name: item?.nombre || item?.descripcion || ''
+});
+
+const normalizeUsuario = (item) => {
+  const username =
+    item?.username ||
+    item?.usuario ||
+    item?.correo ||
+    item?.email ||
+    item?.codigo ||
+    '';
+
+  const nameCandidates = [
+    item?.nombre_completo,
+    item?.nombreCompleto,
+    item?.full_name,
+    item?.fullName,
+    [
+      item?.primer_nombre,
+      item?.segundo_nombre,
+      item?.primer_apellido,
+      item?.segundo_apellido
+    ]
+      .filter(Boolean)
+      .join(' '),
+    item?.nombre
+  ];
+
+  const fullName =
+    nameCandidates.find(
+      (candidate) => candidate && typeof candidate === 'string' && candidate.trim()
+    ) || username;
+
+  return {
+    id: item?.id ?? username ?? fullName,
+    username,
+    fullName: fullName || username,
+    label: fullName && username ? `${fullName} (${username})` : fullName || username
+  };
 };
 
-const normalizeSkus = (skus) =>
-  (Array.isArray(skus) ? skus : []).map((sku) => ({
-    id: sku.id,
-    codigo_sku: sku.codigo_sku,
-    nombre: sku.nombre || sku.descripcion || '',
-    categoria: sku.categoria || '',
-    subcategoria: sku.subcategoria || '',
-    descripcion: sku.descripcion || ''
-  }));
-
-const defaultRecepcionEstado = (selected) => {
-  if (!selected) {
-    return {};
+const mapSolicitud = (raw) => {
+  if (!raw) {
+    return null;
   }
-  const map = {};
-  (selected.items || []).forEach((item) => {
-    const cantidadBase =
-      item.cantidad_enviada || item.cantidad_pedida || item.cantidad_recibida || 0;
-    map[item.id] = {
-      checked: item.recibido || false,
-      cantidad: cantidadBase
-    };
-  });
-  return map;
+
+  const toDate = (value) => (value ? new Date(value) : null);
+
+  const items = Array.isArray(raw.items)
+    ? raw.items.map((item) => ({
+        id: item.id ?? null,
+        categoria: item.categoria ?? '',
+        subcategoria: item.subcategoria ?? '',
+        sku: item.sku ?? '',
+        descripcion: item.descripcion ?? '',
+        cantidad: item.cantidad_pedida ?? item.cantidad_enviada ?? item.cantidad_recibida ?? 0,
+        cantidad_pedida: item.cantidad_pedida ?? 0,
+        cantidad_enviada: item.cantidad_enviada ?? 0,
+        cantidad_recibida: item.cantidad_recibida ?? 0,
+        cantidad_devuelta: item.cantidad_devuelta ?? 0,
+        recibido: Boolean(item.recibido),
+        devuelto: Boolean(item.devuelto)
+      }))
+    : [];
+
+  return {
+    ...raw,
+    items,
+    fecha_creacion: toDate(raw.fecha_creacion),
+    fecha_envio: toDate(raw.fecha_envio),
+    fecha_recibido: toDate(raw.fecha_recibido),
+    fecha_cargado_ec: toDate(raw.fecha_cargado_ec)
+  };
 };
 
-export const SolicitudMedicamentosProvider = ({ children, value }) => {
-  const [mode, setMode] = useState('list');
+export const SolicitudProvider = ({ children, value = {} }) => {
+  const {
+    items: remoteItems = [],
+    loading = false,
+    error = null,
+    create,
+    update,
+    enviar,
+    marcarPendienteRecibir,
+    recibir,
+    cargarEstadoCuenta,
+    anular,
+    devolverItem,
+    refresh = () => {}
+  } = value;
+
+  const solicitudes = useMemo(
+    () =>
+      Array.isArray(remoteItems)
+        ? remoteItems.map(mapSolicitud).filter(Boolean)
+        : [],
+    [remoteItems]
+  );
+
+  const [mode, setMode] = useState('list'); // list | form | detail
   const [selected, setSelected] = useState(null);
-  const [formState, setFormState] = useState(initialFormState);
-  const [itemDraft, setItemDraft] = useState(initialItemDraft);
-  const [itemsDraft, setItemsDraft] = useState([]);
-  const [loadingAction, setLoadingAction] = useState(false);
-  const [catalogs, setCatalogs] = useState({
+  const [form, setForm] = useState(EMPTY_FORM);
+  const [itemDraft, setItemDraft] = useState(EMPTY_ITEM);
+  const [submitting, setSubmitting] = useState(false);
+
+  const [catalogData, setCatalogData] = useState({
     bodegas: [],
     categorias: [],
     subcategorias: [],
@@ -91,121 +190,88 @@ export const SolicitudMedicamentosProvider = ({ children, value }) => {
     departamentos: [],
     usuarios: []
   });
-  const [subcategoriasFiltradas, setSubcategoriasFiltradas] = useState([]);
+  const [catalogLoading, setCatalogLoading] = useState(false);
+  const [catalogError, setCatalogError] = useState(null);
 
-  const solicitudes = useMemo(() => {
-    const sourceItems = value?.items;
-    const rawItems = Array.isArray(sourceItems)
-      ? sourceItems
-      : Array.isArray(sourceItems?.results)
-      ? sourceItems.results
-      : [];
-    return rawItems.map(formatSolicitud);
-  }, [value?.items, value?.items?.results]);
-
-  const ordenesActivas = useMemo(() => {
-    const sourceOrdenes = value?.ordenesActivas;
-    if (Array.isArray(sourceOrdenes)) {
-      return sourceOrdenes;
-    }
-    if (Array.isArray(sourceOrdenes?.results)) {
-      return sourceOrdenes.results;
-    }
-    return [];
-  }, [value?.ordenesActivas, value?.ordenesActivas?.results]);
+  const [pendingAction, setPendingAction] = useState(null);
 
   const loadCatalogs = useCallback(async () => {
+    setCatalogLoading(true);
+    setCatalogError(null);
     try {
-      const [bodegasRes, categoriasRes, departamentosRes, usuariosRes] =
+      const fetchAllPaginated = async (initialUrl) => {
+        let collected = [];
+        let nextUrl = initialUrl;
+        while (nextUrl) {
+          const res = await getData(nextUrl);
+          const data = res?.data || {};
+          collected = collected.concat(asArray(data));
+          nextUrl = data.next || null;
+        }
+        return collected;
+      };
+
+      const [bodegasRes, categoriasRes, skusRes, departamentosRes] =
         await Promise.all([
           getData('inventario/bodegas/?page_size=200'),
           getData('inventario/categorias/?page_size=200'),
-          getData('mantenimiento/departamentos/?page_size=200'),
-          getData('user/filter-users/')
+          getData('inventario/skus/?page_size=200'),
+          getData('mantenimiento/departamentos/?page_size=200')
         ]);
 
-      const bodegasList =
-        bodegasRes?.data?.results ??
-        bodegasRes?.data ??
-        bodegasRes ??
-        [];
-      const categoriasList =
-        categoriasRes?.data?.results ??
-        categoriasRes?.data ??
-        categoriasRes ??
-        [];
-      const departamentosList =
-        departamentosRes?.data?.results ??
-        departamentosRes?.data ??
-        departamentosRes ??
-        [];
-      const usuariosList = Array.isArray(usuariosRes?.data)
-        ? usuariosRes.data
-        : usuariosRes?.data?.results ?? usuariosRes ?? [];
+      const usuariosRes = await fetchAllPaginated('user/filter-users/');
 
-      setCatalogs((prev) => ({
-        ...prev,
-        bodegas: dedupe(bodegasList, 'nombre'),
-        categorias: categoriasList,
-        departamentos: departamentosList,
-        usuarios: usuariosList
-      }));
-    } catch (error) {
-      console.error('Error cargando catálogos de enfermería', error);
-      NotificationManager.error(
-        'No se pudieron cargar catálogos de inventario',
-        'Error',
-        4000
-      );
-    }
-  }, []);
+      const bodegas = asArray(bodegasRes.data).map(normalizeBodega);
+      const categorias = asArray(categoriasRes.data).map(normalizeCategoria);
+      const skus = asArray(skusRes.data).map(normalizeSku);
+      const departamentos = asArray(departamentosRes.data).map(normalizeDepartamento);
+      const usuarios = usuariosRes.map(normalizeUsuario);
 
-  const loadSkus = useCallback(async ({ categoriaNombre, subcategoriaNombre }) => {
-    try {
-      const params = new URLSearchParams({ page_size: '500' });
-      if (categoriaNombre) {
-        params.append('categoria', categoriaNombre);
+      const subcategorias = [];
+      for (const categoria of categorias) {
+        if (!categoria?.id) {
+          continue;
+        }
+        try {
+          const subRes = await getData(
+            `inventario/categorias/subcategorias/${categoria.id}/?page_size=200`
+          );
+          const list = asArray(subRes.data).map((item) =>
+            normalizeSubcategoria(item, categoria.id)
+          );
+          subcategorias.push(...list);
+        } catch (subError) {
+          console.warn(
+            'No se pudieron cargar las subcategorías para la categoría',
+            categoria.id,
+            subError
+          );
+        }
       }
-      if (subcategoriaNombre) {
-        params.append('subcategoria', subcategoriaNombre);
-      }
-      const response = await getData(`inventario/skus/?${params.toString()}`);
-      const list =
-        response?.data?.results ??
-        response?.data ??
-        response ??
-        [];
-      setCatalogs((prev) => ({
-        ...prev,
-        skus: normalizeSkus(list)
-      }));
-    } catch (error) {
-      console.error('Error cargando SKUs', error);
-      NotificationManager.error(
-        'No se pudieron cargar los SKUs disponibles',
-        'Error',
-        4000
-      );
-      setCatalogs((prev) => ({ ...prev, skus: [] }));
-    }
-  }, []);
 
-  const loadSubcategorias = useCallback(async (categoriaId) => {
-    if (!categoriaId) {
-      setSubcategoriasFiltradas([]);
-      return;
-    }
-    try {
-      const response = await getData(
-        `inventario/categorias/subcategorias/${categoriaId}/`
+      setCatalogData({
+        bodegas,
+        categorias,
+        subcategorias,
+        skus,
+        departamentos,
+        usuarios
+      });
+    } catch (err) {
+      console.error('Error cargando catálogos para solicitudes de medicamentos', err);
+      setCatalogError(
+        'No se pudieron cargar los catálogos. Intenta nuevamente o contacta al administrador.'
       );
-      const list = Array.isArray(response?.data)
-        ? response.data
-        : response?.data?.results ?? [];
-      setSubcategoriasFiltradas(list);
-    } catch (error) {
-      console.error('Error cargando subcategorías', error);
-      setSubcategoriasFiltradas([]);
+      setCatalogData({
+        bodegas: [],
+        categorias: [],
+        subcategorias: [],
+        skus: [],
+        departamentos: [],
+        usuarios: []
+      });
+    } finally {
+      setCatalogLoading(false);
     }
   }, []);
 
@@ -213,406 +279,415 @@ export const SolicitudMedicamentosProvider = ({ children, value }) => {
     loadCatalogs();
   }, [loadCatalogs]);
 
-  const resetDraft = useCallback(() => {
-    setFormState(initialFormState);
-    setItemDraft(initialItemDraft);
-    setItemsDraft([]);
-    setSelected(null);
+  useEffect(() => {
+    if (!selected) {
+      return;
+    }
+    const updated = solicitudes.find((item) => item.id === selected.id);
+    if (updated && updated !== selected) {
+      setSelected(updated);
+    }
+  }, [solicitudes, selected]);
+
+  const resetDrafts = useCallback(() => {
+    setForm(EMPTY_FORM);
+    setItemDraft(EMPTY_ITEM);
   }, []);
 
-  const openCreate = useCallback(() => {
-    resetDraft();
+  const openNew = useCallback(() => {
+    resetDrafts();
+    setSelected(null);
     setMode('form');
-  }, [resetDraft]);
+  }, [resetDrafts]);
 
   const openEdit = useCallback((solicitud) => {
     if (!solicitud) {
       return;
     }
-    setSelected(solicitud);
-    setFormState({
-      id: solicitud.id,
-      bodega_origen: solicitud.bodega_origen || '',
-      bodega_destino: solicitud.bodega_destino || '',
-      comentarios: solicitud.comentarios || ''
-    });
-    setItemsDraft(
-      (solicitud.items || []).map((item) => ({
-        id: item.id,
-        sku: item.sku,
-        descripcion: item.descripcion,
-        cantidad: item.cantidad_pedida,
-        categoria: item.categoria || '',
-        subcategoria: item.subcategoria || '',
-        comentario_enfermeria: item.comentario_enfermeria || ''
+    setForm({
+      id: solicitud.id ?? null,
+      estatus: solicitud.estatus ?? 'PENDIENTE_ENVIAR',
+      bodega_origen: solicitud.bodega_origen ?? '',
+      bodega_destino: solicitud.bodega_destino ?? '',
+      comentarios: solicitud.comentarios ?? '',
+      items: (solicitud.items || []).map((item) => ({
+        ...item,
+        cantidad: item.cantidad ?? item.cantidad_pedida ?? item.cantidad_enviada ?? 1
       }))
-    );
+    });
+    setItemDraft(EMPTY_ITEM);
     setMode('form');
   }, []);
 
   const openDetail = useCallback((solicitud) => {
-    setSelected(solicitud || null);
+    setSelected(solicitud ?? null);
     setMode('detail');
   }, []);
 
-  const closeDetail = useCallback(() => {
-    setSelected(null);
-    setMode('list');
-  }, []);
-
-  const addItemDraft = useCallback(() => {
-    const skuObj = (catalogs.skus || []).find(
-      (sku) => sku.codigo_sku === itemDraft.sku
-    );
-    if (!skuObj) {
-      NotificationManager.warning('Selecciona un SKU válido', 'Aviso', 3000);
+  const addItem = useCallback(() => {
+    if (!itemDraft.sku) {
+      window.alert('Selecciona o ingresa un SKU válido.');
       return;
     }
-    const cantidad = parseInt(itemDraft.cantidad, 10);
-    if (!Number.isFinite(cantidad) || cantidad <= 0) {
-      NotificationManager.warning(
-        'La cantidad debe ser mayor a cero',
-        'Aviso',
-        3000
-      );
+    if (!itemDraft.cantidad || Number(itemDraft.cantidad) <= 0) {
+      window.alert('La cantidad debe ser mayor a cero.');
       return;
     }
-    setItemsDraft((prev) => [
+    setForm((prev) => ({
       ...prev,
-      {
-        id: null,
-        sku: skuObj.codigo_sku,
-        descripcion: skuObj.nombre,
-        cantidad,
-        categoria: skuObj.categoria,
-        subcategoria: skuObj.subcategoria,
-        comentario_enfermeria: ''
+      items: [
+        ...prev.items,
+        {
+          ...itemDraft,
+          cantidad: Number(itemDraft.cantidad)
+        }
+      ]
+    }));
+    setItemDraft(EMPTY_ITEM);
+  }, [itemDraft]);
+
+  const removeItem = useCallback((index) => {
+    setForm((prev) => ({
+      ...prev,
+      items: prev.items.filter((_, i) => i !== index)
+    }));
+  }, []);
+
+  const persistSolicitud = useCallback(async () => {
+    if (!form.bodega_origen?.trim() || !form.bodega_destino?.trim()) {
+      window.alert('Selecciona las bodegas de origen y destino.');
+      return;
+    }
+    if (!form.items.length) {
+      window.alert('Agrega al menos un SKU a la solicitud.');
+      return;
+    }
+
+    const payload = {
+      bodega_origen: form.bodega_origen,
+      bodega_destino: form.bodega_destino,
+      comentarios: form.comentarios,
+      items: form.items.map((item) => ({
+        id: item.id ?? undefined,
+        categoria: item.categoria ?? '',
+        subcategoria: item.subcategoria ?? '',
+        sku: item.sku,
+        descripcion: item.descripcion ?? '',
+        cantidad_pedida: Number(item.cantidad ?? 0)
+      }))
+    };
+
+    setSubmitting(true);
+    try {
+      if (form.id) {
+        await update?.(form.id, payload);
+      } else {
+        await create?.(payload);
       }
-    ]);
-    setItemDraft(initialItemDraft);
-  }, [catalogs.skus, itemDraft]);
+      await refresh();
+      setMode('list');
+      resetDrafts();
+    } finally {
+      setSubmitting(false);
+    }
+  }, [form, create, update, refresh, resetDrafts]);
 
-  const removeDraftItem = useCallback((index) => {
-    setItemsDraft((prev) => prev.filter((_, idx) => idx !== index));
+  const setStatus = useCallback(
+    async (id, status) => {
+      if (!id || !status) {
+        return;
+      }
+      try {
+        switch (status) {
+          case 'ENVIADA':
+            await enviar?.(id);
+            break;
+          case 'PENDIENTE_RECIBIR':
+            await marcarPendienteRecibir?.(id);
+            break;
+          case 'CARGADA_EC':
+            await cargarEstadoCuenta?.(id);
+            break;
+          default:
+            return;
+        }
+        await refresh();
+      } catch (err) {
+        console.error('No se pudo actualizar el estado de la solicitud', err);
+        const message =
+          err?.response?.data?.error ||
+          err?.response?.data?.detail ||
+          err?.message ||
+          'No se pudo actualizar el estado. Revisa los datos e inténtalo nuevamente.';
+        window.alert(
+          typeof message === 'string' ? message : 'No se pudo actualizar el estado.'
+        );
+      }
+    },
+    [enviar, marcarPendienteRecibir, cargarEstadoCuenta, refresh]
+  );
+
+  const closeActionModal = useCallback(() => {
+    setPendingAction(null);
   }, []);
 
-  const updateDraftItem = useCallback((index, key, value) => {
-    setItemsDraft((prev) =>
-      prev.map((item, idx) =>
-        idx === index
-          ? {
-              ...item,
-              [key]: value
-            }
-          : item
-      )
-    );
+  const openReceiveModal = useCallback((solicitud) => {
+    if (!solicitud || !Array.isArray(solicitud.items)) {
+      window.alert('No hay información de ítems para recibir.');
+      return;
+    }
+    const items = solicitud.items
+      .filter((item) => item.id)
+      .map((item) => {
+        const defaultQty =
+          item.cantidad_recibida ||
+          item.cantidad_enviada ||
+          item.cantidad_pedida ||
+          item.cantidad ||
+          0;
+        return {
+          id: item.id,
+          sku: item.sku,
+          descripcion: item.descripcion,
+          cantidad_enviada: item.cantidad_enviada || item.cantidad_pedida || 0,
+          cantidad_recibida: defaultQty,
+          recibido: item.recibido !== false
+        };
+      });
+
+    if (!items.length) {
+      window.alert('No hay ítems disponibles para marcar como recibidos.');
+      return;
+    }
+
+    setPendingAction({
+      type: 'receive',
+      solicitudId: solicitud.id,
+      solicitud,
+      items
+    });
   }, []);
 
-  const mapItemsPayload = useCallback(
-    () =>
-      itemsDraft.map((item) => ({
+  const openAnularModal = useCallback((solicitud) => {
+    if (!solicitud) {
+      return;
+    }
+    if (solicitud.estatus === 'CARGADA_EC') {
+      window.alert('No es posible anular una solicitud ya cargada al estado de cuenta.');
+      return;
+    }
+    setPendingAction({
+      type: 'anular',
+      solicitudId: solicitud.id,
+      solicitud
+    });
+  }, []);
+
+  const openDevolverModal = useCallback((solicitud, item) => {
+    if (!solicitud || !item) {
+      return;
+    }
+    if (!item.id) {
+      window.alert('No se puede devolver un ítem sin identificador.');
+      return;
+    }
+    const recibido = item.cantidad_recibida || item.cantidad_enviada || item.cantidad || 0;
+    const devuelto = item.cantidad_devuelta || 0;
+    const restante = Math.max(0, recibido - devuelto);
+    if (restante <= 0) {
+      window.alert('No hay unidades disponibles para devolver.');
+      return;
+    }
+
+    setPendingAction({
+      type: 'devolver',
+      solicitudId: solicitud.id,
+      solicitud,
+      item: {
         id: item.id,
         sku: item.sku,
         descripcion: item.descripcion,
-        categoria: item.categoria,
-        subcategoria: item.subcategoria,
-        cantidad_pedida: item.cantidad,
-        comentario_enfermeria: item.comentario_enfermeria
-      })),
-    [itemsDraft]
-  );
-
-  const saveSolicitud = useCallback(async () => {
-    if (!formState.bodega_origen || !formState.bodega_destino) {
-      NotificationManager.warning(
-        'Selecciona bodegas de origen y destino',
-        'Aviso',
-        3000
-      );
-      return;
-    }
-    if (itemsDraft.length === 0) {
-      NotificationManager.warning(
-        'Agrega al menos un SKU a la solicitud',
-        'Aviso',
-        3000
-      );
-      return;
-    }
-    try {
-      setLoadingAction(true);
-      const payload = {
-        bodega_origen: formState.bodega_origen,
-        bodega_destino: formState.bodega_destino,
-        comentarios: formState.comentarios,
-        items: mapItemsPayload()
-      };
-      if (formState.id) {
-        await value.update(formState.id, payload);
-        NotificationManager.success('Solicitud actualizada', 'Éxito', 3000);
-      } else {
-        await value.create(payload);
-        NotificationManager.success('Solicitud creada', 'Éxito', 3000);
+        restante,
+        devuelto,
+        recibido
       }
-      await value.refresh?.();
-      resetDraft();
-      setMode('list');
-    } catch (error) {
-      const message =
-        error?.response?.data?.error ||
-        error?.response?.data ||
-        'No se pudo guardar la solicitud';
-      NotificationManager.error(
-        typeof message === 'string' ? message : JSON.stringify(message),
-        'Error',
-        5000
-      );
-    } finally {
-      setLoadingAction(false);
-    }
-  }, [
-    formState.bodega_destino,
-    formState.bodega_origen,
-    formState.comentarios,
-    formState.id,
-    itemsDraft,
-    mapItemsPayload,
-    resetDraft,
-    value
-  ]);
+    });
+  }, []);
 
-  const enviarSolicitud = useCallback(
-    async (solicitud) => {
+  const confirmReceive = useCallback(
+    async (itemsPayload) => {
+      if (!pendingAction || pendingAction.type !== 'receive') {
+        return;
+      }
       try {
-        setLoadingAction(true);
-        await value.enviar(solicitud.id);
-        NotificationManager.success('Solicitud enviada', 'Éxito', 3000);
-        await value.refresh?.();
-      } catch (error) {
-        const message =
-          error?.response?.data?.error ||
-          error?.response?.data ||
-          'No se pudo enviar la solicitud';
-        NotificationManager.error(
-          typeof message === 'string' ? message : JSON.stringify(message),
-          'Error',
-          5000
-        );
-      } finally {
-        setLoadingAction(false);
+        await recibir?.(pendingAction.solicitudId, {
+          items: itemsPayload.map((item) => ({
+            id: item.id,
+            cantidad_recibida: Number(item.cantidad_recibida ?? 0),
+            recibido: item.recibido !== false
+          }))
+        });
+        await refresh();
+        setPendingAction(null);
+      } catch (err) {
+        throw err;
       }
     },
-    [value]
+    [pendingAction, recibir, refresh]
   );
 
-  const marcarPendienteRecibir = useCallback(
-    async (solicitud) => {
+  const confirmAnular = useCallback(
+    async (payload) => {
+      if (!pendingAction || pendingAction.type !== 'anular') {
+        return;
+      }
       try {
-        setLoadingAction(true);
-        await value.marcarPendienteRecibir(solicitud.id);
-        NotificationManager.success(
-          'Solicitud actualizada a Pendiente de Recibir',
-          'Éxito',
-          3000
-        );
-        await value.refresh?.();
-      } catch (error) {
-        const message =
-          error?.response?.data?.error ||
-          error?.response?.data ||
-          'No se pudo actualizar la solicitud';
-        NotificationManager.error(
-          typeof message === 'string' ? message : JSON.stringify(message),
-          'Error',
-          5000
-        );
-      } finally {
-        setLoadingAction(false);
+        await anular?.(pendingAction.solicitudId, payload);
+        await refresh();
+        setPendingAction(null);
+      } catch (err) {
+        throw err;
       }
     },
-    [value]
+    [pendingAction, anular, refresh]
   );
 
-  const recibirSolicitud = useCallback(
-    async (solicitud, itemsPayload) => {
+  const confirmDevolver = useCallback(
+    async (payload) => {
+      if (!pendingAction || pendingAction.type !== 'devolver') {
+        return;
+      }
       try {
-        setLoadingAction(true);
-        await value.recibir(solicitud.id, { items: itemsPayload });
-        NotificationManager.success(
-          'Solicitud recibida correctamente',
-          'Éxito',
-          3000
+        await devolverItem?.(
+          pendingAction.solicitudId,
+          pendingAction.item.id,
+          payload
         );
-        await value.refresh?.();
-        setSelected(null);
-        setMode('list');
-      } catch (error) {
-        const message =
-          error?.response?.data?.error ||
-          error?.response?.data ||
-          'No se pudo marcar como recibida';
-        NotificationManager.error(
-          typeof message === 'string' ? message : JSON.stringify(message),
-          'Error',
-          5000
-        );
-      } finally {
-        setLoadingAction(false);
+        await refresh();
+        setPendingAction(null);
+      } catch (err) {
+        throw err;
       }
     },
-    [value]
+    [pendingAction, devolverItem, refresh]
   );
 
-  const cargarEstadoCuenta = useCallback(
-    async (solicitud) => {
-      try {
-        setLoadingAction(true);
-        await value.cargarEstadoCuenta(solicitud.id);
-        NotificationManager.success(
-          'Solicitud cargada al estado de cuenta',
-          'Éxito',
-          3000
-        );
-        await value.refresh?.();
-        setSelected(null);
-        setMode('list');
-      } catch (error) {
-        const message =
-          error?.response?.data?.error ||
-          error?.response?.data ||
-          'No se pudo cargar al estado de cuenta';
-        NotificationManager.error(
-          typeof message === 'string' ? message : JSON.stringify(message),
-          'Error',
-          5000
-        );
-      } finally {
-        setLoadingAction(false);
+  const catalogs = useMemo(() => {
+    const bodegas = catalogData.bodegas
+      .map((item) => item.name)
+      .filter(Boolean)
+      .sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }));
+
+    const normalizeText = (value) =>
+      typeof value === 'string' ? value.trim().toLowerCase() : '';
+
+    const categorias = catalogData.categorias
+      .map((item) => item.name)
+      .filter(Boolean)
+      .sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }));
+
+    const selectedCategoria = catalogData.categorias.find((cat) => {
+      if (!cat?.name || !itemDraft?.categoria) {
+        return false;
       }
-    },
-    [value]
-  );
+      return normalizeText(cat.name) === normalizeText(itemDraft.categoria);
+    });
+    const subcategoriasSource = selectedCategoria
+      ? catalogData.subcategorias.filter(
+          (sub) => sub.categoriaId === selectedCategoria.id
+        )
+      : [];
 
-  const anularSolicitud = useCallback(
-    async (solicitud, payload = {}) => {
-      try {
-        setLoadingAction(true);
-        await value.anular(solicitud.id, payload);
-        NotificationManager.success('Solicitud anulada', 'Éxito', 3000);
-        await value.refresh?.();
-        setSelected(null);
-        setMode('list');
-      } catch (error) {
-        const message =
-          error?.response?.data?.error ||
-          error?.response?.data ||
-          'No se pudo anular la solicitud';
-        NotificationManager.error(
-          typeof message === 'string' ? message : JSON.stringify(message),
-          'Error',
-          5000
-        );
-      } finally {
-        setLoadingAction(false);
-      }
-    },
-    [value]
-  );
+    const subcategorias = subcategoriasSource
+      .map((item) => item.name)
+      .filter(Boolean)
+      .sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }));
 
-  const devolverItem = useCallback(
-    async (solicitudId, itemId, payload) => {
-      try {
-        setLoadingAction(true);
-        await value.devolverItem(solicitudId, itemId, payload);
-        NotificationManager.success('Ítem enviado a devolución', 'Éxito', 3000);
-        await value.refresh?.();
-      } catch (error) {
-        const message =
-          error?.response?.data?.error ||
-          error?.response?.data ||
-          'No se pudo registrar la devolución';
-        NotificationManager.error(
-          typeof message === 'string' ? message : JSON.stringify(message),
-          'Error',
-          5000
-        );
-      } finally {
-        setLoadingAction(false);
-      }
-    },
-    [value]
-  );
+    const skus = catalogData.skus.map((item) => ({
+      code: item.code,
+      label: item.code && item.name ? `${item.code} — ${item.name}` : item.code || item.name,
+      name: item.name
+    }));
 
-  const contextValue = useMemo(
+    const departamentos = catalogData.departamentos
+      .map((item) => item.name)
+      .filter(Boolean)
+      .sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }));
+
+    return {
+      bodegas,
+      categorias,
+      subcategorias,
+      skus,
+      departamentos,
+      usuarios: catalogData.usuarios
+    };
+  }, [catalogData, itemDraft.categoria]);
+
+  const valueMemo = useMemo(
     () => ({
       mode,
       setMode,
-      solicitudes,
-      ordenesActivas,
-      selected,
-      setSelected,
-      formState,
-      setFormState,
-      itemDraft,
-      setItemDraft,
-      itemsDraft,
-      setItemsDraft,
+      loading,
+      submitting,
+      catalogLoading,
+      catalogError,
       catalogs,
-      subcategoriasFiltradas,
-      loadSubcategorias,
-      loadSkus,
-      addItemDraft,
-      removeDraftItem,
-      updateDraftItem,
-      openCreate,
+      solicitudes,
+      openNew,
       openEdit,
       openDetail,
-      closeDetail,
-      resetDraft,
-      saveSolicitud,
-      enviarSolicitud,
-      marcarPendienteRecibir,
-      recibirSolicitud,
-      cargarEstadoCuenta,
-      anularSolicitud,
-      devolverItem,
-      loadingAction
+      selected,
+      setSelected,
+      form,
+      setForm,
+      item: itemDraft,
+      setItem: setItemDraft,
+      addItem,
+      removeItem,
+      saveSolicitud: persistSolicitud,
+      setStatus,
+      pendingAction,
+      closeActionModal,
+      openReceiveModal,
+      openAnularModal,
+      openDevolverModal,
+      confirmReceive,
+      confirmAnular,
+      confirmDevolver
     }),
     [
       mode,
-      solicitudes,
-      ordenesActivas,
-      selected,
-      formState,
-      itemDraft,
-      itemsDraft,
+      loading,
+      submitting,
+      catalogLoading,
+      catalogError,
       catalogs,
-      subcategoriasFiltradas,
-      loadSubcategorias,
-      loadSkus,
-      addItemDraft,
-      removeDraftItem,
-      updateDraftItem,
-      openCreate,
+      solicitudes,
+      openNew,
       openEdit,
       openDetail,
-      closeDetail,
-      resetDraft,
-      saveSolicitud,
-      enviarSolicitud,
-      marcarPendienteRecibir,
-      recibirSolicitud,
-      cargarEstadoCuenta,
-      anularSolicitud,
-      devolverItem,
-      loadingAction
+      selected,
+      form,
+      itemDraft,
+      addItem,
+      removeItem,
+      persistSolicitud,
+      setStatus,
+      pendingAction,
+      closeActionModal,
+      openReceiveModal,
+      openAnularModal,
+      openDevolverModal,
+      confirmReceive,
+      confirmAnular,
+      confirmDevolver
     ]
   );
 
   return (
-    <SolicitudMedicamentosContext.Provider value={contextValue}>
+    <SolicitudContext.Provider value={valueMemo}>
       {children}
-    </SolicitudMedicamentosContext.Provider>
+    </SolicitudContext.Provider>
   );
 };
