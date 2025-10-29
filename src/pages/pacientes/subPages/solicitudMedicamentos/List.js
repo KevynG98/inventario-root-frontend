@@ -35,10 +35,10 @@ const SolicitudMedicamentosList = () => {
     loadingAction
   } = useSolicitudMedicamentosContext();
 
-  const sortedSolicitudes = useMemo(
-    () => [...solicitudes].sort((a, b) => (b.id ?? 0) - (a.id ?? 0)),
-    [solicitudes]
-  );
+  const sortedSolicitudes = useMemo(() => {
+    const list = Array.isArray(solicitudes) ? solicitudes : [];
+    return [...list].sort((a, b) => (b.id ?? 0) - (a.id ?? 0));
+  }, [solicitudes]);
 
   return (
     <Card className="p-3">
