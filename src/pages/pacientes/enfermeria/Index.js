@@ -226,7 +226,13 @@ const NursingPage = () => {
     handlePatientFormSubmit,
     openAdmissionsModal
   } = useMyContext();
-  const [showIframeModal, setShowIframeModal] = useState(false);
+  const [showIframeModal, setShowIframeModal] = useState(Boolean(iframeSrc));
+
+  useEffect(() => {
+    if (iframeSrc) {
+      setShowIframeModal(true);
+    }
+  }, [iframeSrc]);
 
   const activeMenuItem = useMemo(
     () => findMenuByKey(menuItems, activeMenuKey),
@@ -238,33 +244,20 @@ const NursingPage = () => {
   return (
     <>
       <AdmissionsModal />
+      <div className="mb-3">
+        <HorizontalMenu
+          items={menuItems}
+          activeKey={activeMenuKey}
+          onSelect={handleMenuSelect}
+        />
+      </div>
       <NursingPatientForm
         patient={patient}
         onSave={handlePatientFormSubmit}
         onSelectAdmission={openAdmissionsModal}
       />
-      <HorizontalMenu
-        items={menuItems}
-        activeKey={activeMenuKey}
-        onSelect={handleMenuSelect}
-      />
-      <div className="d-flex justify-content-end mb-2">
-        <Button
-          variant="outline-primary"
-          size="sm"
-          disabled={!iframeSrc}
-          onClick={() => setShowIframeModal(true)}
-        >
-          Ver en pantalla completa
-        </Button>
-      </div>
-      <iframe
-        src={iframeSrc || 'about:blank'}
-        title="Enfermeria"
-        style={{ width: '100%', height: '400px', border: 'none' }}
-      />
       <Modal
-        show={showIframeModal}
+        show={Boolean(showIframeModal && iframeSrc)}
         onHide={() => setShowIframeModal(false)}
         centered
         size="xl"
