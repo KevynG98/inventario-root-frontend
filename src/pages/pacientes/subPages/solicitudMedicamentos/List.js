@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Badge, Button, Card, Table } from 'react-bootstrap';
+import { Alert, Badge, Button, Card, Table } from 'react-bootstrap';
 import { useSolicitudMedicamentosContext } from './Context';
 
 const statusMap = {
@@ -35,10 +35,10 @@ const SolicitudMedicamentosList = () => {
     loadingAction
   } = useSolicitudMedicamentosContext();
 
-  const sortedSolicitudes = useMemo(
-    () => [...solicitudes].sort((a, b) => (b.id ?? 0) - (a.id ?? 0)),
-    [solicitudes]
-  );
+  const sortedSolicitudes = useMemo(() => {
+    const list = Array.isArray(solicitudes) ? solicitudes : [];
+    return [...list].sort((a, b) => (b.id ?? 0) - (a.id ?? 0));
+  }, [solicitudes]);
 
   return (
     <Card className="p-3">
@@ -49,10 +49,16 @@ const SolicitudMedicamentosList = () => {
             Gestiona y da seguimiento a las solicitudes entre bodegas para este paciente.
           </div>
         </div>
-        <Button onClick={openCreate} disabled={loadingAction}>
+        <Button onClick={openCreate} disabled={loadingAction || mode === 'form'}>
           Nueva Solicitud
         </Button>
       </div>
+
+      {mode === 'form' && (
+        <Alert variant="secondary" className="mb-3">
+          Completa la solicitud y guarda o cancela para volver a la gestión normal del listado.
+        </Alert>
+      )}
 
       <div className="table-responsive">
         <Table bordered hover size="sm" className="align-middle">
