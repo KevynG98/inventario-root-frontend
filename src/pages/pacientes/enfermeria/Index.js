@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Alert, Button, Modal, Spinner, Table } from 'react-bootstrap';
 import { FiChevronDown, FiChevronRight } from 'react-icons/fi';
 import { ContextProvider, useMyContext } from './Context';
@@ -226,12 +226,19 @@ const NursingPage = () => {
     handlePatientFormSubmit,
     openAdmissionsModal
   } = useMyContext();
-  const [showIframeModal, setShowIframeModal] = useState(Boolean(iframeSrc));
+  const [showIframeModal, setShowIframeModal] = useState(false);
+  const initialIframeLoadRef = React.useRef(true);
 
   useEffect(() => {
-    if (iframeSrc) {
-      setShowIframeModal(true);
+    if (!iframeSrc) {
+      setShowIframeModal(false);
+      return;
     }
+    if (initialIframeLoadRef.current) {
+      initialIframeLoadRef.current = false;
+      return;
+    }
+    setShowIframeModal(true);
   }, [iframeSrc]);
 
   const activeMenuItem = useMemo(
