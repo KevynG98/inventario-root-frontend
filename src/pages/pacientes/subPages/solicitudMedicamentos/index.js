@@ -6,8 +6,8 @@ import SolicitudMedicamentosForm from './Form';
 const SolicitudMedicamentos = ({ value }) => (
   <SolicitudMedicamentosProvider value={value}>
     <div className="d-flex flex-column gap-4">
-      <SolicitudMedicamentosList />
       <SolicitudMedicamentosForm />
+      <SolicitudMedicamentosList />
     </div>
   </SolicitudMedicamentosProvider>
 );
