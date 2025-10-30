@@ -47,6 +47,8 @@ const PacientesMedicosResidentes = React.lazy(() => import('./pages/pacientes/me
 const PacientesMedicosTratantes = React.lazy(() => import('./pages/pacientes/medicosTratantes/Index'));
 const PacientesDevoluciones = React.lazy(() => import('./pages/pacientes/devoluciones/Index'));
 const PacientesCalendario = React.lazy(() => import('./pages/pacientes/calendario/Index'));
+const PacientesDietas = React.lazy(() => import('./pages/pacientes/dietas/Index'));
+const PacientesSolicitudes = React.lazy(() => import('./pages/pacientes/solicitudes/Index'));
 const DataPacientes = React.lazy(() => import('./pages/pacientes/subPages/infoPaciente/index'));
 
 /* Mantenimiento */
@@ -356,6 +358,18 @@ const routes = [
     exact: true,
     name: 'Calentario de Operaciones',
     component: withGuard(PacientesCalendario, R.ADMIN),
+  },
+  {
+    path: '/dashboard/pacientes/dietas',
+    exact: true,
+    name: 'Dietas',
+    component: withGuard(PacientesDietas, R.ADMIN),
+  },
+  {
+    path: '/dashboard/pacientes/solicitudes',
+    exact: true,
+    name: 'Solicitudes',
+    component: withGuard(PacientesSolicitudes, R.ADMIN),
   },
   {
     path: '/dashboard/pacientes/info-paciente',

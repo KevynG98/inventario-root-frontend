@@ -48,7 +48,10 @@ class App extends Component {
                     </Route>
 
                     {/* Solo rutas dashboard */}
-                    <Route path="/dashboard" component={AdminLayout} />
+                    <Route
+                        path="/dashboard"
+                        render={(props) => <AdminLayout {...props} />}
+                    />
 
                     {/* Opcional: si quieres manejar otras rutas */}
                     <Route path="*" render={() => <Redirect to="/auth/signin-1" />} />

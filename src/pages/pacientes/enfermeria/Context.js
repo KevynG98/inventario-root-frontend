@@ -433,9 +433,13 @@ export const ContextProvider = ({ children }) => {
   return <NursingContext.Provider value={value}>{children}</NursingContext.Provider>;
 };
 
-export const useMyContext = () => {
+export const useMyContext = (options = {}) => {
+  const { optional = false } = options;
   const context = useContext(NursingContext);
   if (!context) {
+    if (optional) {
+      return null;
+    }
     throw new Error('useMyContext must be used within a ContextProvider');
   }
   return context;
