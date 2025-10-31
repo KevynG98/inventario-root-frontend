@@ -10,26 +10,20 @@ const numberFormatter = new Intl.NumberFormat('es-GT', {
 const formatNumber = (value) => numberFormatter.format(value ?? 0);
 
 const formatDateTime = (iso) => {
-  if (!iso) {
-    return 'Pendiente de guardar';
-  }
+  if (!iso) return 'Pendiente de guardar';
   try {
     return new Intl.DateTimeFormat('es-GT', {
       dateStyle: 'medium',
       timeStyle: 'short'
     }).format(new Date(iso));
-  } catch (error) {
+  } catch {
     return 'Pendiente de guardar';
   }
 };
 
 const balanceClass = (value) => {
-  if (value > 0) {
-    return 'text-success';
-  }
-  if (value < 0) {
-    return 'text-danger';
-  }
+  if (value > 0) return 'text-success';
+  if (value < 0) return 'text-danger';
   return 'text-muted';
 };
 
@@ -38,6 +32,25 @@ const TOP_HEADER_STYLE = {
   color: '#a30000',
   fontWeight: 600,
   textTransform: 'uppercase'
+};
+
+const INPUT_STYLE = {
+  height: '45px',
+  width: '110px',
+  fontSize: '16px',
+  textAlign: 'center',
+  margin: '2px auto',
+  display: 'block'
+};
+
+const HEADER_INPUT_STYLE = {
+  height: '42px',
+  width: '120px',
+  fontSize: '15px',
+  textAlign: 'center',
+  fontWeight: 500,
+  margin: '0 auto',
+  display: 'block'
 };
 
 const IngestaExcretaForm = () => {
@@ -58,12 +71,8 @@ const IngestaExcretaForm = () => {
   );
 
   const shiftSummaryMap = useMemo(() => {
-    if (!summaries) {
-      return new Map();
-    }
-    return new Map(
-      summaries.shiftSummaries.map((item) => [item.shiftId, item])
-    );
+    if (!summaries) return new Map();
+    return new Map(summaries.shiftSummaries.map((item) => [item.shiftId, item]));
   }, [summaries]);
 
   const handleHeaderChange = (columnId) => (event) => {
@@ -78,17 +87,13 @@ const IngestaExcretaForm = () => {
     try {
       const result = await saveTable(activeDate);
       if (!result?.success) {
-        window.alert(
-          'Ocurrió un problema al guardar el registro de ingesta y excreta.'
-        );
+        window.alert('Ocurrió un problema al guardar el registro de ingesta y excreta.');
         return;
       }
       window.alert('Registros guardados correctamente.');
     } catch (error) {
       console.error('Error al guardar la tabla de ingesta/excreta', error);
-      window.alert(
-        'No se pudo guardar el registro. Revisa la información e intenta nuevamente.'
-      );
+      window.alert('No se pudo guardar el registro. Revisa la información e intenta nuevamente.');
     }
   };
 
@@ -98,8 +103,7 @@ const IngestaExcretaForm = () => {
         <Card.Body>
           <Card.Title as="h5">Registro diario</Card.Title>
           <Card.Text className="text-muted">
-            Selecciona o crea una fecha para comenzar a registrar la ingesta y
-            excreta del paciente.
+            Selecciona o crea una fecha para comenzar a registrar la ingesta y excreta del paciente.
           </Card.Text>
         </Card.Body>
       </Card>
@@ -107,14 +111,10 @@ const IngestaExcretaForm = () => {
   }
 
   const renderShiftSummaryRow = (summary) => {
-    if (!summary) {
-      return null;
-    }
+    if (!summary) return null;
     return (
       <tr className="table-secondary fw-semibold" key={`${summary.shiftId}-summary`}>
-        <th scope="row" className="text-start">
-          {summary.label}
-        </th>
+        <th scope="row" className="text-start">{summary.label}</th>
         {ingestionColumns.map((column) => (
           <td key={`${summary.shiftId}-ingesta-${column.id}`} className="text-end">
             {formatNumber(summary.columnTotals?.[column.id] ?? 0)}
@@ -140,17 +140,13 @@ const IngestaExcretaForm = () => {
     summaries.rows.forEach((row, index) => {
       if (currentShift && row.shiftId !== currentShift) {
         const summaryRow = shiftSummaryMap.get(currentShift);
-        if (summaryRow) {
-          dataRows.push(renderShiftSummaryRow(summaryRow));
-        }
+        if (summaryRow) dataRows.push(renderShiftSummaryRow(summaryRow));
         currentShift = row.shiftId;
       }
 
       dataRows.push(
         <tr key={row.slotId}>
-          <th scope="row" className="align-middle text-center">
-            {row.label}
-          </th>
+          <th scope="row" className="align-middle text-center">{row.label}</th>
           {ingestionColumns.map((column) => (
             <td key={`${row.slotId}-ingesta-${column.id}`}>
               <Form.Control
@@ -158,9 +154,9 @@ const IngestaExcretaForm = () => {
                 inputMode="decimal"
                 min="0"
                 step="0.1"
-                size="sm"
                 value={row.values[column.id] ?? ''}
                 onChange={handleCellChange(row.slotId, column.id)}
+                style={INPUT_STYLE}
               />
             </td>
           ))}
@@ -174,20 +170,16 @@ const IngestaExcretaForm = () => {
                 inputMode="decimal"
                 min="0"
                 step="0.1"
-                size="sm"
                 value={row.values[column.id] ?? ''}
                 onChange={handleCellChange(row.slotId, column.id)}
+                style={INPUT_STYLE}
               />
             </td>
           ))}
           <td className="text-end fw-semibold align-middle">
             {formatNumber(row.totals.excreta)}
           </td>
-          <td
-            className={`text-end fw-semibold align-middle ${balanceClass(
-              row.totals.balance
-            )}`}
-          >
+          <td className={`text-end fw-semibold align-middle ${balanceClass(row.totals.balance)}`}>
             {formatNumber(row.totals.balance)}
           </td>
         </tr>
@@ -196,9 +188,7 @@ const IngestaExcretaForm = () => {
       const isLastRow = index === summaries.rows.length - 1;
       if (isLastRow && currentShift) {
         const summaryRow = shiftSummaryMap.get(currentShift);
-        if (summaryRow) {
-          dataRows.push(renderShiftSummaryRow(summaryRow));
-        }
+        if (summaryRow) dataRows.push(renderShiftSummaryRow(summaryRow));
       }
     });
   }
@@ -206,9 +196,7 @@ const IngestaExcretaForm = () => {
   if (summaries?.totals24h) {
     dataRows.push(
       <tr className="table-warning fw-semibold" key="totals-24h">
-        <th scope="row" className="text-start">
-          Total 24 horas
-        </th>
+        <th scope="row" className="text-start">Total 24 horas</th>
         {ingestionColumns.map((column) => (
           <td key={`totals-ingesta-${column.id}`} className="text-end">
             {formatNumber(summaries.totals24h.columnTotals?.[column.id] ?? 0)}
@@ -221,11 +209,7 @@ const IngestaExcretaForm = () => {
           </td>
         ))}
         <td className="text-end">{formatNumber(summaries.totals24h.totalExcreta)}</td>
-        <td
-          className={`text-end ${balanceClass(
-            summaries.totals24h.balance
-          )}`}
-        >
+        <td className={`text-end ${balanceClass(summaries.totals24h.balance)}`}>
           {formatNumber(summaries.totals24h.balance)}
         </td>
       </tr>
@@ -240,8 +224,7 @@ const IngestaExcretaForm = () => {
             Registro del {helpers.formatDateFriendly(activeDate)}
           </Card.Title>
           <Card.Text className="text-muted mb-0">
-            Completa los valores horarios para calcular los totales por turno y
-            las 24 horas.
+            Completa los valores horarios para calcular los totales por turno y las 24 horas.
           </Card.Text>
           <Card.Text className="text-muted small mb-0">
             Último guardado: {formatDateTime(activeTable.lastSavedAt)}
@@ -249,17 +232,24 @@ const IngestaExcretaForm = () => {
         </div>
         <div className="d-flex flex-wrap gap-2 align-items-center">
           {activeTable.dirty ? (
-            <Badge bg="warning" text="dark">
-              Cambios pendientes
-            </Badge>
+            <Badge bg="warning" text="dark">Cambios pendientes</Badge>
           ) : (
             <Badge bg="success">Último guardado</Badge>
           )}
           <Button onClick={handleSave}>Guardar registros</Button>
         </div>
       </Card.Header>
+
       <Card.Body className="p-0">
-        <div className="table-responsive">
+        {/* 🔹 contenedor con scroll horizontal SIEMPRE visible */}
+        <div
+          style={{
+            overflowX: 'scroll',
+            scrollbarGutter: 'stable', // mantiene el espacio del scroll
+            whiteSpace: 'nowrap',
+            paddingBottom: '8px'
+          }}
+        >
           <Table bordered size="sm" className="mb-0 align-middle">
             <thead>
               <tr>
@@ -311,10 +301,10 @@ const IngestaExcretaForm = () => {
                   <th key={`header-ingesta-${column.id}`}>
                     <Form.Control
                       type="text"
-                      size="sm"
                       placeholder={column.defaultLabel}
                       value={activeTable.titleOverrides?.[column.id] ?? ''}
                       onChange={handleHeaderChange(column.id)}
+                      style={HEADER_INPUT_STYLE}
                     />
                   </th>
                 ))}
@@ -322,10 +312,10 @@ const IngestaExcretaForm = () => {
                   <th key={`header-excreta-${column.id}`}>
                     <Form.Control
                       type="text"
-                      size="sm"
                       placeholder={column.defaultLabel}
                       value={activeTable.titleOverrides?.[column.id] ?? ''}
                       onChange={handleHeaderChange(column.id)}
+                      style={HEADER_INPUT_STYLE}
                     />
                   </th>
                 ))}
