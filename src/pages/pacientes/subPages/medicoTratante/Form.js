@@ -122,7 +122,7 @@ const MedicoTratanteForm = () => {
                 <Form.Label>Correo electrónico</Form.Label>
                 <Form.Control
                   type="email"
-                  placeholder="correo@hospital.com"
+                  placeholder="correo@inventario.com"
                   value={formState.correo}
                   onChange={handleChange('correo')}
                 />
