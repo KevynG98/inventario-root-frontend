@@ -17,10 +17,10 @@ class NavBar extends Component {
                 <header className={headerClass.join(' ')}>
                     <div className="m-header">
                         <div className="b-brand d-flex align-items-center">
-                            <div className="b-bg d-flex align-items-center justify-content-center" style={{ background: '#fff' }}>
+                            <div className="b-bg d-flex align-items-center justify-content-center" style={{ background: '#0f1219' }}>
                                 <img src={`${process.env.PUBLIC_URL}/inventario_logo.png`} alt="Inventario General logo" style={{ width: '30px', height: '30px', objectFit: 'cover', borderRadius: '6px' }} />
                             </div>
-                            <span className="b-title" style={{ marginLeft: '8px' }}>Inventario General</span>
+                            <span className="b-title" style={{ marginLeft: '8px', color: '#34d399', fontWeight: 700 }}>Inventario General</span>
                         </div>
                     </div>
                     <div className="mobile-menu" id="mobile-header"><i className="feather icon-more-horizontal"/></div>

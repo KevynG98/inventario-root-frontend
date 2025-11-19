@@ -188,8 +188,8 @@ class NavContent extends Component {
       const containerStyle = {
         padding: 0,
         margin: 0,
-        backgroundColor: isActive ? '#384865' : 'transparent',
-        borderLeft: isActive ? '3px solid #00BFFF' : '3px solid transparent',
+        backgroundColor: isActive ? 'rgba(52, 211, 153, 0.1)' : 'transparent',
+        borderLeft: isActive ? '3px solid #34d399' : '3px solid transparent',
         transition: 'background-color 0.3s ease, border-left-color 0.3s ease',
         listStyle: 'none',
         boxSizing: 'border-box'
@@ -201,7 +201,7 @@ class NavContent extends Component {
         justifyContent: 'flex-start',
         padding: '8px 16px',
         minHeight: '40px',
-        color: isActive ? '#00BFFF' : '#fff',
+        color: isActive ? '#34d399' : '#e5e7eb',
         fontWeight: isActive ? 600 : 400,
         textDecoration: 'none',
         background: 'none',
@@ -314,8 +314,8 @@ class NavContent extends Component {
           listStyle: 'none',
           padding: 0,
           margin: 0,
-          backgroundColor: '#2e3b55',
-          color: '#fff'
+          backgroundColor: '#0f1219',
+          color: '#e5e7eb'
         }}
       >
         {navItems}
@@ -324,18 +324,18 @@ class NavContent extends Component {
 
     return (
       <Aux>
-        {horizontal ? (
-          <div className="navbar-content sidenav-horizontal" id="layout-sidenav">
-            <div id="sidenav-wrapper" className="sidenav-horizontal-wrapper">{navList}</div>
-          </div>
-        ) : (
-          <div className="navbar-content datta-scroll" style={{ height: '100vh', backgroundColor: '#2e3b55' }}>
-            <PerfectScrollbar>{navList}</PerfectScrollbar>
-          </div>
-        )}
-      </Aux>
-    );
-  }
+      {horizontal ? (
+        <div className="navbar-content sidenav-horizontal" id="layout-sidenav">
+          <div id="sidenav-wrapper" className="sidenav-horizontal-wrapper">{navList}</div>
+        </div>
+      ) : (
+        <div className="navbar-content datta-scroll" style={{ height: '100vh', backgroundColor: '#0f1219' }}>
+          <PerfectScrollbar>{navList}</PerfectScrollbar>
+        </div>
+      )}
+    </Aux>
+  );
+}
 }
 
 const mapStateToProps = state => ({

@@ -52,8 +52,8 @@ const SignUp1 = () => {
       <div
         className="d-flex flex-column flex-md-row vh-100"
         style={{
-          background: 'linear-gradient(135deg, #0f172a 0%, #1f2937 50%, #111827 100%)',
-          color: '#f9fafb'
+          background: 'radial-gradient(circle at 20% 20%, rgba(34, 211, 238, 0.06), transparent 28%), radial-gradient(circle at 80% 0%, rgba(124, 58, 237, 0.08), transparent 35%), linear-gradient(135deg, #0b1220 0%, #0f172a 45%, #0b3a4c 100%)',
+          color: '#f8fafc'
         }}
       >
         {/* Columna izquierda */}
@@ -70,20 +70,20 @@ const SignUp1 = () => {
           <p className="text-center mb-4" style={{ color: '#cbd5f5' }}>
             Ingresa tus credenciales para continuar
           </p>
-          <h6 className="mb-4 text-uppercase" style={{ color: '#64748b', letterSpacing: '0.2rem' }}>
+          <div className="d-inline-flex align-items-center px-3 py-2 rounded-pill mb-4" style={{ backgroundColor: 'rgba(125, 211, 252, 0.12)', border: '1px solid rgba(125, 211, 252, 0.3)', color: '#7dd3fc', letterSpacing: '0.08rem', fontSize: '0.75rem', textTransform: 'uppercase' }}>
             Ambiente DEV
-          </h6>
+          </div>
 
           <form
             onSubmit={handleSubmit(onSubmit)}
-            style={{ width: '100%', maxWidth: '380px', backgroundColor: 'rgba(15,23,42,0.55)', borderRadius: '24px', padding: '32px', boxShadow: '0 20px 45px rgba(7, 11, 19, 0.45)' }}
+            style={{ width: '100%', maxWidth: '380px', backgroundColor: 'rgba(12, 17, 32, 0.7)', borderRadius: '24px', padding: '32px', boxShadow: '0 20px 45px rgba(7, 11, 19, 0.45)', border: '1px solid rgba(148, 163, 184, 0.2)' }}
           >
             <div className="mb-3">
               <label className="form-label" style={{ color: '#e2e8f0' }}>Nombre de usuario</label>
               <input
                 type="text"
                 className="form-control shadow-sm"
-                style={{ backgroundColor: 'rgba(15, 23, 42, 0.35)', color: '#f9fafb', border: '1px solid rgba(148, 163, 184, 0.4)' }}
+                style={{ backgroundColor: 'rgba(255, 255, 255, 0.04)', color: '#f9fafb', border: '1px solid rgba(148, 163, 184, 0.35)' }}
                 placeholder="usuario"
                 {...register('username', { required: 'El nombre de usuario es requerido' })}
               />
@@ -95,7 +95,7 @@ const SignUp1 = () => {
               <input
                 type="password"
                 className="form-control shadow-sm"
-                style={{ backgroundColor: 'rgba(15, 23, 42, 0.35)', color: '#f9fafb', border: '1px solid rgba(148, 163, 184, 0.4)' }}
+                style={{ backgroundColor: 'rgba(255, 255, 255, 0.04)', color: '#f9fafb', border: '1px solid rgba(148, 163, 184, 0.35)' }}
                 placeholder="password"
                 {...register('password', { required: 'Contraseña requerida' })}
               />
@@ -112,7 +112,7 @@ const SignUp1 = () => {
               type="submit"
               className="btn w-100"
               style={{
-                background: 'linear-gradient(135deg, #38bdf8, #2563eb)',
+                background: 'linear-gradient(135deg, #22d3ee, #6366f1, #7c3aed)',
                 border: 'none',
                 color: '#fff',
                 padding: '12px',
@@ -130,7 +130,7 @@ const SignUp1 = () => {
         <div
           className="d-none d-md-flex flex-column justify-content-center align-items-center w-100"
           style={{
-            background: 'linear-gradient(135deg, rgba(79, 209, 197, 0.25) 0%, rgba(59, 130, 246, 0.45) 100%)',
+            background: 'linear-gradient(135deg, rgba(34, 211, 238, 0.25) 0%, rgba(124, 58, 237, 0.4) 100%)',
             backdropFilter: 'blur(6px)',
             padding: '48px'
           }}

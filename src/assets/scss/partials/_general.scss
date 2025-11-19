@@ -30,7 +30,8 @@ h4,
 h5,
 h6 {
     color: $theme-heading-color;
-    font-weight: 400;
+    font-weight: 600;
+    letter-spacing: -0.01em;
 }
 
 h1 {
@@ -198,9 +199,9 @@ p.text-muted {
 
         h5 {
             margin-bottom: 0;
-            color: #000;
+            color: $theme-heading-color;
             font-size: 17px;
-            font-weight: 400;
+            font-weight: 600;
             display: inline-block;
             margin-right: 10px;
             line-height: 1.1;

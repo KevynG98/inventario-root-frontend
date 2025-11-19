@@ -215,7 +215,7 @@ export const SolicitudProvider = ({ children, value = {} }) => {
         await Promise.all([
           getData('inventario/bodegas/?page_size=200'),
           getData('inventario/categorias/?page_size=200'),
-          getData('inventario/skus/?page_size=200'),
+          getData('inventario/productos/?page_size=200'),
           getData('mantenimiento/departamentos/?page_size=200')
         ]);
 

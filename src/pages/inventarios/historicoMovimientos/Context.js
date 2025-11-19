@@ -41,7 +41,7 @@ export const ContextProvider = ({ children }) => {
       const [b, c, sku] = await Promise.all([
         getData('inventario/bodegas/?page_size=200'),
         getData('inventario/categorias/?page_size=200'),
-        getData('inventario/skus/?page_size=200'),
+        getData('inventario/productos/?page_size=200'),
       ]);
       setBodegas(b?.data?.results ?? b?.data ?? []);
       setCategorias(c?.data?.results ?? c?.data ?? []);

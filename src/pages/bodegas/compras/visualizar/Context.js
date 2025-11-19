@@ -17,7 +17,7 @@ export const ContextProvider = ({ children }) => {
     try {
       const [resBodegas, resSkus, resProvs] = await Promise.all([
         getData('inventario/bodegas/?page_size=200'),
-        getData('inventario/skus/?page_size=200'),
+        getData('inventario/productos/?page_size=200'),
         getData('inventario/proveedores/?page_size=200'),
       ]);
       setBodegas(resBodegas?.data?.results ?? resBodegas?.data ?? []);

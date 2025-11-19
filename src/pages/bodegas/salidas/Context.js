@@ -52,7 +52,7 @@ export const ContextProvider = ({ children }) => {
       getData('mantenimiento/centros-costo/?page_size=200'),
       getData('mantenimiento/cuentas-contables/?page_size=200'),
       getData('inventario/categorias/?page_size=200'),
-      getData('inventario/skus/?page_size=200'),
+      getData('inventario/productos/?page_size=200'),
       getData('admisiones/admisiones-por-area/'),
     ]);
     setBodegas(b.data.results || []);

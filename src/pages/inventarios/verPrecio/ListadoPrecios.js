@@ -28,13 +28,13 @@ const ListadoPrecios = () => {
 
   return (
     <div className="mt-4">
-      <h5 className="mb-3">Listado de SKUs</h5>
+      <h5 className="mb-3">Listado de Productos</h5>
 
-      {/* 🔎 Filtro por nombre, código SKU o código de barras */}
+      {/* 🔎 Filtro por nombre, código del producto o código de barras */}
       <Form onSubmit={handleBuscar} className="mb-3">
         <InputGroup>
           <Form.Control
-            placeholder="Buscar por nombre, código SKU o código de barras..."
+            placeholder="Buscar por nombre, código del producto o código de barras..."
             value={term}
             onChange={(e) => setTerm(e.target.value)}
             onKeyDown={(e) => {
@@ -67,7 +67,7 @@ const ListadoPrecios = () => {
           <thead className="table-primary text-dark">
             <tr>
               <th>Nombre</th>
-              <th>Código SKU</th>
+              <th>Código del Producto</th>
               <th>Acciones</th>
             </tr>
           </thead>
@@ -91,7 +91,7 @@ const ListadoPrecios = () => {
             {(!lista || lista.length === 0) && (
               <tr>
                 <td colSpan={3} className="text-center py-4">
-                  {buscandoSkus ? 'Buscando…' : 'Sin SKUs para mostrar.'}
+                  {buscandoSkus ? 'Buscando…' : 'Sin productos para mostrar.'}
                 </td>
               </tr>
             )}

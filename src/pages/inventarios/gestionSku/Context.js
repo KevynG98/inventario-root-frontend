@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
+import React, { createContext, useState, useContext, useEffect } from 'react';
 import { getData, postData, putData, deleteData } from '../../../apiService';
 import { NotificationManager } from "react-notifications";
 import Swal from 'sweetalert2';
@@ -13,11 +13,6 @@ export const ContextProvider = ({ children }) => {
   const [role, setRole] = useState(null);
   const [categorias, setCategorias] = useState([]);
   const [marcas, setMarcas] = useState([]);
-  const [unidadMedida, setUnidadMedida] = useState([]);
-  const [bodega, setBodega] = useState([]);
-  const [skuActivo, setSkuActivo] = useState(null);
-  const [principiosActivos, setPrincipiosActivos] = useState([]);
-  const [showModalMovimiento, setShowModalMovimiento] = useState(false);
   // búsqueda global
   const [skusFiltrados, setSkusFiltrados] = useState(null);
   const [buscando, setBuscando] = useState(false);
@@ -25,12 +20,6 @@ export const ContextProvider = ({ children }) => {
   const [searchPage, setSearchPage] = useState(1);
   const [searchNext, setSearchNext] = useState(null);
   const [searchPrev, setSearchPrev] = useState(null);
-
-  // ⬇️ NEW: proveedores
-  const [proveedores, setProveedores] = useState([]);
-
-  // subcategorías filtradas
-  const [subcategorias, setSubcategorias] = useState([]);
 
   // paginación
   const [page, setPage] = useState(1);
@@ -40,11 +29,6 @@ export const ContextProvider = ({ children }) => {
   const nextPage = () => setPage(prev => prev + 1);
   const prevPage = () => setPage(prev => prev - 1);
 
-  const abrirModalMovimiento = (sku) => {
-    setSkuActivo(sku);
-    setShowModalMovimiento(true);
-  };
-
   const cargarDatos = async () => {
     Swal.fire({
       title: 'Cargando...',
@@ -53,7 +37,7 @@ export const ContextProvider = ({ children }) => {
     });
 
     try {
-      const response = await getData(`inventario/skus/?page=${page}&page_size=50`);
+      const response = await getData(`inventario/productos/?page=${page}&page_size=50`);
       const resultados = response.data.results;
 
       setData(resultados);
@@ -92,7 +76,7 @@ export const ContextProvider = ({ children }) => {
       params.set('page', String(pageArg || 1));
       // Usar búsqueda OR del backend con ?q= para nombre/código/barcode
       params.set('q', q);
-      const res = await getData(`inventario/skus/buscar/?${params.toString()}`);
+      const res = await getData(`inventario/productos/buscar/?${params.toString()}`);
       const resultados = Array.isArray(res.data) ? res.data : (res.data.results || []);
       setSkusFiltrados(resultados);
       setTermBusqueda(q);
@@ -100,10 +84,10 @@ export const ContextProvider = ({ children }) => {
       setSearchNext(res.data?.next ?? null);
       setSearchPrev(res.data?.previous ?? null);
       if (resultados.length === 0) {
-        Swal.fire({ icon: 'info', title: 'Sin resultados', text: 'No se encontraron SKUs que coincidan.' });
+        Swal.fire({ icon: 'info', title: 'Sin resultados', text: 'No se encontraron productos que coincidan.' });
       }
     } catch (error) {
-      console.error('Error al buscar SKUs:', error);
+      console.error('Error al buscar productos:', error);
       Swal.fire({ icon: 'error', title: 'Error en la búsqueda', text: 'Ocurrió un problema al consultar el backend.' });
     } finally {
       setBuscando(false);
@@ -140,80 +124,31 @@ export const ContextProvider = ({ children }) => {
     }
   };
 
-  const cargarMedida = async () => {
-    try {
-      const response = await getData(`inventario/medidas/?page_size=100`);
-      setUnidadMedida(response.data.results);
-    } catch (error) {
-      console.error('Error al cargar medidas:', error);
-    }
+  const normalizarPayload = (raw) => {
+    const payload = { ...raw };
+    delete payload.clasificacion_producto;
+    delete payload.iva;
+    payload.estado = payload.estado || 'alta';
+    payload.categoria = payload.categoria || '';
+    payload.marca = payload.marca || '';
+    payload.nombre = payload.nombre || '';
+    payload.codigo_sku = payload.codigo_sku || '';
+    payload.principio_activo = payload.principio_activo || 'N/A';
+    payload.unidad_compra = payload.unidad_compra || 'Unidad';
+    payload.unidad_despacho = payload.unidad_despacho || 'Unidad';
+    payload.unidades_por_paquete = parseInt(payload.unidades_por_paquete || 1, 10);
+    payload.barcode = payload.barcode || '';
+    payload.subcategoria = payload.subcategoria || '';
+    payload.proveedor = payload.proveedor || '';
+    payload.is_active = payload.is_active ?? true;
+    return payload;
   };
-
-  const cargarBodega = async () => {
-    try {
-      const response = await getData(`inventario/bodegas/?page=1&page_size=20`);
-      setBodega(response.data.results);
-    } catch (error) {
-      console.error('Error al cargar bodegas:', error);
-    }
-  };
-
-  const cargarPrincipiosActivos = async () => {
-    try {
-      const response = await getData(`inventario/principios/?page=1&page_size=20`);
-      setPrincipiosActivos(response.data.results);
-    } catch (error) {
-      console.error('Error al cargar principios activos:', error);
-    }
-  };
-
-  // ⬇️ NEW: cargar proveedores desde endpoint
-  const cargarProveedores = async () => {
-    try {
-      const response = await getData(`inventario/proveedores/?page=1&page_size=200`);
-      const list = response?.data?.results ?? response?.data ?? [];
-      setProveedores(Array.isArray(list) ? list : []);
-    } catch (error) {
-      console.error('Error al cargar proveedores:', error);
-      setProveedores([]);
-    }
-  };
-
-  // ✅ FIX: memoizar para que no cambie la referencia en cada render
-  const cargarSubcategoriasPorCategoria = useCallback(async (categoriaNombre) => {
-    try {
-      if (!categoriaNombre) {
-        setSubcategorias([]);
-        return;
-      }
-      const cat = categorias.find(c => c?.nombre === categoriaNombre);
-      const catId = cat?.id;
-      if (!catId) {
-        setSubcategorias([]);
-        return;
-      }
-
-      const res = await getData(`inventario/categorias/subcategorias/${catId}?page_size=200`);
-      const list = res.data?.results ?? res.data ?? [];
-
-      // evitar re-render innecesario si la lista es igual (comparación simple por length + nombres)
-      const next = Array.isArray(list) ? list : [];
-      setSubcategorias(prev => {
-        const sameLen = prev.length === next.length;
-        const sameNames = sameLen && prev.every((p, i) => p.nombre === next[i]?.nombre);
-        return sameLen && sameNames ? prev : next;
-      });
-    } catch (error) {
-      console.error('Error al cargar subcategorías:', error);
-      setSubcategorias([]);
-    }
-  }, [categorias]);
 
   const enviarDatos = async (data) => {
     try {
-      const response = await postData("inventario/skus-crear/", data);
+      const response = await postData("inventario/productos-crear/", normalizarPayload(data));
       if (response?.status === 201 && response.data) {
-        NotificationManager.success("SKU creado", "Éxito", 3000);
+        NotificationManager.success("Producto creado", "Éxito", 3000);
         showModal();
       } else {
         NotificationManager.error("Algo salió mal", "Error", 5000);
@@ -232,9 +167,9 @@ export const ContextProvider = ({ children }) => {
 
   const actualizarProveedor = async (datos) => {
     try {
-      const response = await putData(`inventario/skus-actualizar/${datos.id}/`, datos);
+      const response = await putData(`inventario/productos-actualizar/${datos.id}/`, normalizarPayload(datos));
       if (response.status === 200 || response.status === 204) {
-        NotificationManager.success("Marca Editada con exito", "Éxito", 3000);
+        NotificationManager.success("Producto editado con éxito", "Éxito", 3000);
         cargarDatos();
         setShow(false);
       } else {
@@ -248,7 +183,7 @@ export const ContextProvider = ({ children }) => {
   const eliminarProveedor = async (id) => {
     const confirmed = await Swal.fire({
       title: '¿Estás seguro?',
-      text: 'Esta acción eliminará permanentemente la marca.',
+      text: 'Esta acción eliminará permanentemente el producto.',
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#3085d6',
@@ -259,8 +194,8 @@ export const ContextProvider = ({ children }) => {
 
     if (confirmed.isConfirmed) {
       try {
-        await deleteData(`inventario/skus-eliminar/${id}/`);
-        NotificationManager.success("Marca eliminada con éxito", "Éxito", 3000);
+        await deleteData(`inventario/productos-eliminar/${id}/`);
+        NotificationManager.success("Producto eliminado con éxito", "Éxito", 3000);
         cargarDatos && cargarDatos();
       } catch (error) {
         console.error('Error al eliminar proveedor:', error);
@@ -269,39 +204,11 @@ export const ContextProvider = ({ children }) => {
     }
   };
 
-  const recargarSkuActivo = async (id) => {
-    try {
-      const res = await getData(`inventario/skus/${id}/`);
-      setSkuActivo(res.data);
-    } catch (error) {
-      console.error("Error al recargar SKU activo:", error);
-    }
-  };
-
-  const moverProducto = async (datos) => {
-    try {
-      await postData("inventario/skus/mover/", {
-        sku: datos.sku,
-        bodega_origen: datos.bodega_origen,
-        bodega_destino: datos.bodega_destino,
-        cantidad: parseInt(datos.cantidad),
-      });
-      NotificationManager.success("Movimiento realizado", "Éxito", 3000);
-      cargarDatos();
-      cargarBodega();
-      await recargarSkuActivo(datos.sku);
-    } catch (error) {
-      console.error("Error al mover producto:", error);
-      NotificationManager.error("Error al mover producto", "Error", 4000);
-    }
-  };
-
   const showModal = () => setShow(!show);
 
   const abrirModalCrear = () => {
     setProveedorSeleccionado(null);
     setModoFormulario('crear');
-    setSubcategorias([]); // reset
     showModal();
   };
 
@@ -321,11 +228,6 @@ export const ContextProvider = ({ children }) => {
     cargarDatos();
     cargarCategorias();
     cargarMarcas();
-    cargarMedida();
-    cargarBodega();
-    cargarPrincipiosActivos();
-    // ⬇️ NEW: también cargar proveedores
-    cargarProveedores();
     const getRole = () => {
       const u = JSON.parse(localStorage.getItem("user") || "null");
       const r = u?.roles?.[0];
@@ -364,23 +266,6 @@ export const ContextProvider = ({ children }) => {
     eliminarProveedor,
     categorias,
     marcas,
-    unidadMedida,
-    bodega,
-    skuActivo,
-    setSkuActivo,
-    showModalMovimiento,
-    setShowModalMovimiento,
-    abrirModalMovimiento,
-    moverProducto,
-    principiosActivos,
-
-    // subcategorías (memo)
-    subcategorias,
-    cargarSubcategoriasPorCategoria,
-    setSubcategorias,
-
-    // ⬇️ NEW: exponer proveedores
-    proveedores,
     role,
   };
 

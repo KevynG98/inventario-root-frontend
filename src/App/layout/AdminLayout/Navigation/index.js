@@ -55,7 +55,7 @@ class Navigation extends Component {
           display: 'flex',
           flexDirection: 'column',
           minHeight: '100vh',
-          backgroundColor: '#2f3e5a',
+          background: 'linear-gradient(180deg, #11151c 0%, #0b0e14 100%)',
         }}
       >
         <div
@@ -78,9 +78,9 @@ class Navigation extends Component {
             padding: '10px 0',
             textAlign: 'center',
             fontSize: '12px',
-            color: 'rgba(255,255,255,0.5)',
-            backgroundColor: '#2f3e5a',
-            borderTop: '1px solid rgba(255,255,255,0.1)',
+            color: 'rgba(226, 232, 240, 0.78)',
+            backgroundColor: 'rgba(11, 14, 20, 0.95)',
+            borderTop: '1px solid rgba(52, 211, 153, 0.35)',
           }}
         >
           © 2025 Oscar de Leon
@@ -99,7 +99,7 @@ class Navigation extends Component {
             overflowX: 'hidden',
             scrollbarWidth: 'none',
             msOverflowStyle: 'none',
-            backgroundColor: '#2f3e5a',
+            background: 'linear-gradient(180deg, #11151c 0%, #0b0e14 100%)',
           }}
         >
           {this.props.windowWidth < 992 ? (

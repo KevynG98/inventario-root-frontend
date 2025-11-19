@@ -61,9 +61,9 @@ const ModalProductForm = () => {
 
   return (
     <Modal show={show} onHide={showModal} centered>
-      <Modal.Body>
+      <Modal.Body style={{ backgroundColor: '#0f1219', color: '#e5e7eb' }}>
         <div className="px-3 py-2">
-          <h4 className="mb-4 fw-bold">
+          <h4 className="mb-4 fw-bold" style={{ color: '#e5e7eb' }}>
             {isViewingProduct
               ? 'Detalles del producto'
               : isEditingProduct
@@ -73,7 +73,7 @@ const ModalProductForm = () => {
 
           <form key={formKey} onSubmit={handleSubmit(onSubmit)}>
             <div className="mb-3">
-              <label className="form-label">Nombre</label>
+              <label className="form-label" style={{ color: '#e5e7eb' }}>Nombre</label>
               <input
                 className="form-control"
                 placeholder="Nombre del producto"
@@ -84,7 +84,7 @@ const ModalProductForm = () => {
             </div>
 
             <div className="mb-3">
-              <label className="form-label">Descripción</label>
+              <label className="form-label" style={{ color: '#e5e7eb' }}>Descripción</label>
               <textarea
                 className="form-control"
                 placeholder="Descripción"
@@ -95,7 +95,7 @@ const ModalProductForm = () => {
             </div>
 
             <div className="mb-3">
-              <label className="form-label">Precio</label>
+              <label className="form-label" style={{ color: '#e5e7eb' }}>Precio</label>
               <input
                 type="number"
                 step="0.01"
@@ -108,7 +108,7 @@ const ModalProductForm = () => {
             </div>
 
             <div className="mb-3">
-              <label className="form-label">Unidad de medida</label>
+              <label className="form-label" style={{ color: '#e5e7eb' }}>Unidad de medida</label>
               <input
                 className="form-control"
                 placeholder="Ej: kg, unidad, litro"
@@ -118,7 +118,7 @@ const ModalProductForm = () => {
             </div>
 
             <div className="mb-3">
-              <label className="form-label">Cantidad</label>
+              <label className="form-label" style={{ color: '#e5e7eb' }}>Cantidad</label>
               <input
                 type="number"
                 className="form-control"
@@ -129,7 +129,7 @@ const ModalProductForm = () => {
             </div>
 
             <div className="mb-3">
-              <label className="form-label">Categoría</label>
+              <label className="form-label" style={{ color: '#e5e7eb' }}>Categoría</label>
               <select
                 className="form-control"
                 disabled={isViewingProduct}

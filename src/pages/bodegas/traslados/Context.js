@@ -65,7 +65,7 @@ export const ContextProvider = ({ children }) => {
       const [b, c, sku, deps, usersAll] = await Promise.all([
         getData('inventario/bodegas/?page_size=200'),
         getData('inventario/categorias/?page_size=200'),
-        getData('inventario/skus/?page_size=200'),
+        getData('inventario/productos/?page_size=200'),
         getData('mantenimiento/departamentos/?page_size=200'),
         fetchAllPaginated('user/filter-users/'),
       ]);

@@ -4,10 +4,14 @@
 
 .custom-select,
 .form-control {
-    background: $theme-background;
-    padding: 10px 20px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(148, 163, 184, 0.35);
+    color: #e2e8f0;
+    padding: 10px 16px;
     font-size: 14px;
     height: auto;
+    border-radius: 10px;
+    transition: all 0.15s ease;
 
     &.form-control-lg {
         font-size: 1.25rem;
@@ -23,20 +27,22 @@
     }
 
     &:focus {
-        background: $theme-background;
+        background: rgba(255, 255, 255, 0.06);
+        border-color: #22c55e;
+        box-shadow: 0 0 0 2px rgba(34, 211, 153, 0.25);
     }
 
     &::-moz-placeholder {
-        color: #aaaeb3;
+        color: #cbd5e1;
         opacity: 1;
     }
 
     &:-ms-input-placeholder {
-        color: #aaaeb3;
+        color: #cbd5e1;
     }
 
     &::-webkit-input-placeholder {
-        color: #aaaeb3;
+        color: #cbd5e1;
     }
 }
 /* input group start */

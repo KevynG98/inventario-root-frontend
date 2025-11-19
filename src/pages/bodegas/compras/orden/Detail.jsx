@@ -54,7 +54,7 @@ const OrdenCompraDetail = (props) => {
     const cargarSkus = async () => {
       try {
         setLoadingSkus(true);
-        const res = await getData('inventario/skus/?page_size=200');
+        const res = await getData('inventario/productos/?page_size=200');
         const list = res?.data?.results ?? res?.data ?? [];
         setSkus(Array.isArray(list) ? list : []);
       } catch (_) {

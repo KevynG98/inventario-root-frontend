@@ -15,7 +15,7 @@ export const PreciosProvider = ({ children }) => {
 
   const cargarSkus = async () => {
     Swal.fire({
-      title: 'Cargando SKUs...',
+      title: 'Cargando productos...',
       allowOutsideClick: false,
       didOpen: () => {
         Swal.showLoading();
@@ -23,7 +23,7 @@ export const PreciosProvider = ({ children }) => {
     });
   
     try {
-      const res = await getData('inventario/skus/?page_size=1000');
+      const res = await getData('inventario/productos/?page_size=1000');
       const resultados = res.data.results || [];
   
       setSkus(resultados);
@@ -34,7 +34,7 @@ export const PreciosProvider = ({ children }) => {
         Swal.fire({
           icon: 'info',
           title: 'Sin resultados',
-          text: 'No se encontraron SKUs.',
+          text: 'No se encontraron productos.',
         });
       }
     } catch (error) {
@@ -43,10 +43,10 @@ export const PreciosProvider = ({ children }) => {
       Swal.fire({
         icon: 'error',
         title: 'Error',
-        text: 'Error al cargar SKUs',
+        text: 'Error al cargar productos',
       });
   
-      console.error('Error al cargar SKUs:', error);
+      console.error('Error al cargar productos:', error);
     }
   };  
 
@@ -74,7 +74,7 @@ export const PreciosProvider = ({ children }) => {
   };
 
   const abrirModalEditarPrecios = (sku) => {
-    console.log('Abriendo modal para SKU:', sku);
+    console.log('Abriendo modal para producto:', sku);
     setSku(sku.codigo_sku);
     setDescripcionSku(sku.descripcion_estado_cuenta);
     const preciosSKU = precios.filter((p) => p.sku === sku.id);

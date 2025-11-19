@@ -47,7 +47,7 @@ export const ContextProvider = ({ children }) => {
     });
 
     try {
-      const url = `inventario/skus-filtrados/?page=${page}&clasificacion=consignacion&page_size=50`;
+      const url = `inventario/productos-filtrados/?page=${page}&clasificacion=consignacion&page_size=50`;
       const response = await getData(url);
       const resultados = response.data.results;
 
@@ -120,7 +120,7 @@ export const ContextProvider = ({ children }) => {
   const enviarDatos = async (data) => {
     console.log("DATOS", data);
     try {
-      const response = await postData("inventario/skus-crear/", data);
+      const response = await postData("inventario/productos-crear/", data);
       if (response?.status === 201 && response.data) {
         NotificationManager.success("SKU creado", "Éxito", 3000);
         showModal();
@@ -142,7 +142,7 @@ export const ContextProvider = ({ children }) => {
 
   const actualizarProveedor = async (datos) => {
     try {
-      const response = await putData(`inventario/skus-actualizar/${datos.id}/`, datos);
+      const response = await putData(`inventario/productos-actualizar/${datos.id}/`, datos);
 
       if (response.status === 200 || response.status === 204) {
         console.log("Proveedor actualizado con éxito:", response.data);
@@ -171,7 +171,7 @@ export const ContextProvider = ({ children }) => {
 
     if (confirmed.isConfirmed) {
       try {
-        const response = await deleteData(`inventario/skus-eliminar/${id}/`);
+        const response = await deleteData(`inventario/productos-eliminar/${id}/`);
         console.log('Proveedor eliminado:', response.status);
         NotificationManager.success("Marca eliminada con éxito", "Éxito", 3000);
 
@@ -186,7 +186,7 @@ export const ContextProvider = ({ children }) => {
 
   const recargarSkuActivo = async (id) => {
     try {
-      const res = await getData(`inventario/skus/${id}/`);
+      const res = await getData(`inventario/productos/${id}/`);
       setSkuActivo(res.data);
     } catch (error) {
       console.error("Error al recargar SKU activo:", error);
@@ -195,7 +195,7 @@ export const ContextProvider = ({ children }) => {
 
   const moverProducto = async (datos) => {
     try {
-      const res = await postData("inventario/skus/mover/", {
+      const res = await postData("inventario/productos/mover/", {
         sku: datos.sku,
         bodega_origen: datos.bodega_origen,
         bodega_destino: datos.bodega_destino,

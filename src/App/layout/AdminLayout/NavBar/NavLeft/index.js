@@ -47,7 +47,7 @@ class NavLeft extends Component {
                     '/dashboard/inventario/unidades-medida',
                     '/dashboard/inventario/principiosActivos',
                     '/dashboard/inventario/categorias',
-                    '/dashboard/inventario/sku',
+                    '/dashboard/inventario/productos',
                     '/dashboard/inventario/stock',
                     '/dashboard/inventario/movimientos',
                     '/dashboard/inventario/consignacion',
@@ -147,10 +147,10 @@ class NavLeft extends Component {
                             position: 'fixed',
                             top: 15,
                             left: 15,
-                            background: '#2f3e5a',
-                            color: 'white',
+                            background: '#1f2933',
+                            color: '#e5e7eb',
                             padding: 10,
-                            borderRadius: 5,
+                            borderRadius: 10,
                             zIndex: 2000,
                             cursor: 'pointer'
                         }} onClick={() => this.setState({ mobileOpen: true })}>
@@ -177,9 +177,9 @@ class NavLeft extends Component {
                                     style={{
                                         width: 250,
                                         height: '100%',
-                                        background: '#2f3e5a',
-                                        color: 'white',
-                                        padding: '1rem',
+                                        background: 'linear-gradient(180deg, #11151c 0%, #0b0e14 100%)',
+                                        color: '#e5e7eb',
+                                        padding: '1.25rem',
                                         display: 'flex',
                                         flexDirection: 'column',
                                         overflowY: 'auto'

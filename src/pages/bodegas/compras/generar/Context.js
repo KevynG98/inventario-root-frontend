@@ -49,7 +49,7 @@ export const ContextProvider = ({ children }) => {
 
   const getSkus = async () => {
     try {
-      const response = await getData('/inventario/skus/?page_size=100');
+      const response = await getData('/inventario/productos/?page_size=100');
       setSkus(response.data.results);
     } catch (error) {
       console.error('Error al cargar SKUs:', error);

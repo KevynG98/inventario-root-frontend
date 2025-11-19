@@ -33,7 +33,7 @@ export const ContextProvider = ({ children }) => {
     });
 
     try {
-      let url = `inventario/skus/?page=${page}`;
+      let url = `inventario/productos/?page=${page}`;
       if (fechaInicio) url += `&fecha_inicio=${fechaInicio}`;
       if (fechaFin) url += `&fecha_fin=${fechaFin}`;
 

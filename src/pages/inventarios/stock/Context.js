@@ -38,7 +38,7 @@ export const ContextProvider = ({ children }) => {
     });
 
     try {
-      const response = await getData(`inventario/skus-con-bodegas/?page=${page}&page_size=50`);
+      const response = await getData(`inventario/productos-con-bodegas/?page=${page}&page_size=50`);
       const resultados = response.data.results;
 
       setData(resultados);
@@ -80,7 +80,7 @@ export const ContextProvider = ({ children }) => {
     try {
       // Usar búsqueda libre con ?q= para evitar intersección AND de filtros
       const params = new URLSearchParams({ page_size: '50', q });
-      const res = await getData(`inventario/skus-con-bodegas/buscar/?${params.toString()}`);
+      const res = await getData(`inventario/productos-con-bodegas/buscar/?${params.toString()}`);
       const resultados = Array.isArray(res.data) ? res.data : (res.data.results || []);
 
       setDataFiltrada(resultados);
@@ -200,7 +200,7 @@ export const ContextProvider = ({ children }) => {
 
   const actualizarBodegaSKU = async (skuId, datos) => {
     try {
-      const response = await putData(`inventario/skus-actualizar/${skuId}/`, datos);
+      const response = await putData(`inventario/productos-actualizar/${skuId}/`, datos);
       if (response.status === 200 || response.status === 204) {
         NotificationManager.success("Stock actualizado", "Éxito", 3000);
         cargarDatos();

@@ -35,16 +35,16 @@ class NavRight extends Component {
         <ul className="navbar-nav ml-auto">
           <li>
             <Dropdown alignRight={!this.props.rtlLayout} className="drp-user">
-              <Dropdown.Toggle variant="link" id="dropdown-user">
-                <FiUser size={20} />
+              <Dropdown.Toggle variant="link" id="dropdown-user" style={{ color: '#34d399' }}>
+                <FiUser size={20} color="#34d399" />
               </Dropdown.Toggle>
               <Dropdown.Menu alignRight className="profile-notification">
                 <div className="pro-head text-center p-3 border-bottom">
                   <img src={Avatar1} className="img-radius mb-2" alt="User" style={{ width: '40px', height: '40px' }} />
-                  <div>{username}</div>
+                  <div style={{ color: '#34d399', fontWeight: 600 }}>{username}</div>
                 </div>
-                <Dropdown.Item onClick={this.handleLogout} className="d-flex align-items-center">
-                  <FiLogOut className="me-2" />
+                <Dropdown.Item onClick={this.handleLogout} className="d-flex align-items-center" style={{ color: '#34d399' }}>
+                  <FiLogOut className="me-2" color="#34d399" />
                   Cerrar sesión
                 </Dropdown.Item>
               </Dropdown.Menu>
