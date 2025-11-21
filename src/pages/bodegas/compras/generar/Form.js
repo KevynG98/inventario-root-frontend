@@ -72,7 +72,7 @@ const FormularioRequisicion = () => {
     const cantidad = values.cantidadSku;
     const precio = values.precioSku;
     const skuObj = skus.find((s) => String(s.id) === String(skuId));
-    const skuCodigo = skuObj?.codigo_sku || '';
+    const skuCodigo = skuObj?.codigo_inventario || '';
     const descripcion = skuObj?.nombre || skuObj?.descripcion || '';
     const unidad = skuObj?.unidad_despacho || skuObj?.unidad_compra || '';
 
@@ -266,7 +266,7 @@ const FormularioRequisicion = () => {
                       <option value="">Selecciona un SKU</option>
                       {filteredSkus.map((sku) => (
                         <option key={sku.id} value={sku.id}>
-                          {sku.codigo_sku} - {sku.descripcion ?? sku.nombre}
+                          {sku.codigo_inventario} - {sku.descripcion ?? sku.nombre}
                         </option>
                       ))}
                     </Form.Control>

@@ -54,7 +54,7 @@ const ModalMarca = () => {
             </Col>
             <Col md={6}>
               <Form.Label>Código SKU *</Form.Label>
-              <Form.Control type="text" {...register("codigo_sku")} disabled={readOnly} />
+              <Form.Control type="text" {...register("codigo_inventario")} disabled={readOnly} />
             </Col>
           </Row>
 

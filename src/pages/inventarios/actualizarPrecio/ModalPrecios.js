@@ -6,34 +6,32 @@ const ModalPrecios = () => {
   const {
     showModalPrecios,
     setShowModalPrecios,
-    skuActivo,
+    inventarioActivo,
     seguros,
     cargarSeguros,
     actualizarPrecio,
     crearPrecio,
     eliminarPrecio,
-    sku,
-    descripcionSku,
+    codigoInventarioActivo,
+    descripcionInventario,
   } = usePreciosContext();
 
-  const [precios, setPrecios] = useState([]);
   const [editando, setEditando] = useState({});
   const [valores, setValores] = useState({});
 
   useEffect(() => {
-    if (skuActivo) {
+    if (inventarioActivo) {
       const map = {};
-      skuActivo.precios?.forEach((p) => {
+      inventarioActivo.precios?.forEach((p) => {
         map[p.seguro_id] = parseFloat(p.precio);
       });
       setValores(map);
     }
-  }, [skuActivo]);
+  }, [inventarioActivo]);
 
   useEffect(() => {
     cargarSeguros();
   }, []);
-
   const handleChange = (id, value) => {
     setValores((prev) => ({ ...prev, [id]: value }));
   };
@@ -42,21 +40,21 @@ const ModalPrecios = () => {
     const precio = parseFloat(valores[seguroId]);
     if (isNaN(precio)) return;
 
-    const existente = skuActivo.precios?.find((p) => p.seguro_id === seguroId);
+    const existente = inventarioActivo.precios?.find((p) => p.seguro_id === seguroId);
     const seguroNombre = seguros.find((s) => s.id === seguroId)?.nombre || '';
 
     if (existente) {
       await actualizarPrecio({
         id: existente.id,
         precio,
-        sku: skuActivo.id,
-        sku_nombre: skuActivo.nombre,
+        inventario: inventarioActivo.id,
+        inventario_nombre: inventarioActivo.nombre,
         seguro_nombre: seguroNombre,
       });
     } else {
       await crearPrecio({
-        sku: skuActivo.id,
-        sku_nombre: skuActivo.nombre,  // asegúrate que `skuActivo.nombre` exista
+        inventario: inventarioActivo.id,
+        inventario_nombre: inventarioActivo.nombre,
         seguro_nombre: seguroNombre,
         precio,
       });
@@ -66,13 +64,13 @@ const ModalPrecios = () => {
   };
 
   const cancelar = (id) => {
-    const original = skuActivo.precios?.find((p) => p.seguro_id === id)?.precio || 0;
+    const original = inventarioActivo.precios?.find((p) => p.seguro_id === id)?.precio || 0;
     setValores((prev) => ({ ...prev, [id]: original }));
     setEditando((prev) => ({ ...prev, [id]: false }));
   };
 
   const handleEliminar = async (seguroId) => {
-    const existente = skuActivo.precios?.find((p) => p.seguro_id === seguroId);
+    const existente = inventarioActivo.precios?.find((p) => p.seguro_id === seguroId);
     if (existente) {
       await eliminarPrecio(existente.id);
       setValores((prev) => ({ ...prev, [seguroId]: 0 }));
@@ -85,8 +83,8 @@ const ModalPrecios = () => {
     <Modal show={showModalPrecios} onHide={handleClose} size="lg">
       <Modal.Header closeButton>
         <div className="d-flex flex-column">
-          <Modal.Title>Editar precios de {sku}</Modal.Title>
-          <p className="text-muted mb-0">{descripcionSku}</p>
+          <Modal.Title>Editar precios de {codigoInventarioActivo}</Modal.Title>
+          <p className="text-muted mb-0">{descripcionInventario}</p>
         </div>
       </Modal.Header>
       <Modal.Body>

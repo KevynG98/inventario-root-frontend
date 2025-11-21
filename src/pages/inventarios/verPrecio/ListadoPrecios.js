@@ -75,7 +75,7 @@ const ListadoPrecios = () => {
             {(lista || []).map((sku, idx) => (
               <tr key={idx}>
                 <td>{sku.nombre}</td>
-                <td>{sku.codigo_sku}</td>
+                <td>{sku.codigo_inventario}</td>
                 <td className="text-center">
                   <Button
                     variant="outline-primary"

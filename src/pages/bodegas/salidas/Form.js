@@ -73,7 +73,7 @@ const SalidaForm = () => {
     const iva = _round2(gravaIva ? (costo - precio_sin_iva) : 0);
     const total = _round2(costo * cantidad);
     setItems(prev => [...prev, {
-      sku: skuObj.codigo_sku,
+      sku: skuObj.codigo_inventario,
       descripcion: skuObj.nombre || skuObj.descripcion || '',
       costo, cantidad, precio_sin_iva, iva, total,
     }]);
@@ -212,7 +212,7 @@ const SalidaForm = () => {
               <Form.Label>SKU</Form.Label>
               <Form.Control as="select" value={draft.skuId} onChange={(e) => setDraft({ ...draft, skuId: String(e.target.value) })}>
                 <option value="">Seleccione</option>
-                {skuOptions.map(s => <option key={s.id} value={s.id}>{s.codigo_sku} - {(s.nombre || s.descripcion)}</option>)}
+                {skuOptions.map(s => <option key={s.id} value={s.id}>{s.codigo_inventario} - {(s.nombre || s.descripcion)}</option>)}
               </Form.Control>
             </Col>
             <Col md={2}>
