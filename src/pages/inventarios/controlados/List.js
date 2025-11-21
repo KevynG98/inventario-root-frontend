@@ -60,7 +60,7 @@ const Medidas = () => {
             {data.map((sku, idx) => (
               <tr key={idx}>
                 <td>{sku.id}</td>
-                <td>{sku.codigo_sku}</td>
+                <td>{sku.codigo_inventario}</td>
                 <td>{sku.nombre}</td>
                 <td>{sku.marca}</td>
                 <td>{sku.unidad_despacho}</td>

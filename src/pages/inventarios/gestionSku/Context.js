@@ -132,7 +132,7 @@ export const ContextProvider = ({ children }) => {
     payload.categoria = payload.categoria || '';
     payload.marca = payload.marca || '';
     payload.nombre = payload.nombre || '';
-    payload.codigo_sku = payload.codigo_sku || '';
+    payload.codigo_inventario = payload.codigo_inventario || '';
     payload.principio_activo = payload.principio_activo || 'N/A';
     payload.unidad_compra = payload.unidad_compra || 'Unidad';
     payload.unidad_despacho = payload.unidad_despacho || 'Unidad';
@@ -155,8 +155,8 @@ export const ContextProvider = ({ children }) => {
       }
     } catch (err) {
       const detail = err.response?.data;
-      if (detail?.codigo_sku?.[0]) {
-        NotificationManager.error(`Código duplicado: ${detail.codigo_sku[0]}`, "Error", 5000);
+      if (detail?.codigo_inventario?.[0]) {
+        NotificationManager.error(`Código duplicado: ${detail.codigo_inventario[0]}`, "Error", 5000);
       } else {
         NotificationManager.error("Error desconocido al crear", "Error", 5000);
       }

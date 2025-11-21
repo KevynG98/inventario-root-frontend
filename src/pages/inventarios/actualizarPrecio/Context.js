@@ -5,15 +5,15 @@ import Swal from 'sweetalert2';
 const PreciosContext = createContext();
 
 export const PreciosProvider = ({ children }) => {
-  const [skus, setSkus] = useState([]);
+  const [inventarios, setInventarios] = useState([]);
   const [seguros, setSeguros] = useState([]);
   const [precios, setPrecios] = useState([]);
   const [showModalPrecios, setShowModalPrecios] = useState(false);
-  const [skuActivo, setSkuActivo] = useState(null);
-  const [sku, setSku] = useState('');
-  const [descripcionSku, setDescripcionSku] = useState('');
+  const [inventarioActivo, setInventarioActivo] = useState(null);
+  const [codigoInventarioActivo, setCodigoInventarioActivo] = useState('');
+  const [descripcionInventario, setDescripcionInventario] = useState('');
 
-  const cargarSkus = async () => {
+  const cargarInventarios = async () => {
     Swal.fire({
       title: 'Cargando productos...',
       allowOutsideClick: false,
@@ -26,7 +26,7 @@ export const PreciosProvider = ({ children }) => {
       const res = await getData('inventario/productos/?page_size=1000');
       const resultados = res.data.results || [];
   
-      setSkus(resultados);
+      setInventarios(resultados);
   
       Swal.close();
   
@@ -65,7 +65,7 @@ export const PreciosProvider = ({ children }) => {
       const preciosTransformados = res.data.map(p => ({
         ...p,
         seguro_id: seguros.find(s => s.nombre === p.seguro_nombre)?.id || null,
-        precio: parseFloat(p.precio), // Asegurar que sea número
+        precio: parseFloat(p.precio),
       }));
       setPrecios(preciosTransformados || []);
     } catch (error) {
@@ -73,12 +73,12 @@ export const PreciosProvider = ({ children }) => {
     }
   };
 
-  const abrirModalEditarPrecios = (sku) => {
-    console.log('Abriendo modal para producto:', sku);
-    setSku(sku.codigo_sku);
-    setDescripcionSku(sku.descripcion_estado_cuenta);
-    const preciosSKU = precios.filter((p) => p.sku === sku.id);
-    setSkuActivo({ ...sku, precios: preciosSKU });
+  const abrirModalEditarPrecios = (inventario) => {
+    console.log('Abriendo modal para producto:', inventario);
+    setCodigoInventarioActivo(inventario.codigo_inventario);
+    setDescripcionInventario(inventario.descripcion_estado_cuenta);
+    const preciosInventario = precios.filter((p) => p.inventario === inventario.id);
+    setInventarioActivo({ ...inventario, precios: preciosInventario });
     setShowModalPrecios(true);
   };
 
@@ -110,7 +110,7 @@ export const PreciosProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    cargarSkus();
+    cargarInventarios();
     cargarSeguros();
   }, []);
   
@@ -124,10 +124,10 @@ export const PreciosProvider = ({ children }) => {
   return (
     <PreciosContext.Provider
       value={{
-        skus,
+        inventarios,
         seguros,
         precios,
-        skuActivo,
+        inventarioActivo,
         showModalPrecios,
         setShowModalPrecios,
         abrirModalEditarPrecios,
@@ -135,8 +135,8 @@ export const PreciosProvider = ({ children }) => {
         crearPrecio,
         eliminarPrecio,
         cargarSeguros,
-        sku,
-        descripcionSku,
+        codigoInventarioActivo,
+        descripcionInventario,
       }}
     >
       {children}

@@ -142,7 +142,7 @@ const Marcas = () => {
                 <tr key={idx}>
                   <td className="text-center">{sku.id}</td>
                   <td>{sku.nombre}</td>
-                  <td>{sku.codigo_sku}</td>
+                  <td>{sku.codigo_inventario}</td>
                   {bodega.map((b, i) => {
                     const stock = sku.bodegas?.find(x => x.nombre_bodega === b.nombre);
                     const cantidad = stock ? stock.cantidad : 0;

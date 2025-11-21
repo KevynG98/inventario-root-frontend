@@ -199,12 +199,12 @@ const ModalRequisicion = () => {
     const handleAnular = () => { if (requireObs()) return; lanzarSweetAlertEstado('Requisición rechazada', 'rechazada'); };
 
     const skuTexto = (skuCodeOrId) => {
-        // Some records might store ID; others store codigo_sku
+        // Some records might store ID; others store codigo_inventario
         const list = skus || [];
         const fromId = list.find((s) => String(s.id) === String(skuCodeOrId));
-        if (fromId) return `${fromId.codigo_sku} - ${fromId.descripcion ?? fromId.nombre}`;
-        const fromCode = list.find((s) => String(s.codigo_sku) === String(skuCodeOrId));
-        if (fromCode) return `${fromCode.codigo_sku} - ${fromCode.descripcion ?? fromCode.nombre}`;
+        if (fromId) return `${fromId.codigo_inventario} - ${fromId.descripcion ?? fromId.nombre}`;
+        const fromCode = list.find((s) => String(s.codigo_inventario) === String(skuCodeOrId));
+        if (fromCode) return `${fromCode.codigo_inventario} - ${fromCode.descripcion ?? fromCode.nombre}`;
         return skuCodeOrId;
     };
 
@@ -234,7 +234,7 @@ const ModalRequisicion = () => {
         if (!nuevoSkuId || !nuevaCantidad || !nuevoPrecio) return;
         const skuObj = (skus || []).find((s) => String(s.id) === String(nuevoSkuId));
         const unidad = skuObj?.unidad_despacho || skuObj?.unidad_compra || '';
-        const codigo = skuObj?.codigo_sku || nuevoSkuId;
+        const codigo = skuObj?.codigo_inventario || nuevoSkuId;
         const descripcion = skuObj?.nombre || skuObj?.descripcion || '';
         const cantidad = parseFloat(nuevaCantidad);
         const precio = parseFloat(nuevoPrecio);
@@ -426,7 +426,7 @@ const ModalRequisicion = () => {
                                                 return provSku === prov.toString().toLowerCase();
                                               })
                                               .map((s) => (
-                                                <option key={s.id} value={s.id}>{s.codigo_sku} - {s.descripcion ?? s.nombre}</option>
+                                                <option key={s.id} value={s.id}>{s.codigo_inventario} - {s.descripcion ?? s.nombre}</option>
                                               ))}
                                         </Form.Control>
                                     </td>

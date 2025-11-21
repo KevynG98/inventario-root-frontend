@@ -129,8 +129,8 @@ export const ContextProvider = ({ children }) => {
       }
     } catch (err) {
       const detail = err.response?.data;
-      if (detail?.codigo_sku?.[0]) {
-        NotificationManager.error(`Código duplicado: ${detail.codigo_sku[0]}`, "Error", 5000);
+      if (detail?.codigo_inventario?.[0]) {
+        NotificationManager.error(`Código duplicado: ${detail.codigo_inventario[0]}`, "Error", 5000);
       } else {
         NotificationManager.error("Error desconocido al crear", "Error", 5000);
       }

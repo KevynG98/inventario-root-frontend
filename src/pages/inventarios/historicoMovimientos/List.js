@@ -70,7 +70,7 @@ const Movimientos = () => {
             <option value="__none__" disabled>Seleccione un SKU…</option>
             <option value="">Todos</option>
             {filteredSkus.map(s => (
-              <option key={s.id} value={s.codigo_sku}>{s.codigo_sku} - {s.nombre}</option>
+              <option key={s.id} value={s.codigo_inventario}>{s.codigo_inventario} - {s.nombre}</option>
             ))}
           </select>
         </div>

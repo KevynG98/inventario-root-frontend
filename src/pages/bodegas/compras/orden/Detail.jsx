@@ -76,7 +76,7 @@ const OrdenCompraDetail = (props) => {
     const precio = parseFloat(it.precio_sin_iva || 0);
     let iva = parseFloat(it.iva || 0);
     // Regla: servicios (codigo 'SERV') IVA 0, productos afectos 12% automáticamente si no se sobreescribe
-    if (String(it.codigo_sku || '').toUpperCase() === 'SERV') {
+    if (String(it.codigo_inventario || '').toUpperCase() === 'SERV') {
       iva = 0;
     } else if (!Number.isFinite(it._iva_manual)) {
       // Si el usuario no ha tocado el campo IVA manualmente, autocalcular 12%
@@ -89,7 +89,7 @@ const OrdenCompraDetail = (props) => {
   const addItem = () => {
     setOc((prev) => ({
       ...prev,
-      items: [...(prev.items || []), { codigo_sku: '', descripcion: '', unidad_medida: '', cantidad: 1, precio_sin_iva: 0, iva: 0, total: 0 }],
+      items: [...(prev.items || []), { codigo_inventario: '', descripcion: '', unidad_medida: '', cantidad: 1, precio_sin_iva: 0, iva: 0, total: 0 }],
     }));
   };
   const removeItem = (idx) => setOc((prev) => ({ ...prev, items: prev.items.filter((_, i) => i !== idx) }));
@@ -97,9 +97,9 @@ const OrdenCompraDetail = (props) => {
     const items = [...(prev.items || [])];
     const next = { ...items[idx], [k]: v };
     if (k === 'iva') next._iva_manual = true; // marca override manual
-    if (k === 'codigo_sku') {
+    if (k === 'codigo_inventario') {
       // Si el usuario elige un SKU del catálogo, precargar descripción/unidad
-      const skuSel = (skus || []).find((s) => String(s.codigo_sku) === String(v));
+      const skuSel = (skus || []).find((s) => String(s.codigo_inventario) === String(v));
       if (skuSel) {
         next.descripcion = skuSel.nombre || skuSel.descripcion || next.descripcion || '';
         next.unidad_medida = skuSel.unidad_despacho || skuSel.unidad_compra || next.unidad_medida || '';
@@ -119,7 +119,7 @@ const OrdenCompraDetail = (props) => {
       const estadoOk = !s.estado || String(s.estado).toLowerCase() === 'alta';
       return prov && sp === prov && estadoOk;
     });
-    return filtered.sort((a, b) => String(a.codigo_sku || '').localeCompare(String(b.codigo_sku || '')));
+    return filtered.sort((a, b) => String(a.codigo_inventario || '').localeCompare(String(b.codigo_inventario || '')));
   }, [skus, oc]);
 
   const doPatchEditar = async (observaciones) => {
@@ -305,16 +305,16 @@ const OrdenCompraDetail = (props) => {
                   {editable ? (
                     <Form.Control
                       as="select"
-                      value={String(it.codigo_sku || '')}
-                      onChange={(e) => changeItem(idx, 'codigo_sku', e.target.value)}
+                      value={String(it.codigo_inventario || '')}
+                      onChange={(e) => changeItem(idx, 'codigo_inventario', e.target.value)}
                     >
                       <option value="">Seleccione</option>
                       <option value="SERV">SERV - Servicio</option>
                       {skusProveedor.map((s) => (
-                        <option key={s.id} value={s.codigo_sku}>{s.codigo_sku} - {(s.nombre || s.descripcion)}</option>
+                        <option key={s.id} value={s.codigo_inventario}>{s.codigo_inventario} - {(s.nombre || s.descripcion)}</option>
                       ))}
                     </Form.Control>
-                  ) : it.codigo_sku}
+                  ) : it.codigo_inventario}
                 </td>
                 <td>{editable ? (<Form.Control value={it.descripcion} onChange={(e) => changeItem(idx, 'descripcion', e.target.value)} />) : it.descripcion}</td>
                 <td>{editable ? (<Form.Control value={it.unidad_medida} onChange={(e) => changeItem(idx, 'unidad_medida', e.target.value)} />) : it.unidad_medida}</td>

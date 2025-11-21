@@ -34,7 +34,7 @@ const ModalMedidas = () => {
   useEffect(() => {
     if (modoFormulario === 'crear') {
       reset({
-        codigo_sku: '',
+        codigo_inventario: '',
         nombre: '',
         estado: 'alta',
         categoria: '',
@@ -133,10 +133,10 @@ const ModalMedidas = () => {
                 <Form.Label className="text-light">Código del Producto *</Form.Label>
                 <Form.Control
                   className={inputClasses}
-                  {...register('codigo_sku', { required: true })}
+                  {...register('codigo_inventario', { required: true })}
                   readOnly={readOnly}
                 />
-                {errors.codigo_sku && <small className="text-danger">El código del producto es obligatorio</small>}
+                {errors.codigo_inventario && <small className="text-danger">El código del producto es obligatorio</small>}
               </Form.Group>
             </Col>
             <Col md={8}>

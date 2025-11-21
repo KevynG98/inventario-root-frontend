@@ -12,11 +12,11 @@ const ListadoPrecios = () => {
         const rows = Array.isArray(skus) ? skus : [];
         const t = (s) => (String(s || '')).toLowerCase();
         const filtered = rows.filter((r) => (
-            (!fCodigo || t(r.codigo_sku).includes(t(fCodigo))) &&
+            (!fCodigo || t(r.codigo_inventario).includes(t(fCodigo))) &&
             (!fNombre || t(r.nombre || r.descripcion).includes(t(fNombre))) &&
             (!fBarcode || t(r.barcode).includes(t(fBarcode)))
         ));
-        return [...filtered].sort((a,b)=> String(a.codigo_sku||'').localeCompare(String(b.codigo_sku||'')));
+        return [...filtered].sort((a,b)=> String(a.codigo_inventario||'').localeCompare(String(b.codigo_inventario||'')));
     }, [skus, fCodigo, fNombre, fBarcode]);
 
     return (
@@ -43,7 +43,7 @@ const ListadoPrecios = () => {
                         {filas.map((sku, idx) => (
                             <tr key={idx}>
                                 <td>{sku.nombre}</td>
-                                <td>{sku.codigo_sku}</td>
+                                <td>{sku.codigo_inventario}</td>
                                 <td className="text-center">
                                     <Button
                                         variant="outline-primary"

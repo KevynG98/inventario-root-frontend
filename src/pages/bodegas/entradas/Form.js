@@ -79,7 +79,7 @@ const EntradaForm = () => {
     setItems(prev => [
       ...prev,
       {
-        sku: skuObj.codigo_sku,
+        sku: skuObj.codigo_inventario,
         descripcion: skuObj.nombre || skuObj.descripcion || '',
         costo,
         cantidad,
@@ -194,7 +194,7 @@ const EntradaForm = () => {
               <Form.Label>SKU</Form.Label>
               <Form.Control as="select" value={draft.skuId} onChange={(e) => setDraft({ ...draft, skuId: e.target.value })}>
                 <option value="">Seleccione</option>
-                {skuOptions.map(s => <option key={s.id} value={s.id}>{s.codigo_sku} - {(s.nombre || s.descripcion)}</option>)}
+                {skuOptions.map(s => <option key={s.id} value={s.id}>{s.codigo_inventario} - {(s.nombre || s.descripcion)}</option>)}
               </Form.Control>
             </Col>
             <Col md={2}>

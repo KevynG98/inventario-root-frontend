@@ -71,7 +71,7 @@ const normalizeSubcategoria = (item, categoriaId) => ({
 
 const normalizeSku = (item) => ({
   id: item?.id ?? item?.sku_id ?? null,
-  code: item?.codigo_sku || item?.codigo || '',
+  code: item?.codigo_inventario || item?.codigo || '',
   name: item?.nombre || item?.descripcion || ''
 });
 

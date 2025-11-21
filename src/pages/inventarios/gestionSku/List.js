@@ -38,10 +38,10 @@ const Medidas = () => {
       ? rows
       : rows.filter((r) => (
           toL(r.nombre).includes(q) ||
-          toL(r.codigo_sku).includes(q) ||
+          toL(r.codigo_inventario).includes(q) ||
           toL(r.codigo_barras).includes(q)
         ));
-    return [...f].sort((a, b) => String(a.codigo_sku || '').localeCompare(String(b.codigo_sku || '')));
+    return [...f].sort((a, b) => String(a.codigo_inventario || '').localeCompare(String(b.codigo_inventario || '')));
   }, [data, skusFiltrados, term]);
 
   const handleBuscar = async (e) => {
@@ -92,7 +92,7 @@ const Medidas = () => {
           {filtered.map((sku, idx) => (
             <tr key={idx}>
               <td>{sku.id}</td>
-              <td>{sku.codigo_sku}</td>
+              <td>{sku.codigo_inventario}</td>
               <td>{sku.nombre}</td>
               <td>{sku.marca}</td>
               <td>{sku.unidad_despacho}</td>
@@ -128,7 +128,7 @@ const Medidas = () => {
               <div className="d-flex justify-content-between align-items-start mb-2">
                 <div>
                   <p className="text-muted mb-1">Código</p>
-                  <h6 className="mb-0">{sku.codigo_sku}</h6>
+                  <h6 className="mb-0">{sku.codigo_inventario}</h6>
                 </div>
                 <Badge bg={sku.estado === 'alta' ? 'success' : 'secondary'}>
                   {sku.estado === 'alta' ? 'Disponible' : 'No Disponible'}

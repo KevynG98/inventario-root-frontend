@@ -75,7 +75,7 @@ export const PreciosProvider = ({ children }) => {
 
   const abrirModalEditarPrecios = (sku) => {
     console.log('Abriendo modal para producto:', sku);
-    setSku(sku.codigo_sku);
+    setSku(sku.codigo_inventario);
     setDescripcionSku(sku.descripcion_estado_cuenta);
     const preciosSKU = precios.filter((p) => p.sku === sku.id);
     setSkuActivo({ ...sku, precios: preciosSKU });
@@ -138,7 +138,7 @@ export const PreciosProvider = ({ children }) => {
       const filtrados = (skus || []).filter(s =>
         idsSku.has(s.id) ||
         (s.nombre && s.nombre.toString().toLowerCase().includes(ql)) ||
-        (s.codigo_sku && s.codigo_sku.toString().toLowerCase().includes(ql)) ||
+        (s.codigo_inventario && s.codigo_inventario.toString().toLowerCase().includes(ql)) ||
         (s.codigo_barras && s.codigo_barras.toString().toLowerCase().includes(ql))
       );
 

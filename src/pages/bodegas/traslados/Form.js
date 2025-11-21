@@ -63,7 +63,7 @@ const TrasladoForm = () => {
     const cantidad = Number(draft.cantidad || 0);
     if (cantidad <= 0) return;
     setItems(prev => [...prev, {
-      sku: skuObj.codigo_sku,
+      sku: skuObj.codigo_inventario,
       descripcion: skuObj.nombre || skuObj.descripcion || '',
       cantidad,
     }]);
@@ -146,7 +146,7 @@ const TrasladoForm = () => {
               <Form.Label>SKU</Form.Label>
               <Form.Control as="select" value={draft.skuId} onChange={(e) => setDraft({ ...draft, skuId: String(e.target.value) })}>
                 <option value="">Seleccione</option>
-                {skuOptions.map(s => <option key={s.id} value={s.id}>{s.codigo_sku} - {(s.nombre || s.descripcion)}</option>)}
+                {skuOptions.map(s => <option key={s.id} value={s.id}>{s.codigo_inventario} - {(s.nombre || s.descripcion)}</option>)}
               </Form.Control>
             </Col>
             <Col md={3}>
