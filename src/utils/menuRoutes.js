@@ -34,6 +34,17 @@ const staticRoutes = [
       { title: 'Actualización de Precios', url: '/dashboard/inventario/precios', icon: <FiEdit3 />, roles: [1, 9] },
     ],
   },
+  {
+    title: 'Proyectos',
+    icon: <FiPackage />,
+    roles: R.INVENTARIO,
+    children: [
+      { title: 'Cotizaciones', url: '/dashboard/proyectos/cotizaciones', icon: <FiList />, roles: [1, 8] },
+      { title: 'Cotizaciones Rechazadas', url: '/dashboard/proyectos/cotizaciones-rechazadas', icon: <FiList />, roles: [1, 8]},
+      { title: 'Proyectos', url: '/dashboard/proyectos/proyectos', icon: <FiEdit3 />, roles: [1, 8]}
+    ],
+
+  }
 ];
 
 let menuIdCounter = 0;
