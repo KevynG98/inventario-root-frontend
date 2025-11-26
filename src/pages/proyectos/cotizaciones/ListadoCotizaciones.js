@@ -4,7 +4,7 @@ import { usePreciosContext } from './Context';
 
 const ListadoPrecios = () => {
     const { skus, abrirModalEditarPrecios, 
-        rechazarCotizacion, aprovarCotizacion, cotizaciones } = usePreciosContext();
+        rechazarCotizacion, aprobarCotizacion, cotizaciones } = usePreciosContext();
     const [fCodigo, setFCodigo] = useState('');
     const [fNombre, setFNombre] = useState('');
     const [fBarcode, setFBarcode] = useState('');
@@ -57,11 +57,15 @@ const ListadoPrecios = () => {
                                     </Button>
                                 </td>              
                                 <td>
-                                    <Button variant='outline-danger' size='sm'>
+                                    <Button variant='outline-danger' size='sm'
+                                        onClick={() => rechazarCotizacion(cot.id)}
+                                    >
                                         Rechazar
                                     </Button>
 
-                                    <Button variant='outline-primary' size='sm'>
+                                    <Button variant='outline-primary' size='sm'
+                                        onClick={() => aprobarCotizacion(cot.id)}
+                                    >
                                         Aprobar
                                     </Button>                                    
                                 </td>                  

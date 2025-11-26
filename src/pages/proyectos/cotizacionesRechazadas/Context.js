@@ -12,10 +12,13 @@ export const PreciosProvider = ({ children }) => {
   const [inventarioActivo, setInventarioActivo] = useState(null);
   const [codigoInventarioActivo, setCodigoInventarioActivo] = useState('');
   const [descripcionInventario, setDescripcionInventario] = useState('');
+  const [cotizacionSeleccionada, setCotizacionSeleccionada] = useState(null);
+  const [cotizaciones, setCotizaciones] = useState([]);
 
-  const cargarInventarios = async () => {
+  const cargarCotizacionesRechazadas = async () => {
+
     Swal.fire({
-      title: 'Cargando productos...',
+      title: 'Cargando cotizaciones...',
       allowOutsideClick: false,
       didOpen: () => {
         Swal.showLoading();
@@ -23,10 +26,13 @@ export const PreciosProvider = ({ children }) => {
     });
   
     try {
-      const res = await getData('inventario/productos/?page_size=1000');
-      const resultados = res.data.results || [];
+      const res = await getData('proyecto/cotizaciones-rechazadas/?page=1&page_size=50');
+      const resultados = res.data || [];
+
+      console.log('Cotizaciones cargadas:', resultados);
+      
   
-      setInventarios(resultados);
+      setCotizaciones(resultados);
   
       Swal.close();
   
@@ -47,8 +53,9 @@ export const PreciosProvider = ({ children }) => {
       });
   
       console.error('Error al cargar productos:', error);
-    }
-  };  
+    }    
+
+  }
 
   const cargarSeguros = async () => {
     try {
@@ -73,12 +80,9 @@ export const PreciosProvider = ({ children }) => {
     }
   };
 
-  const abrirModalEditarPrecios = (inventario) => {
-    console.log('Abriendo modal para producto:', inventario);
-    setCodigoInventarioActivo(inventario.codigo_inventario);
-    setDescripcionInventario(inventario.descripcion_estado_cuenta);
-    const preciosInventario = precios.filter((p) => p.inventario === inventario.id);
-    setInventarioActivo({ ...inventario, precios: preciosInventario });
+  const abrirModalEditarPrecios = (cotizacion) => {
+    console.log('Abriendo modal para cotización:', cotizacion);
+    setCotizacionSeleccionada(cotizacion);
     setShowModalPrecios(true);
   };
 
@@ -110,8 +114,7 @@ export const PreciosProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    cargarInventarios();
-    cargarSeguros();
+    cargarCotizacionesRechazadas();
   }, []);
   
   useEffect(() => {
@@ -137,6 +140,8 @@ export const PreciosProvider = ({ children }) => {
         cargarSeguros,
         codigoInventarioActivo,
         descripcionInventario,
+        cotizaciones,
+        cotizacionSeleccionada
       }}
     >
       {children}

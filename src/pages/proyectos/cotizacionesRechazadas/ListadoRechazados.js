@@ -3,7 +3,7 @@ import { Table, Button } from 'react-bootstrap';
 import { usePreciosContext } from './Context';
 
 const ListadoPrecios = () => {
-    const { skus, abrirModalEditarPrecios, seguros, precios } = usePreciosContext();
+    const { skus, abrirModalEditarPrecios, seguros, precios, cotizaciones } = usePreciosContext();
     const [fCodigo, setFCodigo] = useState('');
     const [fNombre, setFNombre] = useState('');
     const [fBarcode, setFBarcode] = useState('');
@@ -32,36 +32,29 @@ const ListadoPrecios = () => {
                     <thead className="table-primary text-dark">
                         <tr>
                             <th>Nombre Empresa</th>
-                            <th>Nombre Cotizador</th>
+                            <th>Nombre Proyecto</th>
                             <th>Correo</th>
                             <th>Monto presupuestado</th>
-                            {seguros.map((s) => (
-                                <th key={s.id}>{s.nombre}</th>
-                            ))}
+                            
                         </tr>
                     </thead>
                     <tbody>
-                        {filas.map((sku, idx) => (
+                        {cotizaciones.map((cot, idx) => (
                             <tr key={idx}>
-                                <td>{sku.nombre}</td>
-                                <td>{sku.codigo_inventario}</td>
+                                <td>{cot.nombreEmpresa}</td>
+                                <td>{cot.nombreProyecto}</td>
+                                <td>
+                                    Q{cot.totalPresupuestado}
+                                </td>
                                 <td className="text-center">
                                     <Button
                                         variant="outline-primary"
                                         size="sm"
-                                        onClick={() => abrirModalEditarPrecios(sku)}
+                                        onClick={() => abrirModalEditarPrecios(cot)}
                                     >
-                                        Editar precios
+                                        Validar Productos de cotizacion
                                     </Button>
-                                </td>
-                                {seguros.map((s) => {
-                                    const precio = precios.find(p => p.sku === sku.id && p.seguro_id === s.id);
-                                    return (
-                                        <td key={s.id} className="text-center">
-                                            {precio ? `Q${precio.precio.toFixed(2)}` : '—'}
-                                        </td>
-                                    );
-                                })}
+                                </td>    
                             </tr>
                         ))}
                     </tbody>

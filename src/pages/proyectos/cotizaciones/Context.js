@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { getData, postData, putData, deleteData } from '../../../apiService';
+import { getData, postData, putData, deleteData, patchData } from '../../../apiService';
 import Swal from 'sweetalert2';
 
 const PreciosContext = createContext();
@@ -42,36 +42,9 @@ export const PreciosProvider = ({ children }) => {
     setCotizacionSeleccionada(cotizacion);
     setShowModalPrecios(true);
   };
-
-  const actualizarPrecio = async (data) => {
-    try {
-      await putData(`inventario/precios-actualizar/${data.id}/`, data);
-      await cargarPrecios();
-    } catch (error) {
-      console.error('Error al actualizar precio:', error);
-    }
-  };
-
-  const crearPrecio = async (data) => {
-    try {
-      await postData('inventario/precios-crear/', data);
-      await cargarPrecios();
-    } catch (error) {
-      console.error('Error al crear precio:', error);
-    }
-  };
-
-  const eliminarPrecio = async (id) => {
-    try {
-      await deleteData(`inventario/precios/${id}/`);
-      await cargarPrecios();
-    } catch (error) {
-      console.error('Error al eliminar precio:', error);
-    }
-  };
   const cargarCotizaciones = async () => {
     Swal.fire({
-      title: 'Cargando productos...',
+      title: 'Cargando cotizaciones...',
       allowOutsideClick: false,
       didOpen: () => {
         Swal.showLoading();
@@ -93,7 +66,7 @@ export const PreciosProvider = ({ children }) => {
         Swal.fire({
           icon: 'info',
           title: 'Sin resultados',
-          text: 'No se encontraron productos.',
+          text: 'No se encontraron cotizaciones.',
         });
       }
     } catch (error) {
@@ -120,7 +93,7 @@ export const PreciosProvider = ({ children }) => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          await deleteData(`proyecto/cotizaciones/${id}/rechazar/`);
+          await putData(`proyecto/proyectos/rechaza-cotizacion`, { id: id });
           
           Swal.fire(
             'Rechazada',
@@ -141,7 +114,36 @@ export const PreciosProvider = ({ children }) => {
     });
   }
 
-  const aprovarCotizacion = async (id) => {
+  const aprobarCotizacion = async (id) => {
+    Swal.fire({
+      title: '¿Estás seguro de aprobar esta cotización?',
+      text: "Esta acción no se puede deshacer.",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, aprobar',
+      cancelButtonText: 'Cancelar'
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          await putData(`proyecto/aprueba-cotizacion`, { id: id });
+          
+          Swal.fire(
+            'Aprobada',
+            'La cotización ha sido aprobada exitosamente.',
+            'success'
+          );
+
+          await cargarCotizaciones();
+        } catch (error) {
+          console.error('Error al aprobar cotización:', error);
+          Swal.fire(
+            'Error',
+            'Hubo un problema al aprobar la cotización.',
+            'error'
+          );
+        }
+      }
+    });
   }
 
   useEffect(() => {
@@ -160,7 +162,7 @@ export const PreciosProvider = ({ children }) => {
     <PreciosContext.Provider
       value={{
         rechazarCotizacion,
-        aprovarCotizacion,
+        aprobarCotizacion,
         cotizaciones,
         seguros,
         precios,
@@ -168,9 +170,6 @@ export const PreciosProvider = ({ children }) => {
         showModalPrecios,
         setShowModalPrecios,
         abrirModalEditarPrecios,
-        actualizarPrecio,
-        crearPrecio,
-        eliminarPrecio,
         cargarSeguros,
         codigoInventarioActivo,
         descripcionInventario,
