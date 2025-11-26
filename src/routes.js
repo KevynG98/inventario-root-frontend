@@ -9,6 +9,11 @@ const InventarioCategorias = React.lazy(() => import('./pages/inventarios/catego
 const InventarioProductos = React.lazy(() => import('./pages/inventarios/gestionSku/Index'));
 const InventarioPrecios = React.lazy(() => import('./pages/inventarios/actualizarPrecio/Index'));
 
+/* Proyectos & Cotizaciones */
+const ProyectosCotizaciones = React.lazy(() => import('./pages/proyectos/cotizaciones/Index'));
+const CotizacionesRechazadas = React.lazy(() => import('./pages/proyectos/cotizacionesRechazadas/Index'));  
+const proyectosEditarPrecios = React.lazy(() => import('./pages/proyectos/cotizaciones/Index'));  
+
 /* ====== PERMISOS ====== */
 
 const getEffectivePermissions = () => {
@@ -83,6 +88,24 @@ const routes = [
     name: 'Actualización de Precios',
     component: withGuard(InventarioPrecios, INVENTARIO_PRECIOS),
   },
+  {
+    path: '/dashboard/proyectos/cotizaciones',
+    exact: true,
+    name: 'Cotizaciones',
+    component: withGuard(ProyectosCotizaciones, INVENTARIO_GESTION),
+  },
+  {
+    path: '/dashboard/proyectos/cotizaciones-rechazadas',
+    exact: true,
+    name: 'Cotizaciones Rechazadas',
+    component: withGuard(CotizacionesRechazadas, INVENTARIO_GESTION), 
+  },
+  {
+    path: '/dashboard/proyectos/proyectos',
+    exact: true,
+    name: 'Proyectos',
+    component: withGuard(proyectosEditarPrecios, INVENTARIO_GESTION),
+  }
 ];
 
 export default routes;
