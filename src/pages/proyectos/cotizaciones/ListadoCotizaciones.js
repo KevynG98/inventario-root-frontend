@@ -33,9 +33,9 @@ const ListadoPrecios = () => {
                     <thead className="table-primary text-dark">
                         <tr>
                             <th>Nombre Empresa</th>
-                            <th>Nombre Proyecto</th>
                             <th>Correo</th>
                             <th>Monto presupuestado</th>
+                            <th>Productos en cotizacion</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
@@ -43,7 +43,7 @@ const ListadoPrecios = () => {
                         {cotizaciones.map((cot, idx) => (
                             <tr key={idx}>
                                 <td>{cot.nombreEmpresa}</td>
-                                <td>{cot.nombreProyecto}</td>
+                                <td>{cot.emailEmpresa}</td>
                                 <td>
                                     Q{cot.totalPresupuestado}
                                 </td>

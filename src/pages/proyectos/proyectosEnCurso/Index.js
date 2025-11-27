@@ -1,12 +1,12 @@
 import React from 'react';
 import { PreciosProvider } from './Context';
-import ListadoPrecios from './ListadoPrecios';
-import ModalPrecios from './ModalPrecios';
+import ListadoProyectos from './ListadoProyectos';
+import ModalProyectos from './ModalProyectos';
 
 const Index = () => (
   <PreciosProvider>
-    <ListadoPrecios />
-    <ModalPrecios />
+    <ListadoProyectos />
+    <ModalProyectos />
   </PreciosProvider>
 );
 

@@ -12,7 +12,7 @@ const InventarioPrecios = React.lazy(() => import('./pages/inventarios/actualiza
 /* Proyectos & Cotizaciones */
 const ProyectosCotizaciones = React.lazy(() => import('./pages/proyectos/cotizaciones/Index'));
 const CotizacionesRechazadas = React.lazy(() => import('./pages/proyectos/cotizacionesRechazadas/Index'));  
-const proyectosEditarPrecios = React.lazy(() => import('./pages/proyectos/cotizaciones/Index'));  
+const proyectosEditarPrecios = React.lazy(() => import('./pages/proyectos/proyectosEnCurso/Index'));  
 
 /* ====== PERMISOS ====== */
 
