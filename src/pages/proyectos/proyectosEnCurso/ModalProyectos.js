@@ -6,12 +6,12 @@ const ModalPrecios = () => {
   const {
     showModalPrecios,
     setShowModalPrecios,
-    cotizacionSeleccionada,
+    proyectoSeleccionado,
   } = usePreciosContext();
 
   const handleClose = () => setShowModalPrecios(false);
 
-  const productos = cotizacionSeleccionada?.productos_detalle || [];
+  const productos = proyectoSeleccionado?.productos_detalle || [];
 
   return (
     <Modal show={showModalPrecios} onHide={handleClose} size="lg">
@@ -19,13 +19,13 @@ const ModalPrecios = () => {
         <div className="d-flex flex-column">
           <Modal.Title>
             Productos de la cotización
-            {cotizacionSeleccionada?.nombreProyecto
-              ? ` - ${cotizacionSeleccionada.nombreProyecto}`
+            {proyectoSeleccionado?.nombreProyecto
+              ? ` - ${proyectoSeleccionado.nombreProyecto}`
               : ''}
           </Modal.Title>
-          {cotizacionSeleccionada?.nombreEmpresa && (
+          {proyectoSeleccionado?.nombreEmpresa && (
             <p className="text-muted mb-0">
-              Empresa: {cotizacionSeleccionada.nombreEmpresa}
+              Empresa: {proyectoSeleccionado.nombreEmpresa}
             </p>
           )}
         </div>

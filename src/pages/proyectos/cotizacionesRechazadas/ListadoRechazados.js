@@ -28,7 +28,13 @@ const ListadoPrecios = () => {
                     <div className="col-md-3"><input className="form-control" placeholder="Nombre" value={fNombre} onChange={(e)=>setFNombre(e.target.value)} /></div>
                     <div className="col-md-3"><input className="form-control" placeholder="Código de barras" value={fBarcode} onChange={(e)=>setFBarcode(e.target.value)} /></div>
                 </div>
-                <Table bordered hover size="sm">
+                <Table
+                    bordered
+                    hover
+                    size="sm"
+                    className="mb-0 w-auto"
+                    style={{ tableLayout: 'auto' }}
+                >
                     <thead className="table-primary text-dark">
                         <tr>
                             <th>Nombre Empresa</th>

@@ -152,9 +152,7 @@ export const PreciosProvider = ({ children }) => {
   }, []);
   
   useEffect(() => {
-    if (seguros.length > 0) {
-      cargarPrecios();
-    }
+    
   }, [seguros]);
   
 
