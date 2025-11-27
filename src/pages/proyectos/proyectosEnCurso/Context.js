@@ -56,6 +56,26 @@ export const PreciosProvider = ({ children }) => {
       }
   };  
 
+  const actualizarEstatusProyecto = async (idProyecto, nuevoEstatus) => {
+    try {
+      const res = await putData(`proyecto/actualizar-estatus`, { id: idProyecto, estatus: nuevoEstatus });
+      // Actualizar el estado localmente
+      cargarProyectos();
+      Swal.fire({
+        icon: 'success',
+        title: 'Éxito',
+        text: 'Estatus del proyecto actualizado correctamente.',
+      });
+    } catch (error) {
+      console.error('Error al actualizar el estatus del proyecto:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'No se pudo actualizar el estatus del proyecto.',
+      });
+    }
+  }
+
 
 
 
@@ -86,7 +106,8 @@ export const PreciosProvider = ({ children }) => {
         codigoInventarioActivo,
         descripcionInventario,
         proyectos,
-        proyectoSeleccionado
+        proyectoSeleccionado,
+        actualizarEstatusProyecto
       }}
     >
       {children}
