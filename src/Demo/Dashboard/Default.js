@@ -1,6 +1,6 @@
 import React from 'react';
 import { Container, Row, Col, Card, Button } from 'react-bootstrap';
-import { FiBox, FiPackage, FiClipboard, FiTag, FiTrendingUp } from 'react-icons/fi';
+import { FiBox, FiPackage, FiClipboard, FiTag } from 'react-icons/fi';
 import Aux from '../../hoc/_Aux';
 
 const quickActions = [
@@ -21,20 +21,13 @@ const quickActions = [
     description: 'Administra marcas y proveedores asociados.',
     icon: <FiTag size={22} />,
     link: '/dashboard/inventario/marcas'
-  },
-  {
-    title: 'Precios',
-    description: 'Actualiza precios y descuentos vigentes.',
-    icon: <FiTrendingUp size={22} />,
-    link: '/dashboard/inventario/precios'
   }
 ];
 
 const quickStats = [
   { label: 'Productos activos', value: '—', hint: 'Conecta este KPI a tu endpoint de inventario.' },
   { label: 'Categorías', value: '—', hint: 'Resume la estructura del catálogo.' },
-  { label: 'Marcas registradas', value: '—', hint: 'Número de marcas disponibles.' },
-  { label: 'Actualizaciones de precio', value: '—', hint: 'Últimos ajustes realizados.' }
+  { label: 'Marcas registradas', value: '—', hint: 'Número de marcas disponibles.' }
 ];
 
 const Dashboard = () => {

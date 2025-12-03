@@ -7,7 +7,6 @@ const Error404 = React.lazy(() => import('./pages/404/Index'));
 const InventarioMarca = React.lazy(() => import('./pages/inventarios/marcas/Index'));
 const InventarioCategorias = React.lazy(() => import('./pages/inventarios/categorias/Index'));
 const InventarioProductos = React.lazy(() => import('./pages/inventarios/gestionSku/Index'));
-const InventarioPrecios = React.lazy(() => import('./pages/inventarios/actualizarPrecio/Index'));
 
 /* Proyectos & Cotizaciones */
 const ProyectosCotizaciones = React.lazy(() => import('./pages/proyectos/cotizaciones/Index'));
@@ -57,8 +56,7 @@ const withGuard = (Component, allowed) => {
   return GuardedComponent;
 };
 
-const INVENTARIO_GESTION = [1, 8];
-const INVENTARIO_PRECIOS = [1, 9];
+const INVENTARIO_GESTION = [1, 6, 7, 8, 9];
 
 /* ====== RUTAS ====== */
 const routes = [
@@ -83,12 +81,6 @@ const routes = [
     component: withGuard(InventarioProductos, INVENTARIO_GESTION),
   },
   {
-    path: '/dashboard/inventario/precios',
-    exact: true,
-    name: 'Actualización de Precios',
-    component: withGuard(InventarioPrecios, INVENTARIO_PRECIOS),
-  },
-  {
     path: '/dashboard/proyectos/cotizaciones',
     exact: true,
     name: 'Cotizaciones',
@@ -105,7 +97,7 @@ const routes = [
     exact: true,
     name: 'Proyectos',
     component: withGuard(proyectosEditarPrecios, INVENTARIO_GESTION),
-  }
+  },
 ];
 
 export default routes;

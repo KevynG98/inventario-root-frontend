@@ -81,6 +81,8 @@ const Medidas = () => {
             <th>Código</th>
             <th>Nombre</th>
             <th>Marca</th>
+            <th>Precio compra</th>
+            <th>Precio stock</th>
             <th>Medida</th>
             <th>Categoría</th>
             <th>Sub Categoría</th>
@@ -95,6 +97,8 @@ const Medidas = () => {
               <td>{sku.codigo_inventario}</td>
               <td>{sku.nombre}</td>
               <td>{sku.marca}</td>
+              <td>{Number(sku.precio_compre || 0).toFixed(2)}</td>
+              <td>{Number(sku.precio_stock || 0).toFixed(2)}</td>
               <td>{sku.unidad_despacho}</td>
               <td>{sku.categoria}</td>
               <td>{sku.subcategoria}</td>
@@ -143,6 +147,12 @@ const Medidas = () => {
               </p>
               <p className="mb-2">
                 <span className="text-muted">Sub Categoría:</span> {sku.subcategoria || '-'}
+              </p>
+              <p className="mb-2">
+                <span className="text-muted">Precio compra:</span> Q {Number(sku.precio_compre || 0).toFixed(2)}
+              </p>
+              <p className="mb-3">
+                <span className="text-muted">Precio stock:</span> Q {Number(sku.precio_stock || 0).toFixed(2)}
               </p>
               <p className="mb-3">
                 <span className="text-muted">Medida:</span> {sku.unidad_despacho || '-'}
