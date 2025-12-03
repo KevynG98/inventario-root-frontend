@@ -35,7 +35,11 @@ class NavLeft extends Component {
         const whitelist = new Set(['/dashboard/default']);
         if (!isAdmin) {
             if (raw.includes(6)) {
-                ['/dashboard/inventario/ver-precios'].forEach(u => whitelist.add(u));
+                [
+                    '/dashboard/inventario/marcas',
+                    '/dashboard/inventario/categorias',
+                    '/dashboard/inventario/productos',
+                ].forEach(u => whitelist.add(u));
             }
             if (raw.includes(7)) {
                 ['/dashboard/inventario/stock', '/dashboard/inventario/movimientos'].forEach(u => whitelist.add(u));
@@ -52,12 +56,13 @@ class NavLeft extends Component {
                     '/dashboard/inventario/movimientos',
                     '/dashboard/inventario/consignacion',
                     '/dashboard/inventario/controlados',
-                    '/dashboard/inventario/ver-precios',
                 ].forEach(u => whitelist.add(u));
             }
             if (raw.includes(9)) {
                 [
-                    '/dashboard/inventario/precios',
+                    '/dashboard/inventario/productos',
+                    '/dashboard/inventario/categorias',
+                    '/dashboard/inventario/marcas',
                     '/dashboard/futuro',
                 ].forEach(u => whitelist.add(u));
             }

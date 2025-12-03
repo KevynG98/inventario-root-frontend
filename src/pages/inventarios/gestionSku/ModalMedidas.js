@@ -40,6 +40,8 @@ const ModalMedidas = () => {
         categoria: '',
         marca: '',
         barcode: '',
+        precio_compre: '',
+        precio_stock: '',
       });
     }
 
@@ -160,6 +162,34 @@ const ModalMedidas = () => {
                   {...register('barcode')}
                   readOnly={readOnly}
                 />
+              </Form.Group>
+            </Col>
+            <Col md={3}>
+              <Form.Group>
+                <Form.Label className="text-light">Precio de compra *</Form.Label>
+                <Form.Control
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  className={inputClasses}
+                  {...register('precio_compre', { required: true, min: 0 })}
+                  readOnly={readOnly}
+                />
+                {errors.precio_compre && <small className="text-danger">Ingresa un precio de compra válido</small>}
+              </Form.Group>
+            </Col>
+            <Col md={3}>
+              <Form.Group>
+                <Form.Label className="text-light">Precio en stock *</Form.Label>
+                <Form.Control
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  className={inputClasses}
+                  {...register('precio_stock', { required: true, min: 0 })}
+                  readOnly={readOnly}
+                />
+                {errors.precio_stock && <small className="text-danger">Ingresa un precio de stock válido</small>}
               </Form.Group>
             </Col>
           </Row>

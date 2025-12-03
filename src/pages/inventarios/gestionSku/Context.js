@@ -137,6 +137,8 @@ export const ContextProvider = ({ children }) => {
     payload.unidad_compra = payload.unidad_compra || 'Unidad';
     payload.unidad_despacho = payload.unidad_despacho || 'Unidad';
     payload.unidades_por_paquete = parseInt(payload.unidades_por_paquete || 1, 10);
+    payload.precio_compre = parseFloat(payload.precio_compre ?? 0) || 0;
+    payload.precio_stock = parseFloat(payload.precio_stock ?? 0) || 0;
     payload.barcode = payload.barcode || '';
     payload.subcategoria = payload.subcategoria || '';
     payload.proveedor = payload.proveedor || '';
