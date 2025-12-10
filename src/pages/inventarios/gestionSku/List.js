@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { OverlayTrigger, Tooltip, Button, Spinner, ButtonGroup, Badge } from 'react-bootstrap';
-import { FiEye, FiEdit, FiChevronLeft, FiChevronRight, FiTrash2, FiTruck } from 'react-icons/fi';
+import { FiEye, FiEdit, FiChevronLeft, FiChevronRight, FiTrash2, FiTruck, FiUpload } from 'react-icons/fi';
 import { useMyContext } from './Context';
 
 const Medidas = () => {
@@ -24,6 +24,7 @@ const Medidas = () => {
     limpiarFiltroSkus,
     buscarSkusNextPage,
     buscarSkusPrevPage,
+    abrirModalImport,
   } = useMyContext();
 
   const [term, setTerm] = useState('');
@@ -191,7 +192,7 @@ const Medidas = () => {
 
       <div className="mb-3">
         <div className="row g-2">
-          <div className="col-12 col-md-6">
+          <div className="col-12 col-md-5">
             <form onSubmit={handleBuscar}>
               <input
                 type="text"
@@ -215,7 +216,12 @@ const Medidas = () => {
               Limpiar
             </Button>
           </div>
-          <div className="col-12 col-md-2">
+          <div className="col-6 col-md-2">
+            <Button className="w-100" variant="outline-dark" onClick={abrirModalImport}>
+              <FiUpload className="me-1" /> Carga masiva
+            </Button>
+          </div>
+          <div className="col-6 col-md-1 d-md-flex justify-content-end">
             <Button className="w-100" onClick={abrirModalCrear}>
               Nuevo Producto
             </Button>
