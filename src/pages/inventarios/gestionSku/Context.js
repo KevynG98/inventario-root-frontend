@@ -1,5 +1,5 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import { getData, postData, putData, deleteData } from '../../../apiService';
+import { getData, postData, postFormData, putData, deleteData } from '../../../apiService';
 import { NotificationManager } from "react-notifications";
 import Swal from 'sweetalert2';
 
@@ -20,6 +20,8 @@ export const ContextProvider = ({ children }) => {
   const [searchPage, setSearchPage] = useState(1);
   const [searchNext, setSearchNext] = useState(null);
   const [searchPrev, setSearchPrev] = useState(null);
+  const [importando, setImportando] = useState(false);
+  const [showImport, setShowImport] = useState(false);
 
   // paginación
   const [page, setPage] = useState(1);
@@ -226,6 +228,9 @@ export const ContextProvider = ({ children }) => {
     showModal();
   };
 
+  const abrirModalImport = () => setShowImport(true);
+  const cerrarModalImport = () => setShowImport(false);
+
   useEffect(() => {
     cargarDatos();
     cargarCategorias();
@@ -237,6 +242,29 @@ export const ContextProvider = ({ children }) => {
     };
     setRole(getRole());
   }, [page]);
+
+  const cargarProductosMasivo = async (file) => {
+    if (!file) {
+      NotificationManager.warning("Selecciona un archivo Excel para cargar.", "Aviso", 4000);
+      return;
+    }
+    const formData = new FormData();
+    formData.append('file', file);
+    setImportando(true);
+    try {
+      const res = await postFormData('inventario/productos-carga-masiva/', formData, { timeout: 180000 });
+      const resumen = res.data?.resumen || 'Carga completada';
+      NotificationManager.success(resumen, "Éxito", 5000);
+      await cargarDatos();
+    } catch (error) {
+      const detail = error.response?.data;
+      const mensaje = detail?.error || 'No se pudo completar la carga masiva.';
+      NotificationManager.error(mensaje, "Error", 6000);
+      console.error('Error en carga masiva:', detail || error);
+    } finally {
+      setImportando(false);
+    }
+  };
 
   const values = {
     data,
@@ -269,6 +297,11 @@ export const ContextProvider = ({ children }) => {
     categorias,
     marcas,
     role,
+    importando,
+    cargarProductosMasivo,
+    showImport,
+    abrirModalImport,
+    cerrarModalImport,
   };
 
   return <MyContext.Provider value={values}>{children}</MyContext.Provider>;

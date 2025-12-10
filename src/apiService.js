@@ -133,6 +133,27 @@ const postData = async (endpoint, data, options = {}) => {
   }
 };
 
+// POST (FORM-DATA)
+const postFormData = async (endpoint, data, options = {}) => {
+  try {
+    const headers = {
+      "Content-Type": "multipart/form-data",
+      ...(getAuthToken() && { Authorization: `Token ${getAuthToken()}` }),
+      ...(getUsername() && { "X-User": getUsername() }),
+      ...(options.headers || {}),
+    };
+    const response = await apiClient.post(endpoint, data, {
+      headers,
+      timeout: options.timeout || 120000,
+      ...options
+    });
+    return response;
+  } catch (error) {
+    console.error("❌ Error al enviar form-data:", error.response?.data || error);
+    throw error;
+  }
+};
+
 // PUT
 const putData = async (url, data, options = {}) => {
   try {
@@ -305,6 +326,7 @@ export {
   getData,
   getBinary,
   postData,
+  postFormData,
   putData,
   patchData,
   deleteData,
