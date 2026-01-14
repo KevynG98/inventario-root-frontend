@@ -28,6 +28,10 @@ const ModalMedidas = () => {
     formState: { errors }
   } = useForm();
 
+  const [imagen, setImagen] = React.useState(null);
+  const [preview, setPreview] = React.useState(null);
+  const [imagenEliminada, setImagenEliminada] = React.useState(false);
+
   const readOnly = modoFormulario === 'ver';
 
   // Reset / Prefill
@@ -43,17 +47,67 @@ const ModalMedidas = () => {
         precio_compre: '',
         precio_stock: '',
       });
+      setImagen(null);
+      setPreview(null);
+      setImagenEliminada(false);
     }
 
     if ((modoFormulario === 'editar' || modoFormulario === 'ver') && proveedorSeleccionado) {
       Object.entries(proveedorSeleccionado).forEach(([key, value]) => {
         setValue(key, value);
       });
+      if (proveedorSeleccionado.imagen) {
+        setPreview(proveedorSeleccionado.imagen);
+      } else {
+        setPreview(null);
+      }
+      setImagen(null);
+      setImagenEliminada(false);
     }
   }, [modoFormulario, proveedorSeleccionado, reset, setValue]);
 
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImagen(file);
+      setPreview(URL.createObjectURL(file));
+      setImagenEliminada(false);
+    }
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    if (!readOnly) {
+        const file = e.dataTransfer.files[0];
+        if (file) {
+            setImagen(file);
+            setPreview(URL.createObjectURL(file));
+            setImagenEliminada(false);
+        }
+    }
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+  };
+
+  const handleRemoveImage = () => {
+      setImagen(null);
+      setPreview(null);
+      setImagenEliminada(true);
+  };
+
   const onSubmit = (data) => {
     const payload = { ...data };
+    
+    // Si hay una nueva imagen seleccionada
+    if (imagen) {
+      payload.imagen = imagen;
+    } 
+    // Si NO hay nueva imagen, pero se eliminó explícitamente la anterior
+    else if (imagenEliminada) {
+      payload.imagen = null; // null indicará al backend (o al context) que debe limpiar el campo
+    }
 
     if (modoFormulario === 'crear') {
       enviarDatos(payload);
@@ -62,6 +116,14 @@ const ModalMedidas = () => {
         ...proveedorSeleccionado,
         ...payload,
       };
+      
+      // Aseguramos que la propiedad imagen vaya correctamente configurada en el objeto final
+      if (imagen) {
+          jsonData.imagen = imagen;
+      } else if (imagenEliminada) {
+          jsonData.imagen = null;
+      }
+      
       actualizarProveedor(jsonData);
     }
   };
@@ -77,6 +139,60 @@ const ModalMedidas = () => {
       </Modal.Header>
       <Modal.Body className="bg-dark text-light">
         <Form onSubmit={handleSubmit(onSubmit)}>
+          <Row>
+             <Col md={12} className="mb-3">
+                <Form.Label className="text-light">Imagen del Producto</Form.Label>
+                <div
+                    onDrop={handleDrop}
+                    onDragOver={handleDragOver}
+                    className={`d-flex flex-column align-items-center justify-content-center border rounded p-3 ${readOnly ? '' : 'cursor-pointer'}`}
+                    style={{ 
+                        borderStyle: 'dashed', 
+                        borderColor: '#6c757d', 
+                        backgroundColor: '#2c3034', 
+                        minHeight: '150px' 
+                    }}
+                >
+                    {preview ? (
+                        <div className="text-center">
+                            <img 
+                                src={preview} 
+                                alt="Vista previa" 
+                                style={{ maxHeight: '150px', maxWidth: '100%', objectFit: 'contain' }} 
+                                className="mb-2 rounded"
+                            />
+                            {!readOnly && (
+                                <div className="mt-2">
+                                    <Button variant="outline-danger" size="sm" onClick={handleRemoveImage}>
+                                        Quitar imagen
+                                    </Button>
+                                </div>
+                            )}
+                        </div>
+                    ) : (
+                        <div className="text-center text-secondary">
+                            <i className="feather icon-image fs-1 mb-2"></i>
+                            <p className="mb-1">Arrastra y suelta una imagen aquí</p>
+                            <p className="small">o</p>
+                            {!readOnly && (
+                                <>
+                                    <label htmlFor="imageUpload" className="btn btn-outline-primary btn-sm">
+                                        Seleccionar archivo
+                                    </label>
+                                    <input 
+                                        id="imageUpload" 
+                                        type="file" 
+                                        accept="image/*" 
+                                        onChange={handleImageChange} 
+                                        style={{ display: 'none' }} 
+                                    />
+                                </>
+                            )}
+                        </div>
+                    )}
+                </div>
+             </Col>
+          </Row>
           <Row>
             <Col md={4}>
               <Form.Group>
