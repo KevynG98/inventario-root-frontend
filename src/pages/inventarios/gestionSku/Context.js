@@ -41,6 +41,7 @@ export const ContextProvider = ({ children }) => {
     try {
       const response = await getData(`inventario/productos/?page=${page}&page_size=50`);
       const resultados = response.data.results;
+      console.log("📦 SKU results:", resultados);
 
       setData(resultados);
       setNullNextPage(response.data.next);
@@ -145,12 +146,44 @@ export const ContextProvider = ({ children }) => {
     payload.subcategoria = payload.subcategoria || '';
     payload.proveedor = payload.proveedor || '';
     payload.is_active = payload.is_active ?? true;
+
+    // Si la imagen es una URL (string) y no un archivo, la quitamos del payload 
+    // para que el backend no intente validarla como un archivo nuevo.
+    if (typeof payload.imagen === 'string') {
+        delete payload.imagen;
+    }
+
     return payload;
+  };
+
+  const createFormData = (data) => {
+    const formData = new FormData();
+    Object.keys(data).forEach(key => {
+        if (key === 'imagen') {
+            if (data[key] instanceof File) {
+                formData.append(key, data[key]);
+            } else if (data[key] === null) {
+                // Si es explícitamente null, enviamos cadena vacía para limpiar el campo en Django
+                formData.append(key, ''); 
+            }
+        } else if (data[key] !== null && data[key] !== undefined) {
+            formData.append(key, data[key]);
+        }
+    });
+    return formData;
   };
 
   const enviarDatos = async (data) => {
     try {
-      const response = await postData("inventario/productos-crear/", normalizarPayload(data));
+      const normalizedData = normalizarPayload(data);
+      let response;
+      if (data.imagen instanceof File) {
+          const formData = createFormData({ ...normalizedData, imagen: data.imagen });
+          response = await postFormData("inventario/productos-crear/", formData);
+      } else {
+          response = await postData("inventario/productos-crear/", normalizedData);
+      }
+
       if (response?.status === 201 && response.data) {
         NotificationManager.success("Producto creado", "Éxito", 3000);
         showModal();
@@ -171,7 +204,19 @@ export const ContextProvider = ({ children }) => {
 
   const actualizarProveedor = async (datos) => {
     try {
-      const response = await putData(`inventario/productos-actualizar/${datos.id}/`, normalizarPayload(datos));
+      const normalizedData = normalizarPayload(datos);
+      let response;
+      
+      // Si hay una nueva imagen (objeto File) O se solicitó eliminarla (null)
+      if (datos.imagen instanceof File || datos.imagen === null) {
+          const formData = createFormData({ ...normalizedData, imagen: datos.imagen });
+          response = await putData(`inventario/productos-actualizar/${datos.id}/`, formData, {
+              headers: { 'Content-Type': 'multipart/form-data' }
+          });
+      } else {
+          response = await putData(`inventario/productos-actualizar/${datos.id}/`, normalizedData);
+      }
+
       if (response.status === 200 || response.status === 204) {
         NotificationManager.success("Producto editado con éxito", "Éxito", 3000);
         cargarDatos();

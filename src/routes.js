@@ -4,8 +4,6 @@ const DashboardDefault = React.lazy(() => import('./Demo/Dashboard/Default'));
 const Error404 = React.lazy(() => import('./pages/404/Index'));
 
 /* Inventario */
-const InventarioMarca = React.lazy(() => import('./pages/inventarios/marcas/Index'));
-const InventarioCategorias = React.lazy(() => import('./pages/inventarios/categorias/Index'));
 const InventarioProductos = React.lazy(() => import('./pages/inventarios/gestionSku/Index'));
 
 /* Proyectos & Cotizaciones */
@@ -62,18 +60,6 @@ const INVENTARIO_GESTION = [1, 6, 7, 8, 9];
 const routes = [
   { path: '/dashboard/default', exact: true, name: 'Default', component: DashboardDefault },
   { path: '/dashboard/404', exact: true, name: '404', component: Error404 },
-  {
-    path: '/dashboard/inventario/marcas',
-    exact: true,
-    name: 'Marcas',
-    component: withGuard(InventarioMarca, INVENTARIO_GESTION),
-  },
-  {
-    path: '/dashboard/inventario/categorias',
-    exact: true,
-    name: 'Categorías',
-    component: withGuard(InventarioCategorias, INVENTARIO_GESTION),
-  },
   {
     path: '/dashboard/inventario/productos',
     exact: true,

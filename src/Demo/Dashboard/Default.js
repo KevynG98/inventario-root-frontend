@@ -11,23 +11,15 @@ const quickActions = [
     link: '/dashboard/inventario/productos'
   },
   {
-    title: 'Categorías',
-    description: 'Ordena el catálogo por familias y subcategorías.',
+    title: 'Cotizaciones',
+    description: 'Revisa las solicitudes de cotización de los clientes.',
     icon: <FiClipboard size={22} />,
-    link: '/dashboard/inventario/categorias'
-  },
-  {
-    title: 'Marcas',
-    description: 'Administra marcas y proveedores asociados.',
-    icon: <FiTag size={22} />,
-    link: '/dashboard/inventario/marcas'
+    link: '/dashboard/proyectos/cotizaciones'
   }
 ];
 
 const quickStats = [
-  { label: 'Productos activos', value: '—', hint: 'Conecta este KPI a tu endpoint de inventario.' },
-  { label: 'Categorías', value: '—', hint: 'Resume la estructura del catálogo.' },
-  { label: 'Marcas registradas', value: '—', hint: 'Número de marcas disponibles.' }
+  { label: 'Productos activos', value: '—', hint: 'Total de productos en el catálogo.' },
 ];
 
 const Dashboard = () => {

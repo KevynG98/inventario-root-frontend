@@ -28,6 +28,10 @@ const ModalMedidas = () => {
     formState: { errors }
   } = useForm();
 
+  const [imagen, setImagen] = React.useState(null);
+  const [preview, setPreview] = React.useState(null);
+  const [imagenEliminada, setImagenEliminada] = React.useState(false);
+
   const readOnly = modoFormulario === 'ver';
 
   // Reset / Prefill
@@ -36,24 +40,73 @@ const ModalMedidas = () => {
       reset({
         codigo_inventario: '',
         nombre: '',
-        estado: 'alta',
-        categoria: '',
-        marca: '',
-        barcode: '',
         precio_compre: '',
         precio_stock: '',
       });
+      setImagen(null);
+      setPreview(null);
+      setImagenEliminada(false);
     }
 
     if ((modoFormulario === 'editar' || modoFormulario === 'ver') && proveedorSeleccionado) {
-      Object.entries(proveedorSeleccionado).forEach(([key, value]) => {
-        setValue(key, value);
+      reset({
+        codigo_inventario: proveedorSeleccionado.codigo_inventario || '',
+        nombre: proveedorSeleccionado.nombre || '',
+        precio_compre: proveedorSeleccionado.precio_compre || '',
+        precio_stock: proveedorSeleccionado.precio_stock || '',
       });
+      if (proveedorSeleccionado.imagen) {
+        setPreview(proveedorSeleccionado.imagen);
+      } else {
+        setPreview(null);
+      }
+      setImagen(null);
+      setImagenEliminada(false);
     }
   }, [modoFormulario, proveedorSeleccionado, reset, setValue]);
 
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImagen(file);
+      setPreview(URL.createObjectURL(file));
+      setImagenEliminada(false);
+    }
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    if (!readOnly) {
+        const file = e.dataTransfer.files[0];
+        if (file) {
+            setImagen(file);
+            setPreview(URL.createObjectURL(file));
+            setImagenEliminada(false);
+        }
+    }
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+  };
+
+  const handleRemoveImage = () => {
+      setImagen(null);
+      setPreview(null);
+      setImagenEliminada(true);
+  };
+
   const onSubmit = (data) => {
     const payload = { ...data };
+    
+    // Si hay una nueva imagen seleccionada
+    if (imagen) {
+      payload.imagen = imagen;
+    } 
+    // Si NO hay nueva imagen, pero se eliminó explícitamente la anterior
+    else if (imagenEliminada) {
+      payload.imagen = null; // null indicará al backend (o al context) que debe limpiar el campo
+    }
 
     if (modoFormulario === 'crear') {
       enviarDatos(payload);
@@ -62,6 +115,14 @@ const ModalMedidas = () => {
         ...proveedorSeleccionado,
         ...payload,
       };
+      
+      // Aseguramos que la propiedad imagen vaya correctamente configurada en el objeto final
+      if (imagen) {
+          jsonData.imagen = imagen;
+      } else if (imagenEliminada) {
+          jsonData.imagen = null;
+      }
+      
       actualizarProveedor(jsonData);
     }
   };
@@ -78,57 +139,59 @@ const ModalMedidas = () => {
       <Modal.Body className="bg-dark text-light">
         <Form onSubmit={handleSubmit(onSubmit)}>
           <Row>
-            <Col md={4}>
-              <Form.Group>
-                <Form.Label className="text-light">Estado *</Form.Label>
-                <Form.Control
-                  as="select"
-                  className={inputClasses}
-                  {...register('estado', { required: true })}
-                  readOnly={readOnly}
-                  disabled={readOnly}
+             <Col md={12} className="mb-3">
+                <Form.Label className="text-light">Imagen del Producto</Form.Label>
+                <div
+                    onDrop={handleDrop}
+                    onDragOver={handleDragOver}
+                    className={`d-flex flex-column align-items-center justify-content-center border rounded p-3 ${readOnly ? '' : 'cursor-pointer'}`}
+                    style={{ 
+                        borderStyle: 'dashed', 
+                        borderColor: '#6c757d', 
+                        backgroundColor: '#2c3034', 
+                        minHeight: '150px' 
+                    }}
                 >
-                  <option value="alta">Disponible</option>
-                  <option value="baja">No Disponible</option>
-                </Form.Control>
-              </Form.Group>
-            </Col>
-            <Col md={4}>
-              <Form.Group>
-                <Form.Label className="text-light">Categoría *</Form.Label>
-                <Form.Control
-                  as="select"
-                  className={inputClasses}
-                  {...register('categoria', { required: true })}
-                  readOnly={readOnly}
-                  disabled={readOnly}
-                >
-                  <option value="">Seleccionar</option>
-                  {categorias?.map((data, i) => (
-                    <option key={i} value={data.nombre}>{data.nombre}</option>
-                  ))}
-                </Form.Control>
-              </Form.Group>
-            </Col>
-            <Col md={4}>
-              <Form.Group>
-                <Form.Label className="text-light">Marca *</Form.Label>
-                <Form.Control
-                  as="select"
-                  className={inputClasses}
-                  {...register('marca', { required: true })}
-                  readOnly={readOnly}
-                  disabled={readOnly}
-                >
-                  <option value="">Seleccionar</option>
-                  {marcas?.map((data, i) => (
-                    <option key={i} value={data.nombre}>{data.nombre}</option>
-                  ))}
-                </Form.Control>
-              </Form.Group>
-            </Col>
+                    {preview ? (
+                        <div className="text-center">
+                            <img 
+                                src={preview} 
+                                alt="Vista previa" 
+                                style={{ maxHeight: '150px', maxWidth: '100%', objectFit: 'contain' }} 
+                                className="mb-2 rounded"
+                            />
+                            {!readOnly && (
+                                <div className="mt-2">
+                                    <Button variant="outline-danger" size="sm" onClick={handleRemoveImage}>
+                                        Quitar imagen
+                                    </Button>
+                                </div>
+                            )}
+                        </div>
+                    ) : (
+                        <div className="text-center text-secondary">
+                            <i className="feather icon-image fs-1 mb-2"></i>
+                            <p className="mb-1">Arrastra y suelta una imagen aquí</p>
+                            <p className="small">o</p>
+                            {!readOnly && (
+                                <>
+                                    <label htmlFor="imageUpload" className="btn btn-outline-primary btn-sm">
+                                        Seleccionar archivo
+                                    </label>
+                                    <input 
+                                        id="imageUpload" 
+                                        type="file" 
+                                        accept="image/*" 
+                                        onChange={handleImageChange} 
+                                        style={{ display: 'none' }} 
+                                    />
+                                </>
+                            )}
+                        </div>
+                    )}
+                </div>
+             </Col>
           </Row>
-
           <Row className="mt-2">
             <Col md={4}>
               <Form.Group>
@@ -156,17 +219,7 @@ const ModalMedidas = () => {
           <Row className="mt-2">
             <Col md={6}>
               <Form.Group>
-                <Form.Label className="text-light">Código de Barras</Form.Label>
-                <Form.Control
-                  className={inputClasses}
-                  {...register('barcode')}
-                  readOnly={readOnly}
-                />
-              </Form.Group>
-            </Col>
-            <Col md={3}>
-              <Form.Group>
-                <Form.Label className="text-light">Precio de compra *</Form.Label>
+                <Form.Label className="text-light">Coste (Precio compra) *</Form.Label>
                 <Form.Control
                   type="number"
                   step="0.01"
@@ -178,9 +231,9 @@ const ModalMedidas = () => {
                 {errors.precio_compre && <small className="text-danger">Ingresa un precio de compra válido</small>}
               </Form.Group>
             </Col>
-            <Col md={3}>
+            <Col md={6}>
               <Form.Group>
-                <Form.Label className="text-light">Precio en stock *</Form.Label>
+                <Form.Label className="text-light">Precio de Venta *</Form.Label>
                 <Form.Control
                   type="number"
                   step="0.01"
@@ -189,7 +242,7 @@ const ModalMedidas = () => {
                   {...register('precio_stock', { required: true, min: 0 })}
                   readOnly={readOnly}
                 />
-                {errors.precio_stock && <small className="text-danger">Ingresa un precio de stock válido</small>}
+                {errors.precio_stock && <small className="text-danger">Ingresa un precio de venta válido</small>}
               </Form.Group>
             </Col>
           </Row>

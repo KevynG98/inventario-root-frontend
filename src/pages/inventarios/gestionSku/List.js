@@ -78,89 +78,97 @@ const Medidas = () => {
       <table className="table table-bordered table-sm mt-2">
         <thead className="table-primary text-dark fw-semibold text-center">
           <tr>
+            <th>Imagen</th>
             <th>Interno</th>
             <th>Código</th>
             <th>Nombre</th>
-            <th>Marca</th>
             <th>Precio compra</th>
-            <th>Precio stock</th>
-            <th>Medida</th>
-            <th>Categoría</th>
-            <th>Sub Categoría</th>
-            <th>Estado</th>
+            <th>Precio venta</th>
             <th>Acciones</th>
           </tr>
         </thead>
         <tbody>
-          {filtered.map((sku, idx) => (
-            <tr key={idx}>
-              <td>{sku.id}</td>
-              <td>{sku.codigo_inventario}</td>
-              <td>{sku.nombre}</td>
-              <td>{sku.marca}</td>
-              <td>{Number(sku.precio_compre || 0).toFixed(2)}</td>
-              <td>{Number(sku.precio_stock || 0).toFixed(2)}</td>
-              <td>{sku.unidad_despacho}</td>
-              <td>{sku.categoria}</td>
-              <td>{sku.subcategoria}</td>
-              <td>{sku.estado === 'alta' ? 'Disponible' : 'No Disponible'}</td>
-              <td className="text-center">
-                {renderActionButtons(sku)}
-                {/* <OverlayTrigger overlay={<Tooltip>Eliminar</Tooltip>}>
-                  <Button className="btn btn-outline-secondary btn-sm me-1" onClick={() => eliminarProveedor(sku.id)}>
-                    <FiTrash2 />
-                  </Button>
-                </OverlayTrigger>
-                <OverlayTrigger overlay={<Tooltip>Movimiento</Tooltip>}>
-                  <Button className="btn btn-outline-secondary btn-sm" onClick={() => abrirModalMovimiento(sku)}>
-                    <FiTruck />
-                  </Button>
-                </OverlayTrigger> */}
-              </td>
-            </tr>
-          ))}
-        </tbody>
+          {filtered.map((sku, idx) => {
+            console.log("Rendering SKU:", sku.id, "Image:", sku.imagen);
+                        return (
+                          <tr key={idx} className="align-middle">
+                            <td className="text-center">
+                              {sku.imagen ? (
+                                <img 
+                                  src={sku.imagen} 
+                                  alt={sku.nombre} 
+                                  style={{ width: '40px', height: '40px', objectFit: 'cover' }} 
+                                  className="rounded"
+                                />
+                              ) : (
+                                <div 
+                                  className="bg-light d-flex align-items-center justify-content-center rounded mx-auto" 
+                                  style={{ width: '40px', height: '40px' }}
+                                >
+                                  <i className="feather icon-image text-muted" style={{ fontSize: '20px' }}></i>
+                                </div>
+                              )}
+                            </td>
+                            <td>{sku.id}</td>
+                            <td>{sku.codigo_inventario}</td>
+                            <td>{sku.nombre}</td>
+                            <td>{Number(sku.precio_compre || 0).toFixed(2)}</td>
+                            <td>{Number(sku.precio_stock || 0).toFixed(2)}</td>
+                            <td className="text-center">
+                              {renderActionButtons(sku)}
+                            </td>
+                          </tr>
+                        );
+                      })}        </tbody>
       </table>
     </div>
   );
 
   const renderCards = () => (
-    <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3 mt-2">
+    <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mt-2">
       {filtered.map((sku, idx) => (
         <div className="col" key={idx}>
-          <div className="card h-100 shadow-sm">
-            <div className="card-body">
-              <div className="d-flex justify-content-between align-items-start mb-2">
-                <div>
-                  <p className="text-muted mb-1">Código</p>
-                  <h6 className="mb-0">{sku.codigo_inventario}</h6>
+          <div className="card h-100 shadow-sm border-0">
+            <div 
+              style={{ 
+                height: '180px', 
+                backgroundColor: '#f8f9fa', 
+                overflow: 'hidden',
+                position: 'relative' 
+              }}
+              className="d-flex align-items-center justify-content-center"
+            >
+              {sku.imagen ? (
+                <img 
+                  src={sku.imagen} 
+                  alt={sku.nombre} 
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                />
+              ) : (
+                <div className="text-center text-muted">
+                  <i className="feather icon-image" style={{ fontSize: '48px' }}></i>
+                  <p className="mb-0 small">Sin imagen</p>
                 </div>
-                <Badge bg={sku.estado === 'alta' ? 'success' : 'secondary'}>
-                  {sku.estado === 'alta' ? 'Disponible' : 'No Disponible'}
-                </Badge>
-              </div>
-              <h5 className="card-title mb-1">{sku.nombre}</h5>
-              <p className="mb-2">
-                <span className="text-muted">Marca:</span> {sku.marca || 'Sin marca'}
-              </p>
-              <p className="mb-2">
-                <span className="text-muted">Categoría:</span> {sku.categoria || '-'}
-              </p>
-              <p className="mb-2">
-                <span className="text-muted">Sub Categoría:</span> {sku.subcategoria || '-'}
-              </p>
-              <p className="mb-2">
-                <span className="text-muted">Precio compra:</span> Q {Number(sku.precio_compre || 0).toFixed(2)}
-              </p>
-              <p className="mb-3">
-                <span className="text-muted">Precio stock:</span> Q {Number(sku.precio_stock || 0).toFixed(2)}
-              </p>
-              <p className="mb-3">
-                <span className="text-muted">Medida:</span> {sku.unidad_despacho || '-'}
-              </p>
+              )}
             </div>
-            <div className="card-footer bg-light d-flex justify-content-end">
-              {renderActionButtons(sku)}
+            <div className="card-body">
+              <div className="mb-2">
+                <p className="text-muted small mb-0">Código: {sku.codigo_inventario}</p>
+                <h5 className="card-title text-truncate mb-0" title={sku.nombre}>{sku.nombre}</h5>
+              </div>
+              <div className="row g-2">
+                <div className="col-6">
+                  <span className="text-muted small d-block">Coste (Compra)</span>
+                  <span className="fw-bold text-primary">Q {Number(sku.precio_compre || 0).toFixed(2)}</span>
+                </div>
+                <div className="col-6">
+                  <span className="text-muted small d-block">Precio Venta</span>
+                  <span className="fw-bold text-success">Q {Number(sku.precio_stock || 0).toFixed(2)}</span>
+                </div>
+              </div>
+            </div>
+            <div className="card-footer bg-white border-top-0 d-flex justify-content-end align-items-center">
+                <div>{renderActionButtons(sku)}</div>
             </div>
           </div>
         </div>

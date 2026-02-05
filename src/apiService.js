@@ -155,33 +155,29 @@ const postFormData = async (endpoint, data, options = {}) => {
 };
 
 // PUT
-const putData = async (url, data, options = {}) => {
+const putData = async (endpoint, data, options = {}) => {
   try {
-    if (!options.__skipLoader) {
-      __loaderCount += 1;
-      if (__loaderCount === 1)
-        showGlobalLoader(options.__loaderTitle || "Cargando...");
-    }
     const headers = {
       "Content-Type": "application/json",
       ...(getAuthToken() && { Authorization: `Token ${getAuthToken()}` }),
       ...(getUsername() && { "X-User": getUsername() }),
+      ...(options.headers || {}),
     };
-    const response = await fetch(`${API_URL}${url}`, {
-      method: "PUT",
-      headers,
-      body: JSON.stringify(data),
-    });
-    const json = await response.json();
-    return { status: response.status, data: json };
-  } catch (error) {
-    console.error(`❌ Error al actualizar en ${url}:`, error);
-    throw error;
-  } finally {
-    if (!options.__skipLoader) {
-      __loaderCount = Math.max(0, __loaderCount - 1);
-      if (__loaderCount === 0) hideGlobalLoader();
+
+    // Axios detecta automáticamente FormData y elimina 'Content-Type' para que el navegador ponga el boundary
+    // Si data es FormData, Axios lo manejará, pero si forzamos application/json podría fallar.
+    // Sin embargo, si options.headers trae 'multipart/form-data', Axios suele respetarlo o necesitar que lo quitemos.
+    // Lo mejor es dejar que Axios gestione el Content-Type si es FormData.
+    
+    if (data instanceof FormData) {
+        delete headers["Content-Type"];
     }
+
+    const response = await apiClient.put(endpoint, data, { headers, ...options });
+    return response;
+  } catch (error) {
+    console.error(`❌ Error al actualizar en ${endpoint}:`, error.response?.data || error);
+    throw error;
   }
 };
 
