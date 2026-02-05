@@ -27,11 +27,10 @@ const staticRoutes = [
     title: 'Inventario',
     icon: <FiBox />,
     roles: R.INVENTARIO,
-    children: [
-      { title: 'Marcas', url: '/dashboard/inventario/marcas', icon: <FiPackage />, roles: [1, 6, 7, 8, 9] },
-      { title: 'Categorías', url: '/dashboard/inventario/categorias', icon: <FiClipboard />, roles: [1, 6, 7, 8, 9] },
-      { title: 'Productos', url: '/dashboard/inventario/productos', icon: <FiList />, roles: [1, 6, 7, 8, 9] },
-    ],
+        children: [
+          { title: 'Productos', url: '/dashboard/inventario/productos', icon: <FiList />, roles: [1, 6, 7, 8, 9] },
+        ]
+    ,
   },
   {
     title: 'Proyectos',

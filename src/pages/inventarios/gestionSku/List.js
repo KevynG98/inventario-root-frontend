@@ -82,13 +82,8 @@ const Medidas = () => {
             <th>Interno</th>
             <th>Código</th>
             <th>Nombre</th>
-            <th>Marca</th>
             <th>Precio compra</th>
-            <th>Precio stock</th>
-            <th>Medida</th>
-            <th>Categoría</th>
-            <th>Sub Categoría</th>
-            <th>Estado</th>
+            <th>Precio venta</th>
             <th>Acciones</th>
           </tr>
         </thead>
@@ -117,25 +112,10 @@ const Medidas = () => {
                             <td>{sku.id}</td>
                             <td>{sku.codigo_inventario}</td>
                             <td>{sku.nombre}</td>
-                            <td>{sku.marca}</td>
                             <td>{Number(sku.precio_compre || 0).toFixed(2)}</td>
                             <td>{Number(sku.precio_stock || 0).toFixed(2)}</td>
-                            <td>{sku.unidad_despacho}</td>
-                            <td>{sku.categoria}</td>
-                            <td>{sku.subcategoria}</td>
-                            <td>{sku.estado === 'alta' ? 'Disponible' : 'No Disponible'}</td>
                             <td className="text-center">
                               {renderActionButtons(sku)}
-                              {/* <OverlayTrigger overlay={<Tooltip>Eliminar</Tooltip>}>
-                                <Button className="btn btn-outline-secondary btn-sm me-1" onClick={() => eliminarProveedor(sku.id)}>
-                                  <FiTrash2 />
-                                </Button>
-                              </OverlayTrigger>
-                              <OverlayTrigger overlay={<Tooltip>Movimiento</Tooltip>}>
-                                <Button className="btn btn-outline-secondary btn-sm" onClick={() => abrirModalMovimiento(sku)}>
-                                  <FiTruck />
-                                </Button>
-                              </OverlayTrigger> */}
                             </td>
                           </tr>
                         );
@@ -170,40 +150,24 @@ const Medidas = () => {
                   <p className="mb-0 small">Sin imagen</p>
                 </div>
               )}
-              <div style={{ position: 'absolute', top: '10px', right: '10px' }}>
-                <Badge bg={sku.estado === 'alta' ? 'success' : 'secondary'}>
-                  {sku.estado === 'alta' ? 'Disponible' : 'No Disponible'}
-                </Badge>
-              </div>
             </div>
             <div className="card-body">
               <div className="mb-2">
                 <p className="text-muted small mb-0">Código: {sku.codigo_inventario}</p>
                 <h5 className="card-title text-truncate mb-0" title={sku.nombre}>{sku.nombre}</h5>
               </div>
-              <div className="row g-0 mb-2 border-bottom pb-2">
-                <div className="col-6 small">
-                  <span className="text-muted d-block">Marca</span>
-                  <strong>{sku.marca || 'Sin marca'}</strong>
-                </div>
-                <div className="col-6 small">
-                  <span className="text-muted d-block">Categoría</span>
-                  <strong>{sku.categoria || '-'}</strong>
-                </div>
-              </div>
               <div className="row g-2">
                 <div className="col-6">
-                  <span className="text-muted small d-block">Precio Compra</span>
+                  <span className="text-muted small d-block">Coste (Compra)</span>
                   <span className="fw-bold text-primary">Q {Number(sku.precio_compre || 0).toFixed(2)}</span>
                 </div>
                 <div className="col-6">
-                  <span className="text-muted small d-block">Precio Stock</span>
+                  <span className="text-muted small d-block">Precio Venta</span>
                   <span className="fw-bold text-success">Q {Number(sku.precio_stock || 0).toFixed(2)}</span>
                 </div>
               </div>
             </div>
-            <div className="card-footer bg-white border-top-0 d-flex justify-content-between align-items-center">
-                <small className="text-muted">{sku.unidad_despacho}</small>
+            <div className="card-footer bg-white border-top-0 d-flex justify-content-end align-items-center">
                 <div>{renderActionButtons(sku)}</div>
             </div>
           </div>

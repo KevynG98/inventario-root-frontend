@@ -40,10 +40,6 @@ const ModalMedidas = () => {
       reset({
         codigo_inventario: '',
         nombre: '',
-        estado: 'alta',
-        categoria: '',
-        marca: '',
-        barcode: '',
         precio_compre: '',
         precio_stock: '',
       });
@@ -53,8 +49,11 @@ const ModalMedidas = () => {
     }
 
     if ((modoFormulario === 'editar' || modoFormulario === 'ver') && proveedorSeleccionado) {
-      Object.entries(proveedorSeleccionado).forEach(([key, value]) => {
-        setValue(key, value);
+      reset({
+        codigo_inventario: proveedorSeleccionado.codigo_inventario || '',
+        nombre: proveedorSeleccionado.nombre || '',
+        precio_compre: proveedorSeleccionado.precio_compre || '',
+        precio_stock: proveedorSeleccionado.precio_stock || '',
       });
       if (proveedorSeleccionado.imagen) {
         setPreview(proveedorSeleccionado.imagen);
@@ -193,58 +192,6 @@ const ModalMedidas = () => {
                 </div>
              </Col>
           </Row>
-          <Row>
-            <Col md={4}>
-              <Form.Group>
-                <Form.Label className="text-light">Estado *</Form.Label>
-                <Form.Control
-                  as="select"
-                  className={inputClasses}
-                  {...register('estado', { required: true })}
-                  readOnly={readOnly}
-                  disabled={readOnly}
-                >
-                  <option value="alta">Disponible</option>
-                  <option value="baja">No Disponible</option>
-                </Form.Control>
-              </Form.Group>
-            </Col>
-            <Col md={4}>
-              <Form.Group>
-                <Form.Label className="text-light">Categoría *</Form.Label>
-                <Form.Control
-                  as="select"
-                  className={inputClasses}
-                  {...register('categoria', { required: true })}
-                  readOnly={readOnly}
-                  disabled={readOnly}
-                >
-                  <option value="">Seleccionar</option>
-                  {categorias?.map((data, i) => (
-                    <option key={i} value={data.nombre}>{data.nombre}</option>
-                  ))}
-                </Form.Control>
-              </Form.Group>
-            </Col>
-            <Col md={4}>
-              <Form.Group>
-                <Form.Label className="text-light">Marca *</Form.Label>
-                <Form.Control
-                  as="select"
-                  className={inputClasses}
-                  {...register('marca', { required: true })}
-                  readOnly={readOnly}
-                  disabled={readOnly}
-                >
-                  <option value="">Seleccionar</option>
-                  {marcas?.map((data, i) => (
-                    <option key={i} value={data.nombre}>{data.nombre}</option>
-                  ))}
-                </Form.Control>
-              </Form.Group>
-            </Col>
-          </Row>
-
           <Row className="mt-2">
             <Col md={4}>
               <Form.Group>
@@ -272,17 +219,7 @@ const ModalMedidas = () => {
           <Row className="mt-2">
             <Col md={6}>
               <Form.Group>
-                <Form.Label className="text-light">Código de Barras</Form.Label>
-                <Form.Control
-                  className={inputClasses}
-                  {...register('barcode')}
-                  readOnly={readOnly}
-                />
-              </Form.Group>
-            </Col>
-            <Col md={3}>
-              <Form.Group>
-                <Form.Label className="text-light">Precio de compra *</Form.Label>
+                <Form.Label className="text-light">Coste (Precio compra) *</Form.Label>
                 <Form.Control
                   type="number"
                   step="0.01"
@@ -294,9 +231,9 @@ const ModalMedidas = () => {
                 {errors.precio_compre && <small className="text-danger">Ingresa un precio de compra válido</small>}
               </Form.Group>
             </Col>
-            <Col md={3}>
+            <Col md={6}>
               <Form.Group>
-                <Form.Label className="text-light">Precio en stock *</Form.Label>
+                <Form.Label className="text-light">Precio de Venta *</Form.Label>
                 <Form.Control
                   type="number"
                   step="0.01"
@@ -305,7 +242,7 @@ const ModalMedidas = () => {
                   {...register('precio_stock', { required: true, min: 0 })}
                   readOnly={readOnly}
                 />
-                {errors.precio_stock && <small className="text-danger">Ingresa un precio de stock válido</small>}
+                {errors.precio_stock && <small className="text-danger">Ingresa un precio de venta válido</small>}
               </Form.Group>
             </Col>
           </Row>
