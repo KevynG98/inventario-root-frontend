@@ -40,6 +40,7 @@ const ModalMedidas = () => {
       reset({
         codigo_inventario: '',
         nombre: '',
+        detalles: '',
         precio_compre: '',
         precio_stock: '',
       });
@@ -52,6 +53,7 @@ const ModalMedidas = () => {
       reset({
         codigo_inventario: proveedorSeleccionado.codigo_inventario || '',
         nombre: proveedorSeleccionado.nombre || '',
+        detalles: proveedorSeleccionado.detalles || '',
         precio_compre: proveedorSeleccionado.precio_compre || '',
         precio_stock: proveedorSeleccionado.precio_stock || '',
       });
@@ -243,6 +245,21 @@ const ModalMedidas = () => {
                   readOnly={readOnly}
                 />
                 {errors.precio_stock && <small className="text-danger">Ingresa un precio de venta válido</small>}
+              </Form.Group>
+            </Col>
+          </Row>
+
+          <Row className="mt-2">
+            <Col md={12}>
+              <Form.Group>
+                <Form.Label className="text-light">Detalles</Form.Label>
+                <Form.Control
+                  as="textarea"
+                  rows={3}
+                  className={inputClasses}
+                  {...register('detalles')}
+                  readOnly={readOnly}
+                />
               </Form.Group>
             </Col>
           </Row>

@@ -84,6 +84,7 @@ const Medidas = () => {
             <th>Nombre</th>
             <th>Precio compra</th>
             <th>Precio venta</th>
+            <th>Detalles</th>
             <th>Acciones</th>
           </tr>
         </thead>
@@ -114,6 +115,11 @@ const Medidas = () => {
                             <td>{sku.nombre}</td>
                             <td>{Number(sku.precio_compre || 0).toFixed(2)}</td>
                             <td>{Number(sku.precio_stock || 0).toFixed(2)}</td>
+                            <td>
+                              <div style={{ maxWidth: '150px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={sku.detalles}>
+                                {sku.detalles || 'Sin detalles'}
+                              </div>
+                            </td>
                             <td className="text-center">
                               {renderActionButtons(sku)}
                             </td>
@@ -155,6 +161,9 @@ const Medidas = () => {
               <div className="mb-2">
                 <p className="text-muted small mb-0">Código: {sku.codigo_inventario}</p>
                 <h5 className="card-title text-truncate mb-0" title={sku.nombre}>{sku.nombre}</h5>
+              </div>
+              <div className="mb-2">
+                <p className="text-muted small mb-0 text-truncate" title={sku.detalles}>{sku.detalles || 'Sin detalles'}</p>
               </div>
               <div className="row g-2">
                 <div className="col-6">
